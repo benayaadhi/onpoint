@@ -1,0 +1,3581 @@
+{
+    "id": "tournament-1775726636187",
+    "name": "Padel ChampionshipTest Race Tournament",
+    "teams": [
+        {
+            "id": "team-1",
+            "name": "Adi & Budi"
+        },
+        {
+            "id": "team-2",
+            "name": "Citra & Dani"
+        },
+        {
+            "id": "team-3",
+            "name": "Eko & Fani"
+        },
+        {
+            "id": "team-4",
+            "name": "Gani & Hadi"
+        },
+        {
+            "id": "team-5",
+            "name": "Indra & Joni"
+        },
+        {
+            "id": "team-6",
+            "name": "Kiki & Lili"
+        },
+        {
+            "id": "team-7",
+            "name": "Maya & Nina"
+        },
+        {
+            "id": "team-8",
+            "name": "Oki & Puti"
+        },
+        {
+            "id": "team-9",
+            "name": "Reza & Sari"
+        },
+        {
+            "id": "team-10",
+            "name": "Toni & Udin"
+        },
+        {
+            "id": "team-11",
+            "name": "Vera & Wati"
+        },
+        {
+            "id": "team-12",
+            "name": "Xena & Yuni"
+        },
+        {
+            "id": "team-13",
+            "name": "Arif & Bima"
+        },
+        {
+            "id": "team-14",
+            "name": "Dewi & Elsa"
+        },
+        {
+            "id": "team-15",
+            "name": "Fajar & Galih"
+        },
+        {
+            "id": "team-16",
+            "name": "Hana & Irma"
+        },
+        {
+            "id": "team-17",
+            "name": "Joko & Kris"
+        },
+        {
+            "id": "team-18",
+            "name": "Luna & Mira"
+        },
+        {
+            "id": "team-19",
+            "name": "Nana & Olin"
+        },
+        {
+            "id": "team-20",
+            "name": "Putra & Rizky"
+        },
+        {
+            "id": "team-21",
+            "name": "Sinta & Tari"
+        },
+        {
+            "id": "team-22",
+            "name": "Umar & Vina"
+        },
+        {
+            "id": "team-23",
+            "name": "Wira & Yoga"
+        },
+        {
+            "id": "team-24",
+            "name": "Zara & Amel"
+        }
+    ],
+    "courts": [],
+    "format": "group-knockout",
+    "groups": [
+        {
+            "id": "group-1",
+            "name": "Group A",
+            "teams": [
+                {
+                    "id": "team-1",
+                    "name": "Adi & Budi"
+                },
+                {
+                    "id": "team-2",
+                    "name": "Citra & Dani"
+                },
+                {
+                    "id": "team-3",
+                    "name": "Eko & Fani"
+                },
+                {
+                    "id": "team-4",
+                    "name": "Gani & Hadi"
+                }
+            ],
+            "matches": [
+                {
+                    "id": "match-1",
+                    "round": 1,
+                    "team1": {
+                        "id": "team-1",
+                        "name": "Adi & Budi"
+                    },
+                    "team2": {
+                        "id": "team-4",
+                        "name": "Gani & Hadi"
+                    },
+                    "status": "scheduled",
+                    "groupId": "group-1",
+                    "isDeuce": false,
+                    "position": 0,
+                    "schedule": {},
+                    "completed": false,
+                    "currentSet": 1,
+                    "raceTarget": 4,
+                    "team1Score": {
+                        "sets": 0,
+                        "games": 0,
+                        "points": 0
+                    },
+                    "team2Score": {
+                        "sets": 0,
+                        "games": 0,
+                        "points": 0
+                    },
+                    "currentGame": 0,
+                    "scoringMode": "race",
+                    "servingTeam": "team2",
+                    "isTiebreaker": false,
+                    "pointsInGame": 0,
+                    "isGoldenPoint": false,
+                    "team1RaceScore": 0,
+                    "team2RaceScore": 0
+                },
+                {
+                    "id": "match-2",
+                    "round": 1,
+                    "team1": {
+                        "id": "team-2",
+                        "name": "Citra & Dani"
+                    },
+                    "team2": {
+                        "id": "team-3",
+                        "name": "Eko & Fani"
+                    },
+                    "status": "scheduled",
+                    "groupId": "group-1",
+                    "isDeuce": false,
+                    "position": 1,
+                    "schedule": {},
+                    "completed": false,
+                    "currentSet": 1,
+                    "raceTarget": 4,
+                    "team1Score": {
+                        "sets": 0,
+                        "games": 0,
+                        "points": 0
+                    },
+                    "team2Score": {
+                        "sets": 0,
+                        "games": 0,
+                        "points": 0
+                    },
+                    "currentGame": 0,
+                    "scoringMode": "race",
+                    "servingTeam": "team1",
+                    "isTiebreaker": false,
+                    "pointsInGame": 0,
+                    "isGoldenPoint": false,
+                    "team1RaceScore": 0,
+                    "team2RaceScore": 0
+                },
+                {
+                    "id": "match-3",
+                    "round": 1,
+                    "team1": {
+                        "id": "team-1",
+                        "name": "Adi & Budi"
+                    },
+                    "team2": {
+                        "id": "team-3",
+                        "name": "Eko & Fani"
+                    },
+                    "status": "scheduled",
+                    "groupId": "group-1",
+                    "isDeuce": false,
+                    "position": 2,
+                    "schedule": {},
+                    "completed": false,
+                    "currentSet": 1,
+                    "raceTarget": 4,
+                    "team1Score": {
+                        "sets": 0,
+                        "games": 0,
+                        "points": 0
+                    },
+                    "team2Score": {
+                        "sets": 0,
+                        "games": 0,
+                        "points": 0
+                    },
+                    "currentGame": 0,
+                    "scoringMode": "race",
+                    "servingTeam": "team2",
+                    "isTiebreaker": false,
+                    "pointsInGame": 0,
+                    "isGoldenPoint": false,
+                    "team1RaceScore": 0,
+                    "team2RaceScore": 0
+                },
+                {
+                    "id": "match-4",
+                    "round": 1,
+                    "team1": {
+                        "id": "team-4",
+                        "name": "Gani & Hadi"
+                    },
+                    "team2": {
+                        "id": "team-2",
+                        "name": "Citra & Dani"
+                    },
+                    "status": "scheduled",
+                    "groupId": "group-1",
+                    "isDeuce": false,
+                    "position": 3,
+                    "schedule": {},
+                    "completed": false,
+                    "currentSet": 1,
+                    "raceTarget": 4,
+                    "team1Score": {
+                        "sets": 0,
+                        "games": 0,
+                        "points": 0
+                    },
+                    "team2Score": {
+                        "sets": 0,
+                        "games": 0,
+                        "points": 0
+                    },
+                    "currentGame": 0,
+                    "scoringMode": "race",
+                    "servingTeam": "team1",
+                    "isTiebreaker": false,
+                    "pointsInGame": 0,
+                    "isGoldenPoint": false,
+                    "team1RaceScore": 0,
+                    "team2RaceScore": 0
+                },
+                {
+                    "id": "match-5",
+                    "round": 1,
+                    "team1": {
+                        "id": "team-1",
+                        "name": "Adi & Budi"
+                    },
+                    "team2": {
+                        "id": "team-2",
+                        "name": "Citra & Dani"
+                    },
+                    "status": "scheduled",
+                    "groupId": "group-1",
+                    "isDeuce": false,
+                    "position": 4,
+                    "schedule": {},
+                    "completed": false,
+                    "currentSet": 1,
+                    "raceTarget": 4,
+                    "team1Score": {
+                        "sets": 0,
+                        "games": 0,
+                        "points": 0
+                    },
+                    "team2Score": {
+                        "sets": 0,
+                        "games": 0,
+                        "points": 0
+                    },
+                    "currentGame": 0,
+                    "scoringMode": "race",
+                    "servingTeam": "team1",
+                    "isTiebreaker": false,
+                    "pointsInGame": 0,
+                    "isGoldenPoint": false,
+                    "team1RaceScore": 0,
+                    "team2RaceScore": 0
+                },
+                {
+                    "id": "match-6",
+                    "round": 1,
+                    "team1": {
+                        "id": "team-3",
+                        "name": "Eko & Fani"
+                    },
+                    "team2": {
+                        "id": "team-4",
+                        "name": "Gani & Hadi"
+                    },
+                    "status": "scheduled",
+                    "groupId": "group-1",
+                    "isDeuce": false,
+                    "position": 5,
+                    "schedule": {},
+                    "completed": false,
+                    "currentSet": 1,
+                    "raceTarget": 4,
+                    "team1Score": {
+                        "sets": 0,
+                        "games": 0,
+                        "points": 0
+                    },
+                    "team2Score": {
+                        "sets": 0,
+                        "games": 0,
+                        "points": 0
+                    },
+                    "currentGame": 0,
+                    "scoringMode": "race",
+                    "servingTeam": "team2",
+                    "isTiebreaker": false,
+                    "pointsInGame": 0,
+                    "isGoldenPoint": false,
+                    "team1RaceScore": 0,
+                    "team2RaceScore": 0
+                }
+            ],
+            "completed": false,
+            "standings": [
+                {
+                    "id": "team-1",
+                    "name": "Adi & Budi",
+                    "wins": 3,
+                    "losses": 0,
+                    "setsWon": 0,
+                    "gamesWon": 0,
+                    "setsLost": 0,
+                    "gamesLost": 0,
+                    "pointsWon": 12,
+                    "pointsLost": 3
+                },
+                {
+                    "id": "team-4",
+                    "name": "Gani & Hadi",
+                    "wins": 1,
+                    "losses": 1,
+                    "setsWon": 0,
+                    "gamesWon": 0,
+                    "setsLost": 0,
+                    "gamesLost": 0,
+                    "pointsWon": 4,
+                    "pointsLost": 4
+                },
+                {
+                    "id": "team-3",
+                    "name": "Eko & Fani",
+                    "wins": 1,
+                    "losses": 1,
+                    "setsWon": 0,
+                    "gamesWon": 0,
+                    "setsLost": 0,
+                    "gamesLost": 0,
+                    "pointsWon": 4,
+                    "pointsLost": 6
+                },
+                {
+                    "id": "team-2",
+                    "name": "Citra & Dani",
+                    "wins": 0,
+                    "losses": 3,
+                    "setsWon": 0,
+                    "gamesWon": 0,
+                    "setsLost": 0,
+                    "gamesLost": 0,
+                    "pointsWon": 5,
+                    "pointsLost": 12
+                }
+            ]
+        },
+        {
+            "id": "group-2",
+            "name": "Group B",
+            "teams": [
+                {
+                    "id": "team-5",
+                    "name": "Indra & Joni"
+                },
+                {
+                    "id": "team-6",
+                    "name": "Kiki & Lili"
+                },
+                {
+                    "id": "team-7",
+                    "name": "Maya & Nina"
+                },
+                {
+                    "id": "team-8",
+                    "name": "Oki & Puti"
+                }
+            ],
+            "matches": [
+                {
+                    "id": "match-7",
+                    "round": 1,
+                    "team1": {
+                        "id": "team-5",
+                        "name": "Indra & Joni"
+                    },
+                    "team2": {
+                        "id": "team-8",
+                        "name": "Oki & Puti"
+                    },
+                    "status": "scheduled",
+                    "groupId": "group-2",
+                    "isDeuce": false,
+                    "position": 0,
+                    "schedule": {},
+                    "completed": false,
+                    "currentSet": 1,
+                    "raceTarget": 4,
+                    "team1Score": {
+                        "sets": 0,
+                        "games": 0,
+                        "points": 0
+                    },
+                    "team2Score": {
+                        "sets": 0,
+                        "games": 0,
+                        "points": 0
+                    },
+                    "currentGame": 0,
+                    "scoringMode": "race",
+                    "servingTeam": "team1",
+                    "isTiebreaker": false,
+                    "pointsInGame": 0,
+                    "isGoldenPoint": false,
+                    "team1RaceScore": 0,
+                    "team2RaceScore": 0
+                },
+                {
+                    "id": "match-8",
+                    "round": 1,
+                    "team1": {
+                        "id": "team-6",
+                        "name": "Kiki & Lili"
+                    },
+                    "team2": {
+                        "id": "team-7",
+                        "name": "Maya & Nina"
+                    },
+                    "status": "scheduled",
+                    "groupId": "group-2",
+                    "isDeuce": false,
+                    "position": 1,
+                    "schedule": {},
+                    "completed": false,
+                    "currentSet": 1,
+                    "raceTarget": 4,
+                    "team1Score": {
+                        "sets": 0,
+                        "games": 0,
+                        "points": 0
+                    },
+                    "team2Score": {
+                        "sets": 0,
+                        "games": 0,
+                        "points": 0
+                    },
+                    "currentGame": 0,
+                    "scoringMode": "race",
+                    "servingTeam": "team1",
+                    "isTiebreaker": false,
+                    "pointsInGame": 0,
+                    "isGoldenPoint": false,
+                    "team1RaceScore": 0,
+                    "team2RaceScore": 0
+                },
+                {
+                    "id": "match-9",
+                    "round": 1,
+                    "team1": {
+                        "id": "team-5",
+                        "name": "Indra & Joni"
+                    },
+                    "team2": {
+                        "id": "team-7",
+                        "name": "Maya & Nina"
+                    },
+                    "status": "scheduled",
+                    "groupId": "group-2",
+                    "isDeuce": false,
+                    "position": 2,
+                    "schedule": {},
+                    "completed": false,
+                    "currentSet": 1,
+                    "raceTarget": 4,
+                    "team1Score": {
+                        "sets": 0,
+                        "games": 0,
+                        "points": 0
+                    },
+                    "team2Score": {
+                        "sets": 0,
+                        "games": 0,
+                        "points": 0
+                    },
+                    "currentGame": 0,
+                    "scoringMode": "race",
+                    "servingTeam": "team1",
+                    "isTiebreaker": false,
+                    "pointsInGame": 0,
+                    "isGoldenPoint": false,
+                    "team1RaceScore": 0,
+                    "team2RaceScore": 0
+                },
+                {
+                    "id": "match-10",
+                    "round": 1,
+                    "team1": {
+                        "id": "team-8",
+                        "name": "Oki & Puti"
+                    },
+                    "team2": {
+                        "id": "team-6",
+                        "name": "Kiki & Lili"
+                    },
+                    "status": "scheduled",
+                    "groupId": "group-2",
+                    "isDeuce": false,
+                    "position": 3,
+                    "schedule": {},
+                    "completed": false,
+                    "currentSet": 1,
+                    "raceTarget": 4,
+                    "team1Score": {
+                        "sets": 0,
+                        "games": 0,
+                        "points": 0
+                    },
+                    "team2Score": {
+                        "sets": 0,
+                        "games": 0,
+                        "points": 0
+                    },
+                    "currentGame": 0,
+                    "scoringMode": "race",
+                    "servingTeam": "team2",
+                    "isTiebreaker": false,
+                    "pointsInGame": 0,
+                    "isGoldenPoint": false,
+                    "team1RaceScore": 0,
+                    "team2RaceScore": 0
+                },
+                {
+                    "id": "match-11",
+                    "round": 1,
+                    "team1": {
+                        "id": "team-5",
+                        "name": "Indra & Joni"
+                    },
+                    "team2": {
+                        "id": "team-6",
+                        "name": "Kiki & Lili"
+                    },
+                    "status": "scheduled",
+                    "groupId": "group-2",
+                    "isDeuce": false,
+                    "position": 4,
+                    "schedule": {},
+                    "completed": false,
+                    "currentSet": 1,
+                    "raceTarget": 4,
+                    "team1Score": {
+                        "sets": 0,
+                        "games": 0,
+                        "points": 0
+                    },
+                    "team2Score": {
+                        "sets": 0,
+                        "games": 0,
+                        "points": 0
+                    },
+                    "currentGame": 0,
+                    "scoringMode": "race",
+                    "servingTeam": "team1",
+                    "isTiebreaker": false,
+                    "pointsInGame": 0,
+                    "isGoldenPoint": false,
+                    "team1RaceScore": 0,
+                    "team2RaceScore": 0
+                },
+                {
+                    "id": "match-12",
+                    "round": 1,
+                    "team1": {
+                        "id": "team-7",
+                        "name": "Maya & Nina"
+                    },
+                    "team2": {
+                        "id": "team-8",
+                        "name": "Oki & Puti"
+                    },
+                    "status": "scheduled",
+                    "groupId": "group-2",
+                    "isDeuce": false,
+                    "position": 5,
+                    "schedule": {},
+                    "completed": false,
+                    "currentSet": 1,
+                    "raceTarget": 4,
+                    "team1Score": {
+                        "sets": 0,
+                        "games": 0,
+                        "points": 0
+                    },
+                    "team2Score": {
+                        "sets": 0,
+                        "games": 0,
+                        "points": 0
+                    },
+                    "currentGame": 0,
+                    "scoringMode": "race",
+                    "servingTeam": "team1",
+                    "isTiebreaker": false,
+                    "pointsInGame": 0,
+                    "isGoldenPoint": false,
+                    "team1RaceScore": 0,
+                    "team2RaceScore": 0
+                }
+            ],
+            "completed": false,
+            "standings": [
+                {
+                    "id": "team-5",
+                    "name": "Indra & Joni",
+                    "wins": 0,
+                    "losses": 0,
+                    "setsWon": 0,
+                    "gamesWon": 0,
+                    "setsLost": 0,
+                    "gamesLost": 0,
+                    "pointsWon": 0,
+                    "pointsLost": 0
+                },
+                {
+                    "id": "team-6",
+                    "name": "Kiki & Lili",
+                    "wins": 0,
+                    "losses": 0,
+                    "setsWon": 0,
+                    "gamesWon": 0,
+                    "setsLost": 0,
+                    "gamesLost": 0,
+                    "pointsWon": 0,
+                    "pointsLost": 0
+                },
+                {
+                    "id": "team-7",
+                    "name": "Maya & Nina",
+                    "wins": 0,
+                    "losses": 0,
+                    "setsWon": 0,
+                    "gamesWon": 0,
+                    "setsLost": 0,
+                    "gamesLost": 0,
+                    "pointsWon": 0,
+                    "pointsLost": 0
+                },
+                {
+                    "id": "team-8",
+                    "name": "Oki & Puti",
+                    "wins": 0,
+                    "losses": 0,
+                    "setsWon": 0,
+                    "gamesWon": 0,
+                    "setsLost": 0,
+                    "gamesLost": 0,
+                    "pointsWon": 0,
+                    "pointsLost": 0
+                }
+            ]
+        },
+        {
+            "id": "group-3",
+            "name": "Group C",
+            "teams": [
+                {
+                    "id": "team-9",
+                    "name": "Reza & Sari"
+                },
+                {
+                    "id": "team-10",
+                    "name": "Toni & Udin"
+                },
+                {
+                    "id": "team-11",
+                    "name": "Vera & Wati"
+                },
+                {
+                    "id": "team-12",
+                    "name": "Xena & Yuni"
+                }
+            ],
+            "matches": [
+                {
+                    "id": "match-13",
+                    "round": 1,
+                    "team1": {
+                        "id": "team-9",
+                        "name": "Reza & Sari"
+                    },
+                    "team2": {
+                        "id": "team-12",
+                        "name": "Xena & Yuni"
+                    },
+                    "status": "scheduled",
+                    "groupId": "group-3",
+                    "isDeuce": false,
+                    "position": 0,
+                    "schedule": {},
+                    "completed": false,
+                    "currentSet": 1,
+                    "raceTarget": 4,
+                    "team1Score": {
+                        "sets": 0,
+                        "games": 0,
+                        "points": 0
+                    },
+                    "team2Score": {
+                        "sets": 0,
+                        "games": 0,
+                        "points": 0
+                    },
+                    "currentGame": 0,
+                    "scoringMode": "race",
+                    "servingTeam": "team1",
+                    "isTiebreaker": false,
+                    "pointsInGame": 0,
+                    "isGoldenPoint": false,
+                    "team1RaceScore": 0,
+                    "team2RaceScore": 0
+                },
+                {
+                    "id": "match-14",
+                    "round": 1,
+                    "team1": {
+                        "id": "team-10",
+                        "name": "Toni & Udin"
+                    },
+                    "team2": {
+                        "id": "team-11",
+                        "name": "Vera & Wati"
+                    },
+                    "status": "scheduled",
+                    "groupId": "group-3",
+                    "isDeuce": false,
+                    "position": 1,
+                    "schedule": {},
+                    "completed": false,
+                    "currentSet": 1,
+                    "raceTarget": 4,
+                    "team1Score": {
+                        "sets": 0,
+                        "games": 0,
+                        "points": 0
+                    },
+                    "team2Score": {
+                        "sets": 0,
+                        "games": 0,
+                        "points": 0
+                    },
+                    "currentGame": 0,
+                    "scoringMode": "race",
+                    "servingTeam": "team1",
+                    "isTiebreaker": false,
+                    "pointsInGame": 0,
+                    "isGoldenPoint": false,
+                    "team1RaceScore": 0,
+                    "team2RaceScore": 0
+                },
+                {
+                    "id": "match-15",
+                    "round": 1,
+                    "team1": {
+                        "id": "team-9",
+                        "name": "Reza & Sari"
+                    },
+                    "team2": {
+                        "id": "team-11",
+                        "name": "Vera & Wati"
+                    },
+                    "status": "scheduled",
+                    "groupId": "group-3",
+                    "isDeuce": false,
+                    "position": 2,
+                    "schedule": {},
+                    "completed": false,
+                    "currentSet": 1,
+                    "raceTarget": 4,
+                    "team1Score": {
+                        "sets": 0,
+                        "games": 0,
+                        "points": 0
+                    },
+                    "team2Score": {
+                        "sets": 0,
+                        "games": 0,
+                        "points": 0
+                    },
+                    "currentGame": 0,
+                    "scoringMode": "race",
+                    "servingTeam": "team1",
+                    "isTiebreaker": false,
+                    "pointsInGame": 0,
+                    "isGoldenPoint": false,
+                    "team1RaceScore": 0,
+                    "team2RaceScore": 0
+                },
+                {
+                    "id": "match-16",
+                    "round": 1,
+                    "team1": {
+                        "id": "team-12",
+                        "name": "Xena & Yuni"
+                    },
+                    "team2": {
+                        "id": "team-10",
+                        "name": "Toni & Udin"
+                    },
+                    "status": "scheduled",
+                    "groupId": "group-3",
+                    "isDeuce": false,
+                    "position": 3,
+                    "schedule": {},
+                    "completed": false,
+                    "currentSet": 1,
+                    "raceTarget": 4,
+                    "team1Score": {
+                        "sets": 0,
+                        "games": 0,
+                        "points": 0
+                    },
+                    "team2Score": {
+                        "sets": 0,
+                        "games": 0,
+                        "points": 0
+                    },
+                    "currentGame": 0,
+                    "scoringMode": "race",
+                    "servingTeam": "team1",
+                    "isTiebreaker": false,
+                    "pointsInGame": 0,
+                    "isGoldenPoint": false,
+                    "team1RaceScore": 0,
+                    "team2RaceScore": 0
+                },
+                {
+                    "id": "match-17",
+                    "round": 1,
+                    "team1": {
+                        "id": "team-9",
+                        "name": "Reza & Sari"
+                    },
+                    "team2": {
+                        "id": "team-10",
+                        "name": "Toni & Udin"
+                    },
+                    "status": "scheduled",
+                    "groupId": "group-3",
+                    "isDeuce": false,
+                    "position": 4,
+                    "schedule": {},
+                    "completed": false,
+                    "currentSet": 1,
+                    "raceTarget": 4,
+                    "team1Score": {
+                        "sets": 0,
+                        "games": 0,
+                        "points": 0
+                    },
+                    "team2Score": {
+                        "sets": 0,
+                        "games": 0,
+                        "points": 0
+                    },
+                    "currentGame": 0,
+                    "scoringMode": "race",
+                    "servingTeam": "team2",
+                    "isTiebreaker": false,
+                    "pointsInGame": 0,
+                    "isGoldenPoint": false,
+                    "team1RaceScore": 0,
+                    "team2RaceScore": 0
+                },
+                {
+                    "id": "match-18",
+                    "round": 1,
+                    "team1": {
+                        "id": "team-11",
+                        "name": "Vera & Wati"
+                    },
+                    "team2": {
+                        "id": "team-12",
+                        "name": "Xena & Yuni"
+                    },
+                    "status": "scheduled",
+                    "groupId": "group-3",
+                    "isDeuce": false,
+                    "position": 5,
+                    "schedule": {},
+                    "completed": false,
+                    "currentSet": 1,
+                    "raceTarget": 4,
+                    "team1Score": {
+                        "sets": 0,
+                        "games": 0,
+                        "points": 0
+                    },
+                    "team2Score": {
+                        "sets": 0,
+                        "games": 0,
+                        "points": 0
+                    },
+                    "currentGame": 0,
+                    "scoringMode": "race",
+                    "servingTeam": "team1",
+                    "isTiebreaker": false,
+                    "pointsInGame": 0,
+                    "isGoldenPoint": false,
+                    "team1RaceScore": 0,
+                    "team2RaceScore": 0
+                }
+            ],
+            "completed": false,
+            "standings": [
+                {
+                    "id": "team-9",
+                    "name": "Reza & Sari",
+                    "wins": 0,
+                    "losses": 0,
+                    "setsWon": 0,
+                    "gamesWon": 0,
+                    "setsLost": 0,
+                    "gamesLost": 0,
+                    "pointsWon": 0,
+                    "pointsLost": 0
+                },
+                {
+                    "id": "team-10",
+                    "name": "Toni & Udin",
+                    "wins": 0,
+                    "losses": 0,
+                    "setsWon": 0,
+                    "gamesWon": 0,
+                    "setsLost": 0,
+                    "gamesLost": 0,
+                    "pointsWon": 0,
+                    "pointsLost": 0
+                },
+                {
+                    "id": "team-11",
+                    "name": "Vera & Wati",
+                    "wins": 0,
+                    "losses": 0,
+                    "setsWon": 0,
+                    "gamesWon": 0,
+                    "setsLost": 0,
+                    "gamesLost": 0,
+                    "pointsWon": 0,
+                    "pointsLost": 0
+                },
+                {
+                    "id": "team-12",
+                    "name": "Xena & Yuni",
+                    "wins": 0,
+                    "losses": 0,
+                    "setsWon": 0,
+                    "gamesWon": 0,
+                    "setsLost": 0,
+                    "gamesLost": 0,
+                    "pointsWon": 0,
+                    "pointsLost": 0
+                }
+            ]
+        },
+        {
+            "id": "group-4",
+            "name": "Group D",
+            "teams": [
+                {
+                    "id": "team-13",
+                    "name": "Arif & Bima"
+                },
+                {
+                    "id": "team-14",
+                    "name": "Dewi & Elsa"
+                },
+                {
+                    "id": "team-15",
+                    "name": "Fajar & Galih"
+                },
+                {
+                    "id": "team-16",
+                    "name": "Hana & Irma"
+                }
+            ],
+            "matches": [
+                {
+                    "id": "match-19",
+                    "round": 1,
+                    "team1": {
+                        "id": "team-13",
+                        "name": "Arif & Bima"
+                    },
+                    "team2": {
+                        "id": "team-16",
+                        "name": "Hana & Irma"
+                    },
+                    "status": "scheduled",
+                    "groupId": "group-4",
+                    "isDeuce": false,
+                    "position": 0,
+                    "schedule": {},
+                    "completed": false,
+                    "currentSet": 1,
+                    "raceTarget": 4,
+                    "team1Score": {
+                        "sets": 0,
+                        "games": 0,
+                        "points": 0
+                    },
+                    "team2Score": {
+                        "sets": 0,
+                        "games": 0,
+                        "points": 0
+                    },
+                    "currentGame": 0,
+                    "scoringMode": "race",
+                    "servingTeam": "team1",
+                    "isTiebreaker": false,
+                    "pointsInGame": 0,
+                    "isGoldenPoint": false,
+                    "team1RaceScore": 0,
+                    "team2RaceScore": 0
+                },
+                {
+                    "id": "match-20",
+                    "round": 1,
+                    "team1": {
+                        "id": "team-14",
+                        "name": "Dewi & Elsa"
+                    },
+                    "team2": {
+                        "id": "team-15",
+                        "name": "Fajar & Galih"
+                    },
+                    "status": "scheduled",
+                    "groupId": "group-4",
+                    "isDeuce": false,
+                    "position": 1,
+                    "schedule": {},
+                    "completed": false,
+                    "currentSet": 1,
+                    "raceTarget": 4,
+                    "team1Score": {
+                        "sets": 0,
+                        "games": 0,
+                        "points": 0
+                    },
+                    "team2Score": {
+                        "sets": 0,
+                        "games": 0,
+                        "points": 0
+                    },
+                    "currentGame": 0,
+                    "scoringMode": "race",
+                    "servingTeam": "team2",
+                    "isTiebreaker": false,
+                    "pointsInGame": 0,
+                    "isGoldenPoint": false,
+                    "team1RaceScore": 0,
+                    "team2RaceScore": 0
+                },
+                {
+                    "id": "match-21",
+                    "round": 1,
+                    "team1": {
+                        "id": "team-13",
+                        "name": "Arif & Bima"
+                    },
+                    "team2": {
+                        "id": "team-15",
+                        "name": "Fajar & Galih"
+                    },
+                    "status": "scheduled",
+                    "groupId": "group-4",
+                    "isDeuce": false,
+                    "position": 2,
+                    "schedule": {},
+                    "completed": false,
+                    "currentSet": 1,
+                    "raceTarget": 4,
+                    "team1Score": {
+                        "sets": 0,
+                        "games": 0,
+                        "points": 0
+                    },
+                    "team2Score": {
+                        "sets": 0,
+                        "games": 0,
+                        "points": 0
+                    },
+                    "currentGame": 0,
+                    "scoringMode": "race",
+                    "servingTeam": "team1",
+                    "isTiebreaker": false,
+                    "pointsInGame": 0,
+                    "isGoldenPoint": false,
+                    "team1RaceScore": 0,
+                    "team2RaceScore": 0
+                },
+                {
+                    "id": "match-22",
+                    "round": 1,
+                    "team1": {
+                        "id": "team-16",
+                        "name": "Hana & Irma"
+                    },
+                    "team2": {
+                        "id": "team-14",
+                        "name": "Dewi & Elsa"
+                    },
+                    "status": "scheduled",
+                    "groupId": "group-4",
+                    "isDeuce": false,
+                    "position": 3,
+                    "schedule": {},
+                    "completed": false,
+                    "currentSet": 1,
+                    "raceTarget": 4,
+                    "team1Score": {
+                        "sets": 0,
+                        "games": 0,
+                        "points": 0
+                    },
+                    "team2Score": {
+                        "sets": 0,
+                        "games": 0,
+                        "points": 0
+                    },
+                    "currentGame": 0,
+                    "scoringMode": "race",
+                    "servingTeam": "team1",
+                    "isTiebreaker": false,
+                    "pointsInGame": 0,
+                    "isGoldenPoint": false,
+                    "team1RaceScore": 0,
+                    "team2RaceScore": 0
+                },
+                {
+                    "id": "match-23",
+                    "round": 1,
+                    "team1": {
+                        "id": "team-13",
+                        "name": "Arif & Bima"
+                    },
+                    "team2": {
+                        "id": "team-14",
+                        "name": "Dewi & Elsa"
+                    },
+                    "status": "scheduled",
+                    "groupId": "group-4",
+                    "isDeuce": false,
+                    "position": 4,
+                    "schedule": {},
+                    "completed": false,
+                    "currentSet": 1,
+                    "raceTarget": 4,
+                    "team1Score": {
+                        "sets": 0,
+                        "games": 0,
+                        "points": 0
+                    },
+                    "team2Score": {
+                        "sets": 0,
+                        "games": 0,
+                        "points": 0
+                    },
+                    "currentGame": 0,
+                    "scoringMode": "race",
+                    "servingTeam": "team2",
+                    "isTiebreaker": false,
+                    "pointsInGame": 0,
+                    "isGoldenPoint": false,
+                    "team1RaceScore": 0,
+                    "team2RaceScore": 0
+                },
+                {
+                    "id": "match-24",
+                    "round": 1,
+                    "team1": {
+                        "id": "team-15",
+                        "name": "Fajar & Galih"
+                    },
+                    "team2": {
+                        "id": "team-16",
+                        "name": "Hana & Irma"
+                    },
+                    "status": "scheduled",
+                    "groupId": "group-4",
+                    "isDeuce": false,
+                    "position": 5,
+                    "schedule": {},
+                    "completed": false,
+                    "currentSet": 1,
+                    "raceTarget": 4,
+                    "team1Score": {
+                        "sets": 0,
+                        "games": 0,
+                        "points": 0
+                    },
+                    "team2Score": {
+                        "sets": 0,
+                        "games": 0,
+                        "points": 0
+                    },
+                    "currentGame": 0,
+                    "scoringMode": "race",
+                    "servingTeam": "team2",
+                    "isTiebreaker": false,
+                    "pointsInGame": 0,
+                    "isGoldenPoint": false,
+                    "team1RaceScore": 0,
+                    "team2RaceScore": 0
+                }
+            ],
+            "completed": false,
+            "standings": [
+                {
+                    "id": "team-13",
+                    "name": "Arif & Bima",
+                    "wins": 0,
+                    "losses": 0,
+                    "setsWon": 0,
+                    "gamesWon": 0,
+                    "setsLost": 0,
+                    "gamesLost": 0,
+                    "pointsWon": 0,
+                    "pointsLost": 0
+                },
+                {
+                    "id": "team-14",
+                    "name": "Dewi & Elsa",
+                    "wins": 0,
+                    "losses": 0,
+                    "setsWon": 0,
+                    "gamesWon": 0,
+                    "setsLost": 0,
+                    "gamesLost": 0,
+                    "pointsWon": 0,
+                    "pointsLost": 0
+                },
+                {
+                    "id": "team-15",
+                    "name": "Fajar & Galih",
+                    "wins": 0,
+                    "losses": 0,
+                    "setsWon": 0,
+                    "gamesWon": 0,
+                    "setsLost": 0,
+                    "gamesLost": 0,
+                    "pointsWon": 0,
+                    "pointsLost": 0
+                },
+                {
+                    "id": "team-16",
+                    "name": "Hana & Irma",
+                    "wins": 0,
+                    "losses": 0,
+                    "setsWon": 0,
+                    "gamesWon": 0,
+                    "setsLost": 0,
+                    "gamesLost": 0,
+                    "pointsWon": 0,
+                    "pointsLost": 0
+                }
+            ]
+        },
+        {
+            "id": "group-5",
+            "name": "Group E",
+            "teams": [
+                {
+                    "id": "team-17",
+                    "name": "Joko & Kris"
+                },
+                {
+                    "id": "team-18",
+                    "name": "Luna & Mira"
+                },
+                {
+                    "id": "team-19",
+                    "name": "Nana & Olin"
+                },
+                {
+                    "id": "team-20",
+                    "name": "Putra & Rizky"
+                }
+            ],
+            "matches": [
+                {
+                    "id": "match-25",
+                    "round": 1,
+                    "team1": {
+                        "id": "team-17",
+                        "name": "Joko & Kris"
+                    },
+                    "team2": {
+                        "id": "team-20",
+                        "name": "Putra & Rizky"
+                    },
+                    "status": "scheduled",
+                    "groupId": "group-5",
+                    "isDeuce": false,
+                    "position": 0,
+                    "schedule": {},
+                    "completed": false,
+                    "currentSet": 1,
+                    "raceTarget": 4,
+                    "team1Score": {
+                        "sets": 0,
+                        "games": 0,
+                        "points": 0
+                    },
+                    "team2Score": {
+                        "sets": 0,
+                        "games": 0,
+                        "points": 0
+                    },
+                    "currentGame": 0,
+                    "scoringMode": "race",
+                    "servingTeam": "team1",
+                    "isTiebreaker": false,
+                    "pointsInGame": 0,
+                    "isGoldenPoint": false,
+                    "team1RaceScore": 0,
+                    "team2RaceScore": 0
+                },
+                {
+                    "id": "match-26",
+                    "round": 1,
+                    "team1": {
+                        "id": "team-18",
+                        "name": "Luna & Mira"
+                    },
+                    "team2": {
+                        "id": "team-19",
+                        "name": "Nana & Olin"
+                    },
+                    "status": "scheduled",
+                    "groupId": "group-5",
+                    "isDeuce": false,
+                    "position": 1,
+                    "schedule": {},
+                    "completed": false,
+                    "currentSet": 1,
+                    "raceTarget": 4,
+                    "team1Score": {
+                        "sets": 0,
+                        "games": 0,
+                        "points": 0
+                    },
+                    "team2Score": {
+                        "sets": 0,
+                        "games": 0,
+                        "points": 0
+                    },
+                    "currentGame": 0,
+                    "scoringMode": "race",
+                    "servingTeam": "team2",
+                    "isTiebreaker": false,
+                    "pointsInGame": 0,
+                    "isGoldenPoint": false,
+                    "team1RaceScore": 0,
+                    "team2RaceScore": 0
+                },
+                {
+                    "id": "match-27",
+                    "round": 1,
+                    "team1": {
+                        "id": "team-17",
+                        "name": "Joko & Kris"
+                    },
+                    "team2": {
+                        "id": "team-19",
+                        "name": "Nana & Olin"
+                    },
+                    "status": "scheduled",
+                    "groupId": "group-5",
+                    "isDeuce": false,
+                    "position": 2,
+                    "schedule": {},
+                    "completed": false,
+                    "currentSet": 1,
+                    "raceTarget": 4,
+                    "team1Score": {
+                        "sets": 0,
+                        "games": 0,
+                        "points": 0
+                    },
+                    "team2Score": {
+                        "sets": 0,
+                        "games": 0,
+                        "points": 0
+                    },
+                    "currentGame": 0,
+                    "scoringMode": "race",
+                    "servingTeam": "team2",
+                    "isTiebreaker": false,
+                    "pointsInGame": 0,
+                    "isGoldenPoint": false,
+                    "team1RaceScore": 0,
+                    "team2RaceScore": 0
+                },
+                {
+                    "id": "match-28",
+                    "round": 1,
+                    "team1": {
+                        "id": "team-20",
+                        "name": "Putra & Rizky"
+                    },
+                    "team2": {
+                        "id": "team-18",
+                        "name": "Luna & Mira"
+                    },
+                    "status": "scheduled",
+                    "groupId": "group-5",
+                    "isDeuce": false,
+                    "position": 3,
+                    "schedule": {},
+                    "completed": false,
+                    "currentSet": 1,
+                    "raceTarget": 4,
+                    "team1Score": {
+                        "sets": 0,
+                        "games": 0,
+                        "points": 0
+                    },
+                    "team2Score": {
+                        "sets": 0,
+                        "games": 0,
+                        "points": 0
+                    },
+                    "currentGame": 0,
+                    "scoringMode": "race",
+                    "servingTeam": "team2",
+                    "isTiebreaker": false,
+                    "pointsInGame": 0,
+                    "isGoldenPoint": false,
+                    "team1RaceScore": 0,
+                    "team2RaceScore": 0
+                },
+                {
+                    "id": "match-29",
+                    "round": 1,
+                    "team1": {
+                        "id": "team-17",
+                        "name": "Joko & Kris"
+                    },
+                    "team2": {
+                        "id": "team-18",
+                        "name": "Luna & Mira"
+                    },
+                    "status": "scheduled",
+                    "groupId": "group-5",
+                    "isDeuce": false,
+                    "position": 4,
+                    "schedule": {},
+                    "completed": false,
+                    "currentSet": 1,
+                    "raceTarget": 4,
+                    "team1Score": {
+                        "sets": 0,
+                        "games": 0,
+                        "points": 0
+                    },
+                    "team2Score": {
+                        "sets": 0,
+                        "games": 0,
+                        "points": 0
+                    },
+                    "currentGame": 0,
+                    "scoringMode": "race",
+                    "servingTeam": "team2",
+                    "isTiebreaker": false,
+                    "pointsInGame": 0,
+                    "isGoldenPoint": false,
+                    "team1RaceScore": 0,
+                    "team2RaceScore": 0
+                },
+                {
+                    "id": "match-30",
+                    "round": 1,
+                    "team1": {
+                        "id": "team-19",
+                        "name": "Nana & Olin"
+                    },
+                    "team2": {
+                        "id": "team-20",
+                        "name": "Putra & Rizky"
+                    },
+                    "status": "scheduled",
+                    "groupId": "group-5",
+                    "isDeuce": false,
+                    "position": 5,
+                    "schedule": {},
+                    "completed": false,
+                    "currentSet": 1,
+                    "raceTarget": 4,
+                    "team1Score": {
+                        "sets": 0,
+                        "games": 0,
+                        "points": 0
+                    },
+                    "team2Score": {
+                        "sets": 0,
+                        "games": 0,
+                        "points": 0
+                    },
+                    "currentGame": 0,
+                    "scoringMode": "race",
+                    "servingTeam": "team2",
+                    "isTiebreaker": false,
+                    "pointsInGame": 0,
+                    "isGoldenPoint": false,
+                    "team1RaceScore": 0,
+                    "team2RaceScore": 0
+                }
+            ],
+            "completed": false,
+            "standings": [
+                {
+                    "id": "team-17",
+                    "name": "Joko & Kris",
+                    "wins": 0,
+                    "losses": 0,
+                    "setsWon": 0,
+                    "gamesWon": 0,
+                    "setsLost": 0,
+                    "gamesLost": 0,
+                    "pointsWon": 0,
+                    "pointsLost": 0
+                },
+                {
+                    "id": "team-18",
+                    "name": "Luna & Mira",
+                    "wins": 0,
+                    "losses": 0,
+                    "setsWon": 0,
+                    "gamesWon": 0,
+                    "setsLost": 0,
+                    "gamesLost": 0,
+                    "pointsWon": 0,
+                    "pointsLost": 0
+                },
+                {
+                    "id": "team-19",
+                    "name": "Nana & Olin",
+                    "wins": 0,
+                    "losses": 0,
+                    "setsWon": 0,
+                    "gamesWon": 0,
+                    "setsLost": 0,
+                    "gamesLost": 0,
+                    "pointsWon": 0,
+                    "pointsLost": 0
+                },
+                {
+                    "id": "team-20",
+                    "name": "Putra & Rizky",
+                    "wins": 0,
+                    "losses": 0,
+                    "setsWon": 0,
+                    "gamesWon": 0,
+                    "setsLost": 0,
+                    "gamesLost": 0,
+                    "pointsWon": 0,
+                    "pointsLost": 0
+                }
+            ]
+        },
+        {
+            "id": "group-6",
+            "name": "Group F",
+            "teams": [
+                {
+                    "id": "team-21",
+                    "name": "Sinta & Tari"
+                },
+                {
+                    "id": "team-22",
+                    "name": "Umar & Vina"
+                },
+                {
+                    "id": "team-23",
+                    "name": "Wira & Yoga"
+                },
+                {
+                    "id": "team-24",
+                    "name": "Zara & Amel"
+                }
+            ],
+            "matches": [
+                {
+                    "id": "match-31",
+                    "round": 1,
+                    "team1": {
+                        "id": "team-21",
+                        "name": "Sinta & Tari"
+                    },
+                    "team2": {
+                        "id": "team-24",
+                        "name": "Zara & Amel"
+                    },
+                    "status": "scheduled",
+                    "groupId": "group-6",
+                    "isDeuce": false,
+                    "position": 0,
+                    "schedule": {},
+                    "completed": false,
+                    "currentSet": 1,
+                    "raceTarget": 4,
+                    "team1Score": {
+                        "sets": 0,
+                        "games": 0,
+                        "points": 0
+                    },
+                    "team2Score": {
+                        "sets": 0,
+                        "games": 0,
+                        "points": 0
+                    },
+                    "currentGame": 0,
+                    "scoringMode": "race",
+                    "servingTeam": "team2",
+                    "isTiebreaker": false,
+                    "pointsInGame": 0,
+                    "isGoldenPoint": false,
+                    "team1RaceScore": 0,
+                    "team2RaceScore": 0
+                },
+                {
+                    "id": "match-32",
+                    "round": 1,
+                    "team1": {
+                        "id": "team-22",
+                        "name": "Umar & Vina"
+                    },
+                    "team2": {
+                        "id": "team-23",
+                        "name": "Wira & Yoga"
+                    },
+                    "status": "scheduled",
+                    "groupId": "group-6",
+                    "isDeuce": false,
+                    "position": 1,
+                    "schedule": {},
+                    "completed": false,
+                    "currentSet": 1,
+                    "raceTarget": 4,
+                    "team1Score": {
+                        "sets": 0,
+                        "games": 0,
+                        "points": 0
+                    },
+                    "team2Score": {
+                        "sets": 0,
+                        "games": 0,
+                        "points": 0
+                    },
+                    "currentGame": 0,
+                    "scoringMode": "race",
+                    "servingTeam": "team2",
+                    "isTiebreaker": false,
+                    "pointsInGame": 0,
+                    "isGoldenPoint": false,
+                    "team1RaceScore": 0,
+                    "team2RaceScore": 0
+                },
+                {
+                    "id": "match-33",
+                    "round": 1,
+                    "team1": {
+                        "id": "team-21",
+                        "name": "Sinta & Tari"
+                    },
+                    "team2": {
+                        "id": "team-23",
+                        "name": "Wira & Yoga"
+                    },
+                    "status": "scheduled",
+                    "groupId": "group-6",
+                    "isDeuce": false,
+                    "position": 2,
+                    "schedule": {},
+                    "completed": false,
+                    "currentSet": 1,
+                    "raceTarget": 4,
+                    "team1Score": {
+                        "sets": 0,
+                        "games": 0,
+                        "points": 0
+                    },
+                    "team2Score": {
+                        "sets": 0,
+                        "games": 0,
+                        "points": 0
+                    },
+                    "currentGame": 0,
+                    "scoringMode": "race",
+                    "servingTeam": "team1",
+                    "isTiebreaker": false,
+                    "pointsInGame": 0,
+                    "isGoldenPoint": false,
+                    "team1RaceScore": 0,
+                    "team2RaceScore": 0
+                },
+                {
+                    "id": "match-34",
+                    "round": 1,
+                    "team1": {
+                        "id": "team-24",
+                        "name": "Zara & Amel"
+                    },
+                    "team2": {
+                        "id": "team-22",
+                        "name": "Umar & Vina"
+                    },
+                    "status": "scheduled",
+                    "groupId": "group-6",
+                    "isDeuce": false,
+                    "position": 3,
+                    "schedule": {},
+                    "completed": false,
+                    "currentSet": 1,
+                    "raceTarget": 4,
+                    "team1Score": {
+                        "sets": 0,
+                        "games": 0,
+                        "points": 0
+                    },
+                    "team2Score": {
+                        "sets": 0,
+                        "games": 0,
+                        "points": 0
+                    },
+                    "currentGame": 0,
+                    "scoringMode": "race",
+                    "servingTeam": "team2",
+                    "isTiebreaker": false,
+                    "pointsInGame": 0,
+                    "isGoldenPoint": false,
+                    "team1RaceScore": 0,
+                    "team2RaceScore": 0
+                },
+                {
+                    "id": "match-35",
+                    "round": 1,
+                    "team1": {
+                        "id": "team-21",
+                        "name": "Sinta & Tari"
+                    },
+                    "team2": {
+                        "id": "team-22",
+                        "name": "Umar & Vina"
+                    },
+                    "status": "scheduled",
+                    "groupId": "group-6",
+                    "isDeuce": false,
+                    "position": 4,
+                    "schedule": {},
+                    "completed": false,
+                    "currentSet": 1,
+                    "raceTarget": 4,
+                    "team1Score": {
+                        "sets": 0,
+                        "games": 0,
+                        "points": 0
+                    },
+                    "team2Score": {
+                        "sets": 0,
+                        "games": 0,
+                        "points": 0
+                    },
+                    "currentGame": 0,
+                    "scoringMode": "race",
+                    "servingTeam": "team2",
+                    "isTiebreaker": false,
+                    "pointsInGame": 0,
+                    "isGoldenPoint": false,
+                    "team1RaceScore": 0,
+                    "team2RaceScore": 0
+                },
+                {
+                    "id": "match-36",
+                    "round": 1,
+                    "team1": {
+                        "id": "team-23",
+                        "name": "Wira & Yoga"
+                    },
+                    "team2": {
+                        "id": "team-24",
+                        "name": "Zara & Amel"
+                    },
+                    "status": "scheduled",
+                    "groupId": "group-6",
+                    "isDeuce": false,
+                    "position": 5,
+                    "schedule": {},
+                    "completed": false,
+                    "currentSet": 1,
+                    "raceTarget": 4,
+                    "team1Score": {
+                        "sets": 0,
+                        "games": 0,
+                        "points": 0
+                    },
+                    "team2Score": {
+                        "sets": 0,
+                        "games": 0,
+                        "points": 0
+                    },
+                    "currentGame": 0,
+                    "scoringMode": "race",
+                    "servingTeam": "team2",
+                    "isTiebreaker": false,
+                    "pointsInGame": 0,
+                    "isGoldenPoint": false,
+                    "team1RaceScore": 0,
+                    "team2RaceScore": 0
+                }
+            ],
+            "completed": false,
+            "standings": [
+                {
+                    "id": "team-21",
+                    "name": "Sinta & Tari",
+                    "wins": 0,
+                    "losses": 0,
+                    "setsWon": 0,
+                    "gamesWon": 0,
+                    "setsLost": 0,
+                    "gamesLost": 0,
+                    "pointsWon": 0,
+                    "pointsLost": 0
+                },
+                {
+                    "id": "team-22",
+                    "name": "Umar & Vina",
+                    "wins": 0,
+                    "losses": 0,
+                    "setsWon": 0,
+                    "gamesWon": 0,
+                    "setsLost": 0,
+                    "gamesLost": 0,
+                    "pointsWon": 0,
+                    "pointsLost": 0
+                },
+                {
+                    "id": "team-23",
+                    "name": "Wira & Yoga",
+                    "wins": 0,
+                    "losses": 0,
+                    "setsWon": 0,
+                    "gamesWon": 0,
+                    "setsLost": 0,
+                    "gamesLost": 0,
+                    "pointsWon": 0,
+                    "pointsLost": 0
+                },
+                {
+                    "id": "team-24",
+                    "name": "Zara & Amel",
+                    "wins": 0,
+                    "losses": 0,
+                    "setsWon": 0,
+                    "gamesWon": 0,
+                    "setsLost": 0,
+                    "gamesLost": 0,
+                    "pointsWon": 0,
+                    "pointsLost": 0
+                }
+            ]
+        }
+    ],
+    "matches": [
+        {
+            "id": "match-1",
+            "round": 1,
+            "team1": {
+                "id": "team-1",
+                "name": "Adi & Budi"
+            },
+            "team2": {
+                "id": "team-4",
+                "name": "Gani & Hadi"
+            },
+            "status": "completed",
+            "winner": {
+                "id": "team-1",
+                "name": "Adi & Budi"
+            },
+            "groupId": "group-1",
+            "isDeuce": false,
+            "position": 0,
+            "schedule": {},
+            "completed": true,
+            "currentSet": 1,
+            "raceTarget": 4,
+            "team1Score": {
+                "sets": 0,
+                "games": 0,
+                "points": 0
+            },
+            "team2Score": {
+                "sets": 0,
+                "games": 0,
+                "points": 0
+            },
+            "currentGame": 0,
+            "scoringMode": "race",
+            "servingTeam": "team2",
+            "isTiebreaker": false,
+            "pointsInGame": 0,
+            "isGoldenPoint": false,
+            "team1RaceScore": 4,
+            "team2RaceScore": 0
+        },
+        {
+            "id": "match-2",
+            "round": 1,
+            "team1": {
+                "id": "team-2",
+                "name": "Citra & Dani"
+            },
+            "team2": {
+                "id": "team-3",
+                "name": "Eko & Fani"
+            },
+            "status": "completed",
+            "winner": {
+                "id": "team-3",
+                "name": "Eko & Fani"
+            },
+            "groupId": "group-1",
+            "isDeuce": false,
+            "position": 1,
+            "schedule": {},
+            "completed": true,
+            "currentSet": 1,
+            "raceTarget": 4,
+            "team1Score": {
+                "sets": 0,
+                "games": 0,
+                "points": 0
+            },
+            "team2Score": {
+                "sets": 0,
+                "games": 0,
+                "points": 0
+            },
+            "currentGame": 0,
+            "scoringMode": "race",
+            "servingTeam": "team1",
+            "isTiebreaker": false,
+            "pointsInGame": 0,
+            "isGoldenPoint": false,
+            "team1RaceScore": 2,
+            "team2RaceScore": 4
+        },
+        {
+            "id": "match-3",
+            "round": 1,
+            "team1": {
+                "id": "team-1",
+                "name": "Adi & Budi"
+            },
+            "team2": {
+                "id": "team-3",
+                "name": "Eko & Fani"
+            },
+            "status": "completed",
+            "winner": {
+                "id": "team-1",
+                "name": "Adi & Budi"
+            },
+            "groupId": "group-1",
+            "isDeuce": false,
+            "position": 2,
+            "schedule": {},
+            "completed": true,
+            "currentSet": 1,
+            "raceTarget": 4,
+            "team1Score": {
+                "sets": 0,
+                "games": 0,
+                "points": 0
+            },
+            "team2Score": {
+                "sets": 0,
+                "games": 0,
+                "points": 0
+            },
+            "currentGame": 0,
+            "scoringMode": "race",
+            "servingTeam": "team2",
+            "isTiebreaker": false,
+            "pointsInGame": 0,
+            "isGoldenPoint": false,
+            "team1RaceScore": 4,
+            "team2RaceScore": 0
+        },
+        {
+            "id": "match-4",
+            "round": 1,
+            "team1": {
+                "id": "team-4",
+                "name": "Gani & Hadi"
+            },
+            "team2": {
+                "id": "team-2",
+                "name": "Citra & Dani"
+            },
+            "status": "completed",
+            "winner": {
+                "id": "team-4",
+                "name": "Gani & Hadi"
+            },
+            "groupId": "group-1",
+            "isDeuce": false,
+            "position": 3,
+            "schedule": {},
+            "completed": true,
+            "currentSet": 1,
+            "raceTarget": 4,
+            "team1Score": {
+                "sets": 0,
+                "games": 0,
+                "points": 0
+            },
+            "team2Score": {
+                "sets": 0,
+                "games": 0,
+                "points": 0
+            },
+            "currentGame": 0,
+            "scoringMode": "race",
+            "servingTeam": "team1",
+            "isTiebreaker": false,
+            "pointsInGame": 0,
+            "isGoldenPoint": false,
+            "team1RaceScore": 4,
+            "team2RaceScore": 0
+        },
+        {
+            "id": "match-5",
+            "round": 1,
+            "team1": {
+                "id": "team-1",
+                "name": "Adi & Budi"
+            },
+            "team2": {
+                "id": "team-2",
+                "name": "Citra & Dani"
+            },
+            "status": "completed",
+            "winner": {
+                "id": "team-1",
+                "name": "Adi & Budi"
+            },
+            "groupId": "group-1",
+            "isDeuce": false,
+            "position": 4,
+            "schedule": {},
+            "completed": true,
+            "currentSet": 1,
+            "raceTarget": 4,
+            "team1Score": {
+                "sets": 0,
+                "games": 0,
+                "points": 0
+            },
+            "team2Score": {
+                "sets": 0,
+                "games": 0,
+                "points": 0
+            },
+            "currentGame": 0,
+            "scoringMode": "race",
+            "servingTeam": "team1",
+            "isTiebreaker": false,
+            "pointsInGame": 0,
+            "isGoldenPoint": false,
+            "team1RaceScore": 4,
+            "team2RaceScore": 3
+        },
+        {
+            "id": "match-6",
+            "round": 1,
+            "team1": {
+                "id": "team-3",
+                "name": "Eko & Fani"
+            },
+            "team2": {
+                "id": "team-4",
+                "name": "Gani & Hadi"
+            },
+            "status": "scheduled",
+            "groupId": "group-1",
+            "isDeuce": false,
+            "position": 5,
+            "schedule": {},
+            "completed": false,
+            "currentSet": 1,
+            "raceTarget": 4,
+            "team1Score": {
+                "sets": 0,
+                "games": 0,
+                "points": 0
+            },
+            "team2Score": {
+                "sets": 0,
+                "games": 0,
+                "points": 0
+            },
+            "currentGame": 0,
+            "scoringMode": "race",
+            "servingTeam": "team2",
+            "isTiebreaker": false,
+            "pointsInGame": 0,
+            "isGoldenPoint": false,
+            "team1RaceScore": 0,
+            "team2RaceScore": 0
+        },
+        {
+            "id": "match-7",
+            "round": 1,
+            "team1": {
+                "id": "team-5",
+                "name": "Indra & Joni"
+            },
+            "team2": {
+                "id": "team-8",
+                "name": "Oki & Puti"
+            },
+            "status": "scheduled",
+            "groupId": "group-2",
+            "isDeuce": false,
+            "position": 0,
+            "schedule": {},
+            "completed": false,
+            "currentSet": 1,
+            "raceTarget": 4,
+            "team1Score": {
+                "sets": 0,
+                "games": 0,
+                "points": 0
+            },
+            "team2Score": {
+                "sets": 0,
+                "games": 0,
+                "points": 0
+            },
+            "currentGame": 0,
+            "scoringMode": "race",
+            "servingTeam": "team1",
+            "isTiebreaker": false,
+            "pointsInGame": 0,
+            "isGoldenPoint": false,
+            "team1RaceScore": 0,
+            "team2RaceScore": 0
+        },
+        {
+            "id": "match-8",
+            "round": 1,
+            "team1": {
+                "id": "team-6",
+                "name": "Kiki & Lili"
+            },
+            "team2": {
+                "id": "team-7",
+                "name": "Maya & Nina"
+            },
+            "status": "scheduled",
+            "groupId": "group-2",
+            "isDeuce": false,
+            "position": 1,
+            "schedule": {},
+            "completed": false,
+            "currentSet": 1,
+            "raceTarget": 4,
+            "team1Score": {
+                "sets": 0,
+                "games": 0,
+                "points": 0
+            },
+            "team2Score": {
+                "sets": 0,
+                "games": 0,
+                "points": 0
+            },
+            "currentGame": 0,
+            "scoringMode": "race",
+            "servingTeam": "team1",
+            "isTiebreaker": false,
+            "pointsInGame": 0,
+            "isGoldenPoint": false,
+            "team1RaceScore": 0,
+            "team2RaceScore": 0
+        },
+        {
+            "id": "match-9",
+            "round": 1,
+            "team1": {
+                "id": "team-5",
+                "name": "Indra & Joni"
+            },
+            "team2": {
+                "id": "team-7",
+                "name": "Maya & Nina"
+            },
+            "status": "scheduled",
+            "groupId": "group-2",
+            "isDeuce": false,
+            "position": 2,
+            "schedule": {},
+            "completed": false,
+            "currentSet": 1,
+            "raceTarget": 4,
+            "team1Score": {
+                "sets": 0,
+                "games": 0,
+                "points": 0
+            },
+            "team2Score": {
+                "sets": 0,
+                "games": 0,
+                "points": 0
+            },
+            "currentGame": 0,
+            "scoringMode": "race",
+            "servingTeam": "team1",
+            "isTiebreaker": false,
+            "pointsInGame": 0,
+            "isGoldenPoint": false,
+            "team1RaceScore": 0,
+            "team2RaceScore": 0
+        },
+        {
+            "id": "match-10",
+            "round": 1,
+            "team1": {
+                "id": "team-8",
+                "name": "Oki & Puti"
+            },
+            "team2": {
+                "id": "team-6",
+                "name": "Kiki & Lili"
+            },
+            "status": "scheduled",
+            "groupId": "group-2",
+            "isDeuce": false,
+            "position": 3,
+            "schedule": {},
+            "completed": false,
+            "currentSet": 1,
+            "raceTarget": 4,
+            "team1Score": {
+                "sets": 0,
+                "games": 0,
+                "points": 0
+            },
+            "team2Score": {
+                "sets": 0,
+                "games": 0,
+                "points": 0
+            },
+            "currentGame": 0,
+            "scoringMode": "race",
+            "servingTeam": "team2",
+            "isTiebreaker": false,
+            "pointsInGame": 0,
+            "isGoldenPoint": false,
+            "team1RaceScore": 0,
+            "team2RaceScore": 0
+        },
+        {
+            "id": "match-11",
+            "round": 1,
+            "team1": {
+                "id": "team-5",
+                "name": "Indra & Joni"
+            },
+            "team2": {
+                "id": "team-6",
+                "name": "Kiki & Lili"
+            },
+            "status": "scheduled",
+            "groupId": "group-2",
+            "isDeuce": false,
+            "position": 4,
+            "schedule": {},
+            "completed": false,
+            "currentSet": 1,
+            "raceTarget": 4,
+            "team1Score": {
+                "sets": 0,
+                "games": 0,
+                "points": 0
+            },
+            "team2Score": {
+                "sets": 0,
+                "games": 0,
+                "points": 0
+            },
+            "currentGame": 0,
+            "scoringMode": "race",
+            "servingTeam": "team1",
+            "isTiebreaker": false,
+            "pointsInGame": 0,
+            "isGoldenPoint": false,
+            "team1RaceScore": 0,
+            "team2RaceScore": 0
+        },
+        {
+            "id": "match-12",
+            "round": 1,
+            "team1": {
+                "id": "team-7",
+                "name": "Maya & Nina"
+            },
+            "team2": {
+                "id": "team-8",
+                "name": "Oki & Puti"
+            },
+            "status": "scheduled",
+            "groupId": "group-2",
+            "isDeuce": false,
+            "position": 5,
+            "schedule": {},
+            "completed": false,
+            "currentSet": 1,
+            "raceTarget": 4,
+            "team1Score": {
+                "sets": 0,
+                "games": 0,
+                "points": 0
+            },
+            "team2Score": {
+                "sets": 0,
+                "games": 0,
+                "points": 0
+            },
+            "currentGame": 0,
+            "scoringMode": "race",
+            "servingTeam": "team1",
+            "isTiebreaker": false,
+            "pointsInGame": 0,
+            "isGoldenPoint": false,
+            "team1RaceScore": 0,
+            "team2RaceScore": 0
+        },
+        {
+            "id": "match-13",
+            "round": 1,
+            "team1": {
+                "id": "team-9",
+                "name": "Reza & Sari"
+            },
+            "team2": {
+                "id": "team-12",
+                "name": "Xena & Yuni"
+            },
+            "status": "scheduled",
+            "groupId": "group-3",
+            "isDeuce": false,
+            "position": 0,
+            "schedule": {},
+            "completed": false,
+            "currentSet": 1,
+            "raceTarget": 4,
+            "team1Score": {
+                "sets": 0,
+                "games": 0,
+                "points": 0
+            },
+            "team2Score": {
+                "sets": 0,
+                "games": 0,
+                "points": 0
+            },
+            "currentGame": 0,
+            "scoringMode": "race",
+            "servingTeam": "team1",
+            "isTiebreaker": false,
+            "pointsInGame": 0,
+            "isGoldenPoint": false,
+            "team1RaceScore": 0,
+            "team2RaceScore": 0
+        },
+        {
+            "id": "match-14",
+            "round": 1,
+            "team1": {
+                "id": "team-10",
+                "name": "Toni & Udin"
+            },
+            "team2": {
+                "id": "team-11",
+                "name": "Vera & Wati"
+            },
+            "status": "scheduled",
+            "groupId": "group-3",
+            "isDeuce": false,
+            "position": 1,
+            "schedule": {},
+            "completed": false,
+            "currentSet": 1,
+            "raceTarget": 4,
+            "team1Score": {
+                "sets": 0,
+                "games": 0,
+                "points": 0
+            },
+            "team2Score": {
+                "sets": 0,
+                "games": 0,
+                "points": 0
+            },
+            "currentGame": 0,
+            "scoringMode": "race",
+            "servingTeam": "team1",
+            "isTiebreaker": false,
+            "pointsInGame": 0,
+            "isGoldenPoint": false,
+            "team1RaceScore": 0,
+            "team2RaceScore": 0
+        },
+        {
+            "id": "match-15",
+            "round": 1,
+            "team1": {
+                "id": "team-9",
+                "name": "Reza & Sari"
+            },
+            "team2": {
+                "id": "team-11",
+                "name": "Vera & Wati"
+            },
+            "status": "scheduled",
+            "groupId": "group-3",
+            "isDeuce": false,
+            "position": 2,
+            "schedule": {},
+            "completed": false,
+            "currentSet": 1,
+            "raceTarget": 4,
+            "team1Score": {
+                "sets": 0,
+                "games": 0,
+                "points": 0
+            },
+            "team2Score": {
+                "sets": 0,
+                "games": 0,
+                "points": 0
+            },
+            "currentGame": 0,
+            "scoringMode": "race",
+            "servingTeam": "team1",
+            "isTiebreaker": false,
+            "pointsInGame": 0,
+            "isGoldenPoint": false,
+            "team1RaceScore": 0,
+            "team2RaceScore": 0
+        },
+        {
+            "id": "match-16",
+            "round": 1,
+            "team1": {
+                "id": "team-12",
+                "name": "Xena & Yuni"
+            },
+            "team2": {
+                "id": "team-10",
+                "name": "Toni & Udin"
+            },
+            "status": "scheduled",
+            "groupId": "group-3",
+            "isDeuce": false,
+            "position": 3,
+            "schedule": {},
+            "completed": false,
+            "currentSet": 1,
+            "raceTarget": 4,
+            "team1Score": {
+                "sets": 0,
+                "games": 0,
+                "points": 0
+            },
+            "team2Score": {
+                "sets": 0,
+                "games": 0,
+                "points": 0
+            },
+            "currentGame": 0,
+            "scoringMode": "race",
+            "servingTeam": "team1",
+            "isTiebreaker": false,
+            "pointsInGame": 0,
+            "isGoldenPoint": false,
+            "team1RaceScore": 0,
+            "team2RaceScore": 0
+        },
+        {
+            "id": "match-17",
+            "round": 1,
+            "team1": {
+                "id": "team-9",
+                "name": "Reza & Sari"
+            },
+            "team2": {
+                "id": "team-10",
+                "name": "Toni & Udin"
+            },
+            "status": "scheduled",
+            "groupId": "group-3",
+            "isDeuce": false,
+            "position": 4,
+            "schedule": {},
+            "completed": false,
+            "currentSet": 1,
+            "raceTarget": 4,
+            "team1Score": {
+                "sets": 0,
+                "games": 0,
+                "points": 0
+            },
+            "team2Score": {
+                "sets": 0,
+                "games": 0,
+                "points": 0
+            },
+            "currentGame": 0,
+            "scoringMode": "race",
+            "servingTeam": "team2",
+            "isTiebreaker": false,
+            "pointsInGame": 0,
+            "isGoldenPoint": false,
+            "team1RaceScore": 0,
+            "team2RaceScore": 0
+        },
+        {
+            "id": "match-18",
+            "round": 1,
+            "team1": {
+                "id": "team-11",
+                "name": "Vera & Wati"
+            },
+            "team2": {
+                "id": "team-12",
+                "name": "Xena & Yuni"
+            },
+            "status": "scheduled",
+            "groupId": "group-3",
+            "isDeuce": false,
+            "position": 5,
+            "schedule": {},
+            "completed": false,
+            "currentSet": 1,
+            "raceTarget": 4,
+            "team1Score": {
+                "sets": 0,
+                "games": 0,
+                "points": 0
+            },
+            "team2Score": {
+                "sets": 0,
+                "games": 0,
+                "points": 0
+            },
+            "currentGame": 0,
+            "scoringMode": "race",
+            "servingTeam": "team1",
+            "isTiebreaker": false,
+            "pointsInGame": 0,
+            "isGoldenPoint": false,
+            "team1RaceScore": 0,
+            "team2RaceScore": 0
+        },
+        {
+            "id": "match-19",
+            "round": 1,
+            "team1": {
+                "id": "team-13",
+                "name": "Arif & Bima"
+            },
+            "team2": {
+                "id": "team-16",
+                "name": "Hana & Irma"
+            },
+            "status": "scheduled",
+            "groupId": "group-4",
+            "isDeuce": false,
+            "position": 0,
+            "schedule": {},
+            "completed": false,
+            "currentSet": 1,
+            "raceTarget": 4,
+            "team1Score": {
+                "sets": 0,
+                "games": 0,
+                "points": 0
+            },
+            "team2Score": {
+                "sets": 0,
+                "games": 0,
+                "points": 0
+            },
+            "currentGame": 0,
+            "scoringMode": "race",
+            "servingTeam": "team1",
+            "isTiebreaker": false,
+            "pointsInGame": 0,
+            "isGoldenPoint": false,
+            "team1RaceScore": 0,
+            "team2RaceScore": 0
+        },
+        {
+            "id": "match-20",
+            "round": 1,
+            "team1": {
+                "id": "team-14",
+                "name": "Dewi & Elsa"
+            },
+            "team2": {
+                "id": "team-15",
+                "name": "Fajar & Galih"
+            },
+            "status": "scheduled",
+            "groupId": "group-4",
+            "isDeuce": false,
+            "position": 1,
+            "schedule": {},
+            "completed": false,
+            "currentSet": 1,
+            "raceTarget": 4,
+            "team1Score": {
+                "sets": 0,
+                "games": 0,
+                "points": 0
+            },
+            "team2Score": {
+                "sets": 0,
+                "games": 0,
+                "points": 0
+            },
+            "currentGame": 0,
+            "scoringMode": "race",
+            "servingTeam": "team2",
+            "isTiebreaker": false,
+            "pointsInGame": 0,
+            "isGoldenPoint": false,
+            "team1RaceScore": 0,
+            "team2RaceScore": 0
+        },
+        {
+            "id": "match-21",
+            "round": 1,
+            "team1": {
+                "id": "team-13",
+                "name": "Arif & Bima"
+            },
+            "team2": {
+                "id": "team-15",
+                "name": "Fajar & Galih"
+            },
+            "status": "scheduled",
+            "groupId": "group-4",
+            "isDeuce": false,
+            "position": 2,
+            "schedule": {},
+            "completed": false,
+            "currentSet": 1,
+            "raceTarget": 4,
+            "team1Score": {
+                "sets": 0,
+                "games": 0,
+                "points": 0
+            },
+            "team2Score": {
+                "sets": 0,
+                "games": 0,
+                "points": 0
+            },
+            "currentGame": 0,
+            "scoringMode": "race",
+            "servingTeam": "team1",
+            "isTiebreaker": false,
+            "pointsInGame": 0,
+            "isGoldenPoint": false,
+            "team1RaceScore": 0,
+            "team2RaceScore": 0
+        },
+        {
+            "id": "match-22",
+            "round": 1,
+            "team1": {
+                "id": "team-16",
+                "name": "Hana & Irma"
+            },
+            "team2": {
+                "id": "team-14",
+                "name": "Dewi & Elsa"
+            },
+            "status": "scheduled",
+            "groupId": "group-4",
+            "isDeuce": false,
+            "position": 3,
+            "schedule": {},
+            "completed": false,
+            "currentSet": 1,
+            "raceTarget": 4,
+            "team1Score": {
+                "sets": 0,
+                "games": 0,
+                "points": 0
+            },
+            "team2Score": {
+                "sets": 0,
+                "games": 0,
+                "points": 0
+            },
+            "currentGame": 0,
+            "scoringMode": "race",
+            "servingTeam": "team1",
+            "isTiebreaker": false,
+            "pointsInGame": 0,
+            "isGoldenPoint": false,
+            "team1RaceScore": 0,
+            "team2RaceScore": 0
+        },
+        {
+            "id": "match-23",
+            "round": 1,
+            "team1": {
+                "id": "team-13",
+                "name": "Arif & Bima"
+            },
+            "team2": {
+                "id": "team-14",
+                "name": "Dewi & Elsa"
+            },
+            "status": "scheduled",
+            "groupId": "group-4",
+            "isDeuce": false,
+            "position": 4,
+            "schedule": {},
+            "completed": false,
+            "currentSet": 1,
+            "raceTarget": 4,
+            "team1Score": {
+                "sets": 0,
+                "games": 0,
+                "points": 0
+            },
+            "team2Score": {
+                "sets": 0,
+                "games": 0,
+                "points": 0
+            },
+            "currentGame": 0,
+            "scoringMode": "race",
+            "servingTeam": "team2",
+            "isTiebreaker": false,
+            "pointsInGame": 0,
+            "isGoldenPoint": false,
+            "team1RaceScore": 0,
+            "team2RaceScore": 0
+        },
+        {
+            "id": "match-24",
+            "round": 1,
+            "team1": {
+                "id": "team-15",
+                "name": "Fajar & Galih"
+            },
+            "team2": {
+                "id": "team-16",
+                "name": "Hana & Irma"
+            },
+            "status": "scheduled",
+            "groupId": "group-4",
+            "isDeuce": false,
+            "position": 5,
+            "schedule": {},
+            "completed": false,
+            "currentSet": 1,
+            "raceTarget": 4,
+            "team1Score": {
+                "sets": 0,
+                "games": 0,
+                "points": 0
+            },
+            "team2Score": {
+                "sets": 0,
+                "games": 0,
+                "points": 0
+            },
+            "currentGame": 0,
+            "scoringMode": "race",
+            "servingTeam": "team2",
+            "isTiebreaker": false,
+            "pointsInGame": 0,
+            "isGoldenPoint": false,
+            "team1RaceScore": 0,
+            "team2RaceScore": 0
+        },
+        {
+            "id": "match-25",
+            "round": 1,
+            "team1": {
+                "id": "team-17",
+                "name": "Joko & Kris"
+            },
+            "team2": {
+                "id": "team-20",
+                "name": "Putra & Rizky"
+            },
+            "status": "scheduled",
+            "groupId": "group-5",
+            "isDeuce": false,
+            "position": 0,
+            "schedule": {},
+            "completed": false,
+            "currentSet": 1,
+            "raceTarget": 4,
+            "team1Score": {
+                "sets": 0,
+                "games": 0,
+                "points": 0
+            },
+            "team2Score": {
+                "sets": 0,
+                "games": 0,
+                "points": 0
+            },
+            "currentGame": 0,
+            "scoringMode": "race",
+            "servingTeam": "team1",
+            "isTiebreaker": false,
+            "pointsInGame": 0,
+            "isGoldenPoint": false,
+            "team1RaceScore": 0,
+            "team2RaceScore": 0
+        },
+        {
+            "id": "match-26",
+            "round": 1,
+            "team1": {
+                "id": "team-18",
+                "name": "Luna & Mira"
+            },
+            "team2": {
+                "id": "team-19",
+                "name": "Nana & Olin"
+            },
+            "status": "scheduled",
+            "groupId": "group-5",
+            "isDeuce": false,
+            "position": 1,
+            "schedule": {},
+            "completed": false,
+            "currentSet": 1,
+            "raceTarget": 4,
+            "team1Score": {
+                "sets": 0,
+                "games": 0,
+                "points": 0
+            },
+            "team2Score": {
+                "sets": 0,
+                "games": 0,
+                "points": 0
+            },
+            "currentGame": 0,
+            "scoringMode": "race",
+            "servingTeam": "team2",
+            "isTiebreaker": false,
+            "pointsInGame": 0,
+            "isGoldenPoint": false,
+            "team1RaceScore": 0,
+            "team2RaceScore": 0
+        },
+        {
+            "id": "match-27",
+            "round": 1,
+            "team1": {
+                "id": "team-17",
+                "name": "Joko & Kris"
+            },
+            "team2": {
+                "id": "team-19",
+                "name": "Nana & Olin"
+            },
+            "status": "scheduled",
+            "groupId": "group-5",
+            "isDeuce": false,
+            "position": 2,
+            "schedule": {},
+            "completed": false,
+            "currentSet": 1,
+            "raceTarget": 4,
+            "team1Score": {
+                "sets": 0,
+                "games": 0,
+                "points": 0
+            },
+            "team2Score": {
+                "sets": 0,
+                "games": 0,
+                "points": 0
+            },
+            "currentGame": 0,
+            "scoringMode": "race",
+            "servingTeam": "team2",
+            "isTiebreaker": false,
+            "pointsInGame": 0,
+            "isGoldenPoint": false,
+            "team1RaceScore": 0,
+            "team2RaceScore": 0
+        },
+        {
+            "id": "match-28",
+            "round": 1,
+            "team1": {
+                "id": "team-20",
+                "name": "Putra & Rizky"
+            },
+            "team2": {
+                "id": "team-18",
+                "name": "Luna & Mira"
+            },
+            "status": "scheduled",
+            "groupId": "group-5",
+            "isDeuce": false,
+            "position": 3,
+            "schedule": {},
+            "completed": false,
+            "currentSet": 1,
+            "raceTarget": 4,
+            "team1Score": {
+                "sets": 0,
+                "games": 0,
+                "points": 0
+            },
+            "team2Score": {
+                "sets": 0,
+                "games": 0,
+                "points": 0
+            },
+            "currentGame": 0,
+            "scoringMode": "race",
+            "servingTeam": "team2",
+            "isTiebreaker": false,
+            "pointsInGame": 0,
+            "isGoldenPoint": false,
+            "team1RaceScore": 0,
+            "team2RaceScore": 0
+        },
+        {
+            "id": "match-29",
+            "round": 1,
+            "team1": {
+                "id": "team-17",
+                "name": "Joko & Kris"
+            },
+            "team2": {
+                "id": "team-18",
+                "name": "Luna & Mira"
+            },
+            "status": "scheduled",
+            "groupId": "group-5",
+            "isDeuce": false,
+            "position": 4,
+            "schedule": {},
+            "completed": false,
+            "currentSet": 1,
+            "raceTarget": 4,
+            "team1Score": {
+                "sets": 0,
+                "games": 0,
+                "points": 0
+            },
+            "team2Score": {
+                "sets": 0,
+                "games": 0,
+                "points": 0
+            },
+            "currentGame": 0,
+            "scoringMode": "race",
+            "servingTeam": "team2",
+            "isTiebreaker": false,
+            "pointsInGame": 0,
+            "isGoldenPoint": false,
+            "team1RaceScore": 0,
+            "team2RaceScore": 0
+        },
+        {
+            "id": "match-30",
+            "round": 1,
+            "team1": {
+                "id": "team-19",
+                "name": "Nana & Olin"
+            },
+            "team2": {
+                "id": "team-20",
+                "name": "Putra & Rizky"
+            },
+            "status": "scheduled",
+            "groupId": "group-5",
+            "isDeuce": false,
+            "position": 5,
+            "schedule": {},
+            "completed": false,
+            "currentSet": 1,
+            "raceTarget": 4,
+            "team1Score": {
+                "sets": 0,
+                "games": 0,
+                "points": 0
+            },
+            "team2Score": {
+                "sets": 0,
+                "games": 0,
+                "points": 0
+            },
+            "currentGame": 0,
+            "scoringMode": "race",
+            "servingTeam": "team2",
+            "isTiebreaker": false,
+            "pointsInGame": 0,
+            "isGoldenPoint": false,
+            "team1RaceScore": 0,
+            "team2RaceScore": 0
+        },
+        {
+            "id": "match-31",
+            "round": 1,
+            "team1": {
+                "id": "team-21",
+                "name": "Sinta & Tari"
+            },
+            "team2": {
+                "id": "team-24",
+                "name": "Zara & Amel"
+            },
+            "status": "scheduled",
+            "groupId": "group-6",
+            "isDeuce": false,
+            "position": 0,
+            "schedule": {},
+            "completed": false,
+            "currentSet": 1,
+            "raceTarget": 4,
+            "team1Score": {
+                "sets": 0,
+                "games": 0,
+                "points": 0
+            },
+            "team2Score": {
+                "sets": 0,
+                "games": 0,
+                "points": 0
+            },
+            "currentGame": 0,
+            "scoringMode": "race",
+            "servingTeam": "team2",
+            "isTiebreaker": false,
+            "pointsInGame": 0,
+            "isGoldenPoint": false,
+            "team1RaceScore": 0,
+            "team2RaceScore": 0
+        },
+        {
+            "id": "match-32",
+            "round": 1,
+            "team1": {
+                "id": "team-22",
+                "name": "Umar & Vina"
+            },
+            "team2": {
+                "id": "team-23",
+                "name": "Wira & Yoga"
+            },
+            "status": "scheduled",
+            "groupId": "group-6",
+            "isDeuce": false,
+            "position": 1,
+            "schedule": {},
+            "completed": false,
+            "currentSet": 1,
+            "raceTarget": 4,
+            "team1Score": {
+                "sets": 0,
+                "games": 0,
+                "points": 0
+            },
+            "team2Score": {
+                "sets": 0,
+                "games": 0,
+                "points": 0
+            },
+            "currentGame": 0,
+            "scoringMode": "race",
+            "servingTeam": "team2",
+            "isTiebreaker": false,
+            "pointsInGame": 0,
+            "isGoldenPoint": false,
+            "team1RaceScore": 0,
+            "team2RaceScore": 0
+        },
+        {
+            "id": "match-33",
+            "round": 1,
+            "team1": {
+                "id": "team-21",
+                "name": "Sinta & Tari"
+            },
+            "team2": {
+                "id": "team-23",
+                "name": "Wira & Yoga"
+            },
+            "status": "scheduled",
+            "groupId": "group-6",
+            "isDeuce": false,
+            "position": 2,
+            "schedule": {},
+            "completed": false,
+            "currentSet": 1,
+            "raceTarget": 4,
+            "team1Score": {
+                "sets": 0,
+                "games": 0,
+                "points": 0
+            },
+            "team2Score": {
+                "sets": 0,
+                "games": 0,
+                "points": 0
+            },
+            "currentGame": 0,
+            "scoringMode": "race",
+            "servingTeam": "team1",
+            "isTiebreaker": false,
+            "pointsInGame": 0,
+            "isGoldenPoint": false,
+            "team1RaceScore": 0,
+            "team2RaceScore": 0
+        },
+        {
+            "id": "match-34",
+            "round": 1,
+            "team1": {
+                "id": "team-24",
+                "name": "Zara & Amel"
+            },
+            "team2": {
+                "id": "team-22",
+                "name": "Umar & Vina"
+            },
+            "status": "scheduled",
+            "groupId": "group-6",
+            "isDeuce": false,
+            "position": 3,
+            "schedule": {},
+            "completed": false,
+            "currentSet": 1,
+            "raceTarget": 4,
+            "team1Score": {
+                "sets": 0,
+                "games": 0,
+                "points": 0
+            },
+            "team2Score": {
+                "sets": 0,
+                "games": 0,
+                "points": 0
+            },
+            "currentGame": 0,
+            "scoringMode": "race",
+            "servingTeam": "team2",
+            "isTiebreaker": false,
+            "pointsInGame": 0,
+            "isGoldenPoint": false,
+            "team1RaceScore": 0,
+            "team2RaceScore": 0
+        },
+        {
+            "id": "match-35",
+            "round": 1,
+            "team1": {
+                "id": "team-21",
+                "name": "Sinta & Tari"
+            },
+            "team2": {
+                "id": "team-22",
+                "name": "Umar & Vina"
+            },
+            "status": "scheduled",
+            "groupId": "group-6",
+            "isDeuce": false,
+            "position": 4,
+            "schedule": {},
+            "completed": false,
+            "currentSet": 1,
+            "raceTarget": 4,
+            "team1Score": {
+                "sets": 0,
+                "games": 0,
+                "points": 0
+            },
+            "team2Score": {
+                "sets": 0,
+                "games": 0,
+                "points": 0
+            },
+            "currentGame": 0,
+            "scoringMode": "race",
+            "servingTeam": "team2",
+            "isTiebreaker": false,
+            "pointsInGame": 0,
+            "isGoldenPoint": false,
+            "team1RaceScore": 0,
+            "team2RaceScore": 0
+        },
+        {
+            "id": "match-36",
+            "round": 1,
+            "team1": {
+                "id": "team-23",
+                "name": "Wira & Yoga"
+            },
+            "team2": {
+                "id": "team-24",
+                "name": "Zara & Amel"
+            },
+            "status": "scheduled",
+            "groupId": "group-6",
+            "isDeuce": false,
+            "position": 5,
+            "schedule": {},
+            "completed": false,
+            "currentSet": 1,
+            "raceTarget": 4,
+            "team1Score": {
+                "sets": 0,
+                "games": 0,
+                "points": 0
+            },
+            "team2Score": {
+                "sets": 0,
+                "games": 0,
+                "points": 0
+            },
+            "currentGame": 0,
+            "scoringMode": "race",
+            "servingTeam": "team2",
+            "isTiebreaker": false,
+            "pointsInGame": 0,
+            "isGoldenPoint": false,
+            "team1RaceScore": 0,
+            "team2RaceScore": 0
+        },
+        {
+            "id": "match-37",
+            "round": 2,
+            "team1": {
+                "id": "",
+                "name": "TBD"
+            },
+            "team2": {
+                "id": "",
+                "name": "TBD"
+            },
+            "status": "scheduled",
+            "isDeuce": false,
+            "position": 0,
+            "schedule": {},
+            "completed": false,
+            "currentSet": 1,
+            "raceTarget": 4,
+            "team1Score": {
+                "sets": 0,
+                "games": 0,
+                "points": 0
+            },
+            "team2Score": {
+                "sets": 0,
+                "games": 0,
+                "points": 0
+            },
+            "currentGame": 0,
+            "scoringMode": "race",
+            "servingTeam": "team1",
+            "isTiebreaker": false,
+            "pointsInGame": 0,
+            "isGoldenPoint": false,
+            "team1RaceScore": 0,
+            "team2RaceScore": 0
+        },
+        {
+            "id": "match-38",
+            "round": 2,
+            "team1": {
+                "id": "",
+                "name": "TBD"
+            },
+            "team2": {
+                "id": "",
+                "name": "TBD"
+            },
+            "status": "scheduled",
+            "isDeuce": false,
+            "position": 1,
+            "schedule": {},
+            "completed": false,
+            "currentSet": 1,
+            "raceTarget": 4,
+            "team1Score": {
+                "sets": 0,
+                "games": 0,
+                "points": 0
+            },
+            "team2Score": {
+                "sets": 0,
+                "games": 0,
+                "points": 0
+            },
+            "currentGame": 0,
+            "scoringMode": "race",
+            "servingTeam": "team1",
+            "isTiebreaker": false,
+            "pointsInGame": 0,
+            "isGoldenPoint": false,
+            "team1RaceScore": 0,
+            "team2RaceScore": 0
+        },
+        {
+            "id": "match-39",
+            "round": 2,
+            "team1": {
+                "id": "",
+                "name": "TBD"
+            },
+            "team2": {
+                "id": "",
+                "name": "TBD"
+            },
+            "status": "scheduled",
+            "isDeuce": false,
+            "position": 2,
+            "schedule": {},
+            "completed": false,
+            "currentSet": 1,
+            "raceTarget": 4,
+            "team1Score": {
+                "sets": 0,
+                "games": 0,
+                "points": 0
+            },
+            "team2Score": {
+                "sets": 0,
+                "games": 0,
+                "points": 0
+            },
+            "currentGame": 0,
+            "scoringMode": "race",
+            "servingTeam": "team1",
+            "isTiebreaker": false,
+            "pointsInGame": 0,
+            "isGoldenPoint": false,
+            "team1RaceScore": 0,
+            "team2RaceScore": 0
+        },
+        {
+            "id": "match-40",
+            "round": 2,
+            "team1": {
+                "id": "",
+                "name": "TBD"
+            },
+            "team2": {
+                "id": "",
+                "name": "TBD"
+            },
+            "status": "scheduled",
+            "isDeuce": false,
+            "position": 3,
+            "schedule": {},
+            "completed": false,
+            "currentSet": 1,
+            "raceTarget": 4,
+            "team1Score": {
+                "sets": 0,
+                "games": 0,
+                "points": 0
+            },
+            "team2Score": {
+                "sets": 0,
+                "games": 0,
+                "points": 0
+            },
+            "currentGame": 0,
+            "scoringMode": "race",
+            "servingTeam": "team1",
+            "isTiebreaker": false,
+            "pointsInGame": 0,
+            "isGoldenPoint": false,
+            "team1RaceScore": 0,
+            "team2RaceScore": 0
+        },
+        {
+            "id": "match-41",
+            "round": 3,
+            "team1": {
+                "id": "",
+                "name": "TBD"
+            },
+            "team2": {
+                "id": "",
+                "name": "TBD"
+            },
+            "status": "scheduled",
+            "isDeuce": false,
+            "position": 0,
+            "schedule": {},
+            "completed": false,
+            "currentSet": 1,
+            "raceTarget": 4,
+            "team1Score": {
+                "sets": 0,
+                "games": 0,
+                "points": 0
+            },
+            "team2Score": {
+                "sets": 0,
+                "games": 0,
+                "points": 0
+            },
+            "currentGame": 0,
+            "scoringMode": "race",
+            "servingTeam": "team1",
+            "isTiebreaker": false,
+            "pointsInGame": 0,
+            "isGoldenPoint": false,
+            "team1RaceScore": 0,
+            "team2RaceScore": 0
+        },
+        {
+            "id": "match-42",
+            "round": 3,
+            "team1": {
+                "id": "",
+                "name": "TBD"
+            },
+            "team2": {
+                "id": "",
+                "name": "TBD"
+            },
+            "status": "scheduled",
+            "isDeuce": false,
+            "position": 1,
+            "schedule": {},
+            "completed": false,
+            "currentSet": 1,
+            "raceTarget": 4,
+            "team1Score": {
+                "sets": 0,
+                "games": 0,
+                "points": 0
+            },
+            "team2Score": {
+                "sets": 0,
+                "games": 0,
+                "points": 0
+            },
+            "currentGame": 0,
+            "scoringMode": "race",
+            "servingTeam": "team1",
+            "isTiebreaker": false,
+            "pointsInGame": 0,
+            "isGoldenPoint": false,
+            "team1RaceScore": 0,
+            "team2RaceScore": 0
+        },
+        {
+            "id": "match-43",
+            "round": 4,
+            "team1": {
+                "id": "",
+                "name": "TBD"
+            },
+            "team2": {
+                "id": "",
+                "name": "TBD"
+            },
+            "status": "scheduled",
+            "isDeuce": false,
+            "position": 0,
+            "schedule": {},
+            "completed": false,
+            "currentSet": 1,
+            "raceTarget": 6,
+            "team1Score": {
+                "sets": 0,
+                "games": 0,
+                "points": 0
+            },
+            "team2Score": {
+                "sets": 0,
+                "games": 0,
+                "points": 0
+            },
+            "currentGame": 0,
+            "scoringMode": "race",
+            "servingTeam": "team1",
+            "isTiebreaker": false,
+            "pointsInGame": 0,
+            "isGoldenPoint": false,
+            "team1RaceScore": 0,
+            "team2RaceScore": 0
+        }
+    ],
+    "completed": false,
+    "createdAt": "2026-04-09T09:23:56.187Z",
+    "groupStage": true,
+    "raceTarget": 4,
+    "scoringMode": "race",
+    "currentRound": 1,
+    "matchDuration": 90,
+    "breakBetweenMatches": 15
+}
