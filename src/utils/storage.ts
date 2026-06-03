@@ -106,6 +106,28 @@ export async function getTournaments(): Promise<Tournament[]> {
   }
 }
 
+// Fetch a single tournament by id — used by the polling fallback so each tick
+// transfers one row instead of the whole table.
+export async function getTournament(id: string): Promise<Tournament | null> {
+  try {
+    const { data, error } = await supabase
+      .from('tournaments')
+      .select('data')
+      .eq('id', id)
+      .maybeSingle();
+
+    if (error) {
+      console.error('Failed to load tournament from Supabase:', error);
+      return getTournamentsLocal().find((t) => t.id === id) ?? null;
+    }
+
+    return (data?.data as Tournament) ?? null;
+  } catch (error) {
+    console.error('Failed to load tournament:', error);
+    return getTournamentsLocal().find((t) => t.id === id) ?? null;
+  }
+}
+
 export async function deleteTournament(tournamentId: string): Promise<void> {
   try {
     const { error } = await supabase

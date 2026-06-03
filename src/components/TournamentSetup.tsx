@@ -293,7 +293,7 @@ export default function TournamentSetup({ onCreateTournament }: TournamentSetupP
                         </button>
                       ))}
                     </div>
-                    <p className="text-xs text-gray-400 mt-2">Deciding-game tiebreak (first to {tiebreakPoints}, win by 2) only when games reach {tiebreakAt}-{tiebreakAt} <span className="font-semibold">and</span> the game hits 40-40. A clean 40-0 just wins the game.</p>
+                    <p className="text-xs text-gray-400 mt-2">Deciding-game tiebreak (first to {tiebreakPoints}{goldenPoint ? `, golden at ${tiebreakPoints - 1}-${tiebreakPoints - 1} → max ${tiebreakPoints}-${tiebreakPoints - 1}` : ', win by 2'}) only when games reach {tiebreakAt}-{tiebreakAt} <span className="font-semibold">and</span> the game hits 40-40. A clean 40-0 just wins the game.</p>
                   </div>
 
                   {/* Deuce rule */}

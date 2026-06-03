@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useParams, useSearchParams, useNavigate } from 'react-router-dom';
 import { Maximize, Minimize, Monitor, Trophy, Tv, ArrowLeft, Target } from 'lucide-react';
 import { Tournament, Match, Court, Group } from '../types/tournament';
-import { getTournaments, subscribeTournaments, subscribeToScoreUpdates } from '../utils/storage';
+import { getTournaments, getTournament, subscribeTournaments, subscribeToScoreUpdates } from '../utils/storage';
 import { realTimeUpdates, MatchUpdateData } from '../utils/realTimeUpdates';
 import { getRacePointDisplay, isGoldenPoint } from '../utils/raceScoring';
 import { getTournamentSponsors, SponsorSlot } from '../utils/sponsors';
@@ -499,8 +499,7 @@ export default function TVDisplay() {
   useEffect(() => {
     if (!tournamentId) return;
     const interval = setInterval(() => {
-      getTournaments().then(ts => {
-        const t = ts.find(t => t.id === tournamentId);
+      getTournament(tournamentId).then(t => {
         if (t) setTournament(t);
       });
     }, 2000);

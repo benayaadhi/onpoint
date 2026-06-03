@@ -225,8 +225,15 @@ export default function MatchScoring({
     const tb1 = m.tiebreakPoints.team1;
     const tb2 = m.tiebreakPoints.team2;
     const target = rules.tiebreakPoints;
+    // Golden mode (and race, which is always golden): sudden death at
+    // (target-1)-(target-1) → first to target wins outright (e.g. 7-6).
+    // Advantage mode: must win the tiebreak by 2 (8-6, 9-7, ...).
+    const goldenTiebreak = isRaceMode || rules.goldenPoint;
+    const tbWon = goldenTiebreak
+      ? (tb1 >= target && tb1 > tb2) || (tb2 >= target && tb2 > tb1)
+      : (tb1 >= target && tb1 - tb2 >= 2) || (tb2 >= target && tb2 - tb1 >= 2);
 
-    if ((tb1 >= target && tb1 - tb2 >= 2) || (tb2 >= target && tb2 - tb1 >= 2)) {
+    if (tbWon) {
       const winTeam: 'team1' | 'team2' = tb1 > tb2 ? 'team1' : 'team2';
       m.isTiebreaker = false;
       m.tiebreakPoints = undefined;

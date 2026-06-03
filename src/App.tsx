@@ -32,6 +32,7 @@ import {
 import {
     saveTournament,
     getTournaments,
+    getTournament,
     deleteTournament,
     subscribeTournaments,
     broadcastScoreUpdate,
@@ -392,10 +393,8 @@ function App() {
         if (!currentTournament?.id) return;
         const id = currentTournament.id;
         const interval = setInterval(async () => {
-            const ts = await getTournaments();
-            const fresh = ts.find((t) => t.id === id);
+            const fresh = await getTournament(id);
             if (!fresh) return;
-            setSavedTournaments(ts);
             setCurrentTournament((prev) => {
                 if (!prev || prev.id !== id) return prev;
                 // Only update if data actually changed (compare updated_at or match count)
@@ -502,9 +501,9 @@ function App() {
             // standings pass is needed here.
             const advancedTournament = advanceTournament(tournamentAfterCourt);
 
-            saveTournament(advancedTournament).then(() => {
-                getTournaments().then(setSavedTournaments);
-            });
+            // Persist only — local state is already updated below (return), and
+            // spectators sync via the websocket broadcast. No full-table refetch.
+            saveTournament(advancedTournament);
 
             // No auto-navigate on completion — user stays on scoring page
             // so they can undo if accidentally clicked the winning point.
