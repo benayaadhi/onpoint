@@ -25,6 +25,7 @@ import {
 } from '../utils/courtAssignment';
 import CourtManager from './CourtManager';
 import GroupKnockoutView from './GroupKnockoutView';
+import ClashView from './ClashView';
 
 // --- PROPS ---
 interface TournamentBracketProps {
@@ -129,6 +130,10 @@ export default function TournamentBracket({
 
   if (tournament.format === 'group-knockout') {
     return <GroupKnockoutView {...viewProps} />;
+  }
+
+  if (tournament.format === 'clash') {
+    return <ClashView {...viewProps} />;
   }
 
   if (tournament.format === 'round-robin') {

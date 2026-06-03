@@ -1,6 +1,6 @@
 import React, { useState, useRef } from 'react';
-import { Plus, Users, Trophy, Target, MapPin, X, Upload, Download, Settings, ChevronDown } from 'lucide-react';
-import { Team, TournamentFormat, Court, TournamentConfig } from '../types/tournament';
+import { Plus, Users, Trophy, Target, MapPin, X, Upload, Download, Settings, ChevronDown, Swords } from 'lucide-react';
+import { Team, TournamentFormat, Court, TournamentConfig, Club, ClashStructure } from '../types/tournament';
 import { generateDummyTeams } from '../utils/tournamentLogic';
 import CourtManager from './CourtManager';
 
@@ -27,7 +27,31 @@ export default function TournamentSetup({ onCreateTournament }: TournamentSetupP
   // Group config
   const [teamsPerGroup, setTeamsPerGroup] = useState(4);
   const [qualifiersPerGroup, setQualifiersPerGroup] = useState(2);
+  // Clash config — each club fields a Men/Women/Mix team
+  const [clashStructure, setClashStructure] = useState<ClashStructure>('rr-final');
+  const [clashClubs, setClashClubs] = useState(
+    Array.from({ length: 4 }, (_, i) => ({
+      name: `Club ${String.fromCharCode(65 + i)}`,
+      men: '',
+      women: '',
+      mix: '',
+    }))
+  );
   const csvInputRef = useRef<HTMLInputElement>(null);
+
+  const updateClub = (idx: number, field: 'name' | 'men' | 'women' | 'mix', value: string) => {
+    setClashClubs((prev) => prev.map((c, i) => (i === idx ? { ...c, [field]: value } : c)));
+  };
+  const addClub = () => {
+    setClashClubs((prev) =>
+      prev.length >= 8
+        ? prev
+        : [...prev, { name: `Club ${String.fromCharCode(65 + prev.length)}`, men: '', women: '', mix: '' }]
+    );
+  };
+  const removeClub = () => {
+    setClashClubs((prev) => (prev.length <= 2 ? prev : prev.slice(0, -1)));
+  };
 
   // Set-length preset: deciding-game tiebreak triggers at N-1 each (4→3-3, 6→5-5)
   const applySetLength = (games: number) => {
@@ -94,7 +118,14 @@ export default function TournamentSetup({ onCreateTournament }: TournamentSetupP
     return 1;
   };
 
+  const clashValid =
+    clashClubs.length >= 2 &&
+    clashClubs.every(
+      (c) => c.name.trim() && c.men.trim() && c.women.trim() && c.mix.trim()
+    );
+
   const canCreateTournament = () => {
+    if (format === 'clash') return clashValid;
     if (format === 'single-elimination') {
       return teams.length >= 4 && (teams.length & (teams.length - 1)) === 0;
     }
@@ -103,13 +134,36 @@ export default function TournamentSetup({ onCreateTournament }: TournamentSetupP
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    if (canCreateTournament()) {
-      onCreateTournament(tournamentName, format, teams, courts, scoringMode, raceTarget, {
-        matchRules: { setsToWin, gamesToWinSet, tiebreakAt, tiebreakPoints, goldenPoint },
-        teamsPerGroup,
-        qualifiersPerGroup,
+    if (!canCreateTournament()) return;
+
+    const rules = { matchRules: { setsToWin, gamesToWinSet, tiebreakAt, tiebreakPoints, goldenPoint } };
+
+    if (format === 'clash') {
+      const clubs: Club[] = clashClubs.map((c, ci) => {
+        const cid = `club-${ci + 1}`;
+        return {
+          id: cid,
+          name: c.name.trim() || `Club ${ci + 1}`,
+          teams: {
+            men: { id: `${cid}-men`, name: c.men.trim() },
+            women: { id: `${cid}-women`, name: c.women.trim() },
+            mix: { id: `${cid}-mix`, name: c.mix.trim() },
+          },
+        };
       });
+      onCreateTournament(tournamentName, 'clash', [], courts, scoringMode, raceTarget, {
+        ...rules,
+        clubs,
+        clashStructure,
+      });
+      return;
     }
+
+    onCreateTournament(tournamentName, format, teams, courts, scoringMode, raceTarget, {
+      ...rules,
+      teamsPerGroup,
+      qualifiersPerGroup,
+    });
   };
 
   const addDefaultCourts = (count: number) => {
@@ -152,11 +206,12 @@ export default function TournamentSetup({ onCreateTournament }: TournamentSetupP
           {/* Format Selection */}
           <div>
             <label className="block text-sm font-semibold text-gray-700 mb-4">Tournament Format</label>
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
               {[
                 { value: 'round-robin', label: 'Round Robin', desc: 'Everyone plays everyone', icon: Users },
                 { value: 'single-elimination', label: 'Single Elimination', desc: 'Lose and you\'re out', icon: Target },
-                { value: 'group-knockout', label: 'Group + Knockout', desc: 'Groups then elimination', icon: Trophy }
+                { value: 'group-knockout', label: 'Group + Knockout', desc: 'Groups then elimination', icon: Trophy },
+                { value: 'clash', label: 'Clash (Club vs Club)', desc: '3 teams/club: men, women, mix', icon: Swords }
               ].map(({ value, label, desc, icon: Icon }) => (
                 <label key={value} className="cursor-pointer">
                   <input type="radio" name="format" value={value} checked={format === value} onChange={(e) => setFormat(e.target.value as TournamentFormat)} className="sr-only" />
@@ -371,13 +426,95 @@ export default function TournamentSetup({ onCreateTournament }: TournamentSetupP
             </div>
           )}
 
+          {/* Clash Setup (clash only) */}
+          {format === 'clash' && (
+            <div className="p-4 bg-[#B45330]/5 border border-[#B45330]/30 rounded-lg space-y-5">
+              <label className="flex items-center gap-2 text-sm font-semibold text-gray-700">
+                <Swords className="w-4 h-4 text-[#B45330]" /> Clash Setup — Club vs Club
+              </label>
+
+              {/* Structure */}
+              <div>
+                <label className="block text-xs font-semibold text-gray-600 mb-2">Structure</label>
+                <div className="flex flex-wrap gap-2">
+                  {[
+                    { v: 'rr-final', l: 'Round-robin + Final' },
+                    { v: 'round-robin', l: 'Round-robin only' },
+                  ].map(({ v, l }) => (
+                    <button
+                      key={v}
+                      type="button"
+                      onClick={() => setClashStructure(v as ClashStructure)}
+                      className={`px-3 py-2 rounded-lg text-sm font-medium transition-all ${
+                        clashStructure === v
+                          ? 'bg-[#B45330] text-white'
+                          : 'bg-white text-gray-600 border border-[#F0EBE3] hover:border-[#B45330]'
+                      }`}
+                    >
+                      {l}
+                    </button>
+                  ))}
+                </div>
+              </div>
+
+              {/* Clubs */}
+              <div>
+                <div className="flex items-center justify-between mb-2">
+                  <label className="text-xs font-semibold text-gray-600">Clubs ({clashClubs.length})</label>
+                  <div className="flex items-center gap-2">
+                    <button type="button" onClick={removeClub} disabled={clashClubs.length <= 2}
+                      className="w-7 h-7 rounded-lg bg-white border border-[#F0EBE3] text-gray-600 hover:border-[#B45330] font-bold disabled:opacity-30 disabled:cursor-not-allowed">−</button>
+                    <span className="w-6 text-center font-bold text-[#2A2A2A]">{clashClubs.length}</span>
+                    <button type="button" onClick={addClub} disabled={clashClubs.length >= 8}
+                      className="w-7 h-7 rounded-lg bg-white border border-[#F0EBE3] text-gray-600 hover:border-[#B45330] font-bold disabled:opacity-30 disabled:cursor-not-allowed">+</button>
+                  </div>
+                </div>
+
+                <div className="space-y-3">
+                  {clashClubs.map((club, ci) => (
+                    <div key={ci} className="bg-white border border-[#F0EBE3] rounded-lg p-3 space-y-2">
+                      <input
+                        type="text"
+                        value={club.name}
+                        onChange={(e) => updateClub(ci, 'name', e.target.value)}
+                        placeholder={`Club ${ci + 1} name`}
+                        className="w-full px-3 py-2 bg-[#FAF8F5] border border-[#F0EBE3] rounded-lg text-sm font-bold text-[#2A2A2A] focus:ring-2 focus:ring-[#B45330] focus:border-transparent"
+                      />
+                      <div className="grid grid-cols-1 sm:grid-cols-3 gap-2">
+                        {([
+                          ['men', 'Men team'],
+                          ['women', 'Women team'],
+                          ['mix', 'Mix team'],
+                        ] as const).map(([field, ph]) => (
+                          <input
+                            key={field}
+                            type="text"
+                            value={club[field]}
+                            onChange={(e) => updateClub(ci, field, e.target.value)}
+                            placeholder={ph}
+                            className="w-full px-3 py-2 bg-white border border-[#F0EBE3] rounded-lg text-sm text-[#2A2A2A] placeholder-gray-400 focus:ring-2 focus:ring-[#B45330] focus:border-transparent"
+                          />
+                        ))}
+                      </div>
+                    </div>
+                  ))}
+                </div>
+                <p className="text-xs text-gray-400 mt-2">
+                  Tiap klub turunkan 3 tim (Men/Women/Mix). Pas dua klub ketemu, mainnya per kategori. {clashClubs.length} klub → {clashStructure === 'rr-final' ? `${(clashClubs.length * (clashClubs.length - 1)) / 2} tie RR + final` : `${(clashClubs.length * (clashClubs.length - 1)) / 2} tie`}.
+                </p>
+              </div>
+            </div>
+          )}
+
           {/* Tab Navigation */}
           <div>
             <div className="border-b border-[#F0EBE3] mb-6">
               <nav className="-mb-px flex space-x-8">
-                <button type="button" onClick={() => setCurrentTab('teams')} className={`py-2 px-1 border-b-2 font-medium text-sm transition-colors ${currentTab === 'teams' ? 'border-[#B45330] text-[#B45330]' : 'border-transparent text-gray-500 hover:text-[#2A2A2A] hover:border-gray-400'}`}>
-                  <div className="flex items-center gap-2"><Users className="w-4 h-4" /> Teams ({teams.length})</div>
-                </button>
+                {format !== 'clash' && (
+                  <button type="button" onClick={() => setCurrentTab('teams')} className={`py-2 px-1 border-b-2 font-medium text-sm transition-colors ${currentTab === 'teams' ? 'border-[#B45330] text-[#B45330]' : 'border-transparent text-gray-500 hover:text-[#2A2A2A] hover:border-gray-400'}`}>
+                    <div className="flex items-center gap-2"><Users className="w-4 h-4" /> Teams ({teams.length})</div>
+                  </button>
+                )}
                 <button type="button" onClick={() => setCurrentTab('courts')} className={`py-2 px-1 border-b-2 font-medium text-sm transition-colors ${currentTab === 'courts' ? 'border-[#B45330] text-[#B45330]' : 'border-transparent text-gray-500 hover:text-[#2A2A2A] hover:border-gray-400'}`}>
                   <div className="flex items-center gap-2">
                     <MapPin className="w-4 h-4" /> Courts ({courts.length})
@@ -387,7 +524,7 @@ export default function TournamentSetup({ onCreateTournament }: TournamentSetupP
             </div>
 
             {/* Teams Tab */}
-            {currentTab === 'teams' && (
+            {currentTab === 'teams' && format !== 'clash' && (
               <div className="space-y-6 animate-pulse-glow animation-delay-200">
                 <div>
                   <label className="block text-sm font-semibold text-gray-700 mb-4">Quick Setup</label>
@@ -456,7 +593,7 @@ export default function TournamentSetup({ onCreateTournament }: TournamentSetupP
             )}
 
             {/* Courts Tab */}
-            {currentTab === 'courts' && (
+            {(currentTab === 'courts' || format === 'clash') && (
               <div className="space-y-6 animate-pulse-glow animation-delay-200">
                 <div>
                   <label className="block text-sm font-semibold text-gray-700 mb-4">Quick Setup</label>
@@ -478,7 +615,8 @@ export default function TournamentSetup({ onCreateTournament }: TournamentSetupP
             <h3 className="font-semibold text-[#A89070] mb-2">Requirements:</h3>
             <ul className="text-gray-600 text-sm space-y-1">
               {format === 'single-elimination' && <li>• Needs a power of 2 teams (4, 8, 16, etc.)</li>}
-              {format !== 'single-elimination' && <li>• Needs at least 4 teams.</li>}
+              {format === 'clash' && <li>• Needs ≥2 clubs, each with all 3 teams (Men/Women/Mix) named.</li>}
+              {format !== 'single-elimination' && format !== 'clash' && <li>• Needs at least 4 teams.</li>}
               {courts.length > 0 && (
                 <li className="text-green-600">
                   • ✓ {courts.length} court{courts.length > 1 ? 's' : ''} added (TV display enabled)

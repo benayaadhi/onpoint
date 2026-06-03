@@ -6,6 +6,9 @@ import {
   Court,
   MatchStatus,
   Group,
+  Club,
+  Tie,
+  RUBBER_CATEGORIES,
   TournamentConfig,
   DEFAULT_MATCH_RULES,
 } from '../types/tournament';
@@ -113,12 +116,18 @@ export function createTournament(
   const matchRules = { ...DEFAULT_MATCH_RULES, ...(config?.matchRules || {}) };
   const teamsPerGroup = config?.teamsPerGroup ?? 4;
   const qualifiersPerGroup = config?.qualifiersPerGroup ?? 2;
+  const isClash = format === 'clash';
+  const clubs = isClash ? config?.clubs ?? [] : undefined;
+  // Clash teams = every club's three category teams flattened.
+  const effectiveTeams = isClash && clubs
+    ? clubs.flatMap((c) => RUBBER_CATEGORIES.map((cat) => c.teams[cat]))
+    : teams;
 
   const tournament: Tournament = {
     id: `tournament-${Date.now()}`,
     name,
     format,
-    teams,
+    teams: effectiveTeams,
     matches: [],
     courts,
     currentRound: 1,
@@ -133,6 +142,9 @@ export function createTournament(
     matchRules,
     teamsPerGroup,
     qualifiersPerGroup,
+    clubs,
+    clashStructure: isClash ? config?.clashStructure ?? 'rr-final' : undefined,
+    clashStage: isClash ? 'round-robin' : undefined,
   };
   tournament.matches = generateMatches(tournament);
 
@@ -199,9 +211,109 @@ function generateMatches(tournament: Tournament): Match[] {
       return generateEliminationMatches(tournament.teams, tournament.scoringMode, tournament.raceTarget);
     case 'group-knockout':
       return generateGroupKnockoutMatches(tournament);
+    case 'clash':
+      return generateClashMatches(tournament);
     default:
       return [];
   }
+}
+
+// ─── Clash (club vs club) generation ─────────────────────────────────────────
+
+// Round-robin pairings of clubs via the circle method (each club plays once
+// per round). Returns club-vs-club ties spread across rounds.
+function roundRobinClubPairings(
+  clubs: Club[]
+): { round: number; a: Club; b: Club }[] {
+  const arr: (Club | null)[] = [...clubs];
+  if (arr.length % 2 !== 0) arr.push(null); // bye
+  const n = arr.length;
+  const out: { round: number; a: Club; b: Club }[] = [];
+  for (let r = 0; r < n - 1; r++) {
+    for (let i = 0; i < n / 2; i++) {
+      const a = arr[i];
+      const b = arr[n - 1 - i];
+      if (a && b) out.push({ round: r + 1, a, b });
+    }
+    const last = arr.pop();
+    if (last !== undefined) arr.splice(1, 0, last);
+  }
+  return out;
+}
+
+function applyRubberScoring(m: Match, tournament: Tournament): void {
+  if (tournament.scoringMode === 'race') {
+    m.scoringMode = 'race';
+    m.raceTarget = tournament.raceTarget || 4;
+    m.team1RaceScore = 0;
+    m.team2RaceScore = 0;
+    m.isGoldenPoint = false;
+  }
+}
+
+function generateClashMatches(tournament: Tournament): Match[] {
+  const clubs = tournament.clubs ?? [];
+  const structure = tournament.clashStructure ?? 'rr-final';
+  const matches: Match[] = [];
+  const ties: Tie[] = [];
+  let matchId = 1;
+  let tieId = 1;
+
+  // Build the 3 rubbers (men/women/mix) for a tie between two clubs.
+  const buildRubbers = (
+    tie: Tie,
+    club1: Club | null,
+    club2: Club | null,
+    round: number
+  ) => {
+    RUBBER_CATEGORIES.forEach((cat, idx) => {
+      const team1 = club1 ? club1.teams[cat] : { id: '', name: 'TBD' };
+      const team2 = club2 ? club2.teams[cat] : { id: '', name: 'TBD' };
+      const m = createMatch(`match-${matchId++}`, team1, team2, round, idx);
+      m.tieId = tie.id;
+      m.category = cat;
+      applyRubberScoring(m, tournament);
+      tie.matchIds.push(m.id);
+      matches.push(m);
+    });
+  };
+
+  // Round-robin ties (used by 'round-robin' and 'rr-final').
+  const pairings = roundRobinClubPairings(clubs);
+  pairings.forEach((p, idx) => {
+    const tie: Tie = {
+      id: `tie-${tieId++}`,
+      club1Id: p.a.id,
+      club2Id: p.b.id,
+      round: p.round,
+      stage: 'round-robin',
+      position: idx,
+      matchIds: [],
+      completed: false,
+    };
+    buildRubbers(tie, p.a, p.b, p.round);
+    ties.push(tie);
+  });
+
+  // 'rr-final' adds a placeholder final tie filled after the round-robin.
+  if (structure === 'rr-final') {
+    const maxRound = pairings.reduce((mx, p) => Math.max(mx, p.round), 0);
+    const finalTie: Tie = {
+      id: `tie-${tieId++}`,
+      club1Id: '',
+      club2Id: '',
+      round: maxRound + 1,
+      stage: 'final',
+      position: 0,
+      matchIds: [],
+      completed: false,
+    };
+    buildRubbers(finalTie, null, null, maxRound + 1);
+    ties.push(finalTie);
+  }
+
+  tournament.ties = ties;
+  return matches;
 }
 
 function generateRoundRobinMatches(teams: Team[]): Match[] {
@@ -389,6 +501,132 @@ function generateKnockoutPlaceholders(
   }
 }
 
+// ─── Clash standings & advancement ───────────────────────────────────────────
+
+// Clubs ranked by rubbers won, then unit difference (padel sets / race games),
+// then ties won. Only round-robin rubbers count toward the table.
+export function calculateClashStandings(tournament: Tournament): Club[] {
+  const clubs = (tournament.clubs ?? []).map((c) => ({
+    ...c,
+    rubbersWon: 0,
+    rubbersLost: 0,
+    tiesWon: 0,
+    setsWon: 0,
+    setsLost: 0,
+  }));
+  const byId = new Map(clubs.map((c) => [c.id, c]));
+  const rrTies = (tournament.ties ?? []).filter((t) => t.stage === 'round-robin');
+
+  rrTies.forEach((tie) => {
+    const c1 = byId.get(tie.club1Id);
+    const c2 = byId.get(tie.club2Id);
+    if (!c1 || !c2) return;
+
+    let c1Rubbers = 0;
+    let c2Rubbers = 0;
+    let done = 0;
+
+    tie.matchIds.forEach((mid) => {
+      const m = tournament.matches.find((x) => x.id === mid);
+      if (!m || !m.completed || !m.winner) return;
+      done++;
+      const c1Won = m.winner.id === m.team1.id;
+      const u1 = m.scoringMode === 'race' ? m.team1RaceScore || 0 : m.team1Score.sets;
+      const u2 = m.scoringMode === 'race' ? m.team2RaceScore || 0 : m.team2Score.sets;
+
+      if (c1Won) c1Rubbers++;
+      else c2Rubbers++;
+      c1.rubbersWon += c1Won ? 1 : 0;
+      c1.rubbersLost += c1Won ? 0 : 1;
+      c2.rubbersWon += c1Won ? 0 : 1;
+      c2.rubbersLost += c1Won ? 1 : 0;
+      c1.setsWon += u1;
+      c1.setsLost += u2;
+      c2.setsWon += u2;
+      c2.setsLost += u1;
+    });
+
+    if (tie.matchIds.length > 0 && done === tie.matchIds.length) {
+      if (c1Rubbers > c2Rubbers) c1.tiesWon += 1;
+      else if (c2Rubbers > c1Rubbers) c2.tiesWon += 1;
+    }
+  });
+
+  return clubs.sort((a, b) => {
+    if (b.rubbersWon !== a.rubbersWon) return b.rubbersWon - a.rubbersWon;
+    const aDiff = a.setsWon - a.setsLost;
+    const bDiff = b.setsWon - b.setsLost;
+    if (bDiff !== aDiff) return bDiff - aDiff;
+    return b.tiesWon - a.tiesWon;
+  });
+}
+
+function advanceClashTournament(tournament: Tournament): Tournament {
+  // Recompute completion + winner of every tie (a tie = 3 rubbers).
+  const ties: Tie[] = (tournament.ties ?? []).map((tie) => {
+    const rubbers = tie.matchIds
+      .map((id) => tournament.matches.find((m) => m.id === id))
+      .filter((m): m is Match => Boolean(m));
+    const allDone = rubbers.length === 3 && rubbers.every((m) => m.completed);
+    let winnerClubId = tie.winnerClubId;
+    if (allDone) {
+      let c1 = 0;
+      let c2 = 0;
+      rubbers.forEach((m) => {
+        if (!m.winner) return;
+        if (m.winner.id === m.team1.id) c1++;
+        else c2++;
+      });
+      winnerClubId = c1 >= c2 ? tie.club1Id : tie.club2Id;
+    }
+    return { ...tie, completed: allDone, winnerClubId };
+  });
+
+  let updated: Tournament = { ...tournament, ties };
+  const structure = tournament.clashStructure ?? 'rr-final';
+  const standings = calculateClashStandings(updated);
+  const rrTies = ties.filter((t) => t.stage === 'round-robin');
+  const rrDone = rrTies.length > 0 && rrTies.every((t) => t.completed);
+
+  if (structure === 'round-robin') {
+    if (rrDone) {
+      updated.completed = true;
+      updated.winnerClubId = standings[0]?.id;
+      updated.clashStage = 'done';
+    }
+    return updated;
+  }
+
+  // rr-final: seed the final tie with the top two clubs once the RR is done.
+  const finalTie = ties.find((t) => t.stage === 'final');
+  if (!finalTie) return updated;
+
+  if (rrDone && !finalTie.club1Id && standings.length >= 2) {
+    const top1 = tournament.clubs!.find((c) => c.id === standings[0].id);
+    const top2 = tournament.clubs!.find((c) => c.id === standings[1].id);
+    if (top1 && top2) {
+      const newTies = ties.map((t) =>
+        t.id === finalTie.id ? { ...t, club1Id: top1.id, club2Id: top2.id } : t
+      );
+      const newMatches = updated.matches.map((m) =>
+        m.tieId === finalTie.id && m.category
+          ? { ...m, team1: top1.teams[m.category], team2: top2.teams[m.category] }
+          : m
+      );
+      updated = { ...updated, ties: newTies, matches: newMatches, clashStage: 'final' };
+    }
+  }
+
+  const freshFinal = (updated.ties ?? []).find((t) => t.stage === 'final');
+  if (freshFinal?.completed && freshFinal.winnerClubId) {
+    updated.completed = true;
+    updated.winnerClubId = freshFinal.winnerClubId;
+    updated.clashStage = 'done';
+  }
+
+  return updated;
+}
+
 function createMatch(
   id: string,
   team1: Team,
@@ -458,6 +696,10 @@ export function advanceTournament(tournament: Tournament): Tournament {
 
   if (tournament.format === 'single-elimination') {
     return advanceEliminationTournament(updatedTournament);
+  }
+
+  if (tournament.format === 'clash') {
+    return advanceClashTournament(updatedTournament);
   }
 
   // For round-robin, check if tournament is complete

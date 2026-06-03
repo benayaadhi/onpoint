@@ -82,6 +82,9 @@ export interface Match {
   // Group system additions
   groupId?: string;
   setHistory?: SetHistory[];
+  // Clash (club vs club) additions — a rubber inside a tie
+  tieId?: string;
+  category?: RubberCategory;
   // Scoring mode (set on match from tournament config)
   scoringMode?: 'padel' | 'race';
   raceTarget?: number;
@@ -110,11 +113,43 @@ export interface Group {
   standings: Team[];
 }
 
+// ─── Clash (club vs club) format ─────────────────────────────────────────────
+export type RubberCategory = 'men' | 'women' | 'mix';
+export const RUBBER_CATEGORIES: RubberCategory[] = ['men', 'women', 'mix'];
+
+// A club fields one team per category; clubs are what the standings rank.
+export interface Club {
+  id: string;
+  name: string;
+  teams: Record<RubberCategory, Team>;
+  // standings (recomputed from completed rubbers)
+  rubbersWon?: number;
+  rubbersLost?: number;
+  tiesWon?: number;
+  setsWon?: number;
+  setsLost?: number;
+}
+
+// A tie is one club-vs-club confrontation = 3 rubbers (one per category).
+export interface Tie {
+  id: string;
+  club1Id: string;
+  club2Id: string;
+  round: number;
+  stage: 'round-robin' | 'final' | 'knockout';
+  position: number; // bracket position (knockout) or schedule slot
+  matchIds: string[]; // the 3 rubber match ids
+  completed: boolean;
+  winnerClubId?: string;
+}
+
+export type ClashStructure = 'round-robin' | 'rr-final' | 'knockout';
+
 export interface Tournament {
   id: string;
   name: string;
   slug?: string; // URL-safe version of name, e.g. "wepadl-2025"
-  format: 'round-robin' | 'single-elimination' | 'group-knockout';
+  format: 'round-robin' | 'single-elimination' | 'group-knockout' | 'clash';
   teams: Team[];
   matches: Match[];
   courts: Court[];
@@ -135,15 +170,25 @@ export interface Tournament {
   matchRules?: MatchRules;
   teamsPerGroup?: number; // default 4
   qualifiersPerGroup?: number; // teams advancing from each group, default 2
+  // Clash format additions
+  clubs?: Club[];
+  ties?: Tie[];
+  clashStructure?: ClashStructure; // default 'rr-final'
+  clashStage?: 'round-robin' | 'final' | 'done'; // progress within rr-final
+  winnerClubId?: string; // clash champion club
 }
 
 export interface TournamentConfig {
   matchRules: MatchRules;
   teamsPerGroup: number;
   qualifiersPerGroup: number;
+  // Clash format
+  clubs?: Club[];
+  clashStructure?: ClashStructure;
 }
 
 export type TournamentFormat =
   | 'round-robin'
   | 'single-elimination'
-  | 'group-knockout';
+  | 'group-knockout'
+  | 'clash';
