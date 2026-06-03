@@ -495,14 +495,15 @@ export default function TVDisplay() {
     return unsub;
   }, [tournamentId]);
 
-  // Guaranteed fallback: poll every 2s (works even if realtime fails)
+  // Guaranteed fallback: poll every 20s (websocket broadcast handles the
+  // instant updates; this only matters if that connection drops).
   useEffect(() => {
     if (!tournamentId) return;
     const interval = setInterval(() => {
       getTournament(tournamentId).then(t => {
         if (t) setTournament(t);
       });
-    }, 2000);
+    }, 20000);
     return () => clearInterval(interval);
   }, [tournamentId]);
 

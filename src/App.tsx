@@ -387,8 +387,9 @@ function App() {
         return unsub;
     }, [currentTournament?.id]);
 
-    // Guaranteed fallback: poll Supabase every 2s
-    // Ensures sync even if realtime subscriptions fail (e.g. postgres_changes not enabled)
+    // Guaranteed fallback: poll Supabase every 20s. Real-time updates come
+    // instantly via the websocket broadcast; this only catches up if that
+    // connection drops, so a slow interval keeps egress low while idle.
     useEffect(() => {
         if (!currentTournament?.id) return;
         const id = currentTournament.id;
@@ -400,7 +401,7 @@ function App() {
                 // Only update if data actually changed (compare updated_at or match count)
                 return fresh;
             });
-        }, 2000);
+        }, 20000);
         return () => clearInterval(interval);
     }, [currentTournament?.id]);
 
