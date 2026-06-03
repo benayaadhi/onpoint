@@ -614,46 +614,67 @@ export function calculateGroupStandings(
 }
 
 function advanceEliminationTournament(tournament: Tournament): Tournament {
-  const currentRoundMatches = tournament.matches.filter(
-    (m) => m.round === tournament.currentRound
-  );
-  const allCompleted = currentRoundMatches.every((m) => m.completed);
-  if (!allCompleted) return tournament;
-  const nextRoundMatches = tournament.matches.filter(
-    (m) => m.round === tournament.currentRound + 1
-  );
-  if (nextRoundMatches.length === 0) {
-    return {
-      ...tournament,
-      completed: true,
-      winner: currentRoundMatches[0]?.winner,
-    };
-  }
+  // Knockout matches only (group matches carry a groupId and are left alone).
+  const knockoutMatches = tournament.matches.filter((m) => !m.groupId);
+  if (knockoutMatches.length === 0) return tournament;
 
+  // First knockout round: round 1 for single-elimination, round 2 for
+  // group-knockout (its bracket is seeded by qualification, not by feeders).
+  const firstKnockoutRound = Math.min(...knockoutMatches.map((m) => m.round));
+  const maxRound = Math.max(...knockoutMatches.map((m) => m.round));
+
+  // Fill each later-round match as soon as BOTH its feeder matches are done —
+  // independent of the other matches in the same round. So if A beats B and
+  // D beats C, the A vs D semifinal is ready even while E/F and G/H play on.
+  // Already-assigned slots (same team id) are left untouched so an in-progress
+  // match is never reset.
   const newMatches = tournament.matches.map((match) => {
-    if (match.round === tournament.currentRound + 1) {
-      const newMatch = { ...match };
-      const prevRoundPos1 = newMatch.position * 2;
-      const prevRoundPos2 = prevRoundPos1 + 1;
-      const winner1 = currentRoundMatches.find(
-        (m) => m.position === prevRoundPos1
-      )?.winner;
-      const winner2 = currentRoundMatches.find(
-        (m) => m.position === prevRoundPos2
-      )?.winner;
+    if (match.groupId || match.round <= firstKnockoutRound) return match;
 
-      if (winner1) newMatch.team1 = winner1;
-      if (winner2) newMatch.team2 = winner2;
+    const prevRound = match.round - 1;
+    const feeder1 = knockoutMatches.find(
+      (m) => m.round === prevRound && m.position === match.position * 2
+    );
+    const feeder2 = knockoutMatches.find(
+      (m) => m.round === prevRound && m.position === match.position * 2 + 1
+    );
 
-      return newMatch;
+    let updated = match;
+    if (
+      feeder1?.completed &&
+      feeder1.winner &&
+      match.team1?.id !== feeder1.winner.id
+    ) {
+      updated = { ...updated, team1: feeder1.winner };
     }
-    return match;
+    if (
+      feeder2?.completed &&
+      feeder2.winner &&
+      match.team2?.id !== feeder2.winner.id
+    ) {
+      updated = { ...updated, team2: feeder2.winner };
+    }
+    return updated;
   });
+
+  // Tournament is complete once the final (highest-round) match is done.
+  const finalMatch = newMatches.find((m) => !m.groupId && m.round === maxRound);
+  const completed = !!finalMatch?.completed;
+
+  // currentRound = furthest round that has both teams assigned (informational).
+  const playableRounds = newMatches
+    .filter((m) => !m.groupId && m.team1?.id && m.team2?.id)
+    .map((m) => m.round);
+  const currentRound = playableRounds.length
+    ? Math.max(...playableRounds)
+    : tournament.currentRound;
 
   return {
     ...tournament,
     matches: newMatches,
-    currentRound: tournament.currentRound + 1,
+    completed,
+    winner: completed ? finalMatch?.winner : tournament.winner,
+    currentRound,
   };
 }
 
