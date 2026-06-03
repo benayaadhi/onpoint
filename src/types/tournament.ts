@@ -93,6 +93,9 @@ export interface Match {
   isGoldenPoint?: boolean;
   // Configurable padel rules (falls back to DEFAULT_MATCH_RULES when absent)
   rules?: MatchRules;
+  // Monotonic stamp (ms) of the last score change — used to reject stale
+  // incoming updates so an optimistic local score never bounces backward.
+  lastUpdated?: number;
 }
 
 export interface SetHistory {

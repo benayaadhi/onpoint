@@ -83,7 +83,13 @@ export default function MatchScoring({
   const rules = { ...DEFAULT_MATCH_RULES, ...(currentMatch.rules || {}) };
 
   useEffect(() => {
-    setCurrentMatch(match);
+    // Ignore an incoming match that is older than what we already show, so a
+    // late/stale update can't revert a fresher local score (no score bounce).
+    setCurrentMatch((prev) =>
+      prev && prev.id === match.id && (match.lastUpdated ?? 0) < (prev.lastUpdated ?? 0)
+        ? prev
+        : match
+    );
     setSetHistory(match.setHistory || []);
     realTimeUpdates.saveCurrentMatchData(match);
   }, [match]);
@@ -125,20 +131,23 @@ export default function MatchScoring({
     action: string,
     eventType?: string
   ) => {
+    // Stamp this change so stale incoming updates can be rejected downstream.
+    const stamped: Match = { ...updatedMatch, lastUpdated: Date.now() };
+
     // Start timer on first scoring action
     startTimer();
     // Stop timer when match ends
-    if (updatedMatch.completed) stopTimer();
+    if (stamped.completed) stopTimer();
 
     setMatchHistory((prev) => [
       ...prev,
       { match: cloneMatch(currentMatch), timestamp: Date.now(), action },
     ]);
-    setCurrentMatch(updatedMatch);
-    onUpdateMatch(updatedMatch);
-    realTimeUpdates.saveCurrentMatchData(updatedMatch);
+    setCurrentMatch(stamped);
+    onUpdateMatch(stamped);
+    realTimeUpdates.saveCurrentMatchData(stamped);
     realTimeUpdates.broadcastMatchUpdate(
-      updatedMatch,
+      stamped,
       action,
       eventType || REAL_TIME_EVENTS.MATCH_UPDATED
     );

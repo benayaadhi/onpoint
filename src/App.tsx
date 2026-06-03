@@ -380,7 +380,12 @@ function App() {
                 if (!prev) return prev;
                 return {
                     ...prev,
-                    matches: prev.matches.map((m) => (m.id === match.id ? match : m)),
+                    matches: prev.matches.map((m) => {
+                        if (m.id !== match.id) return m;
+                        // Reject a stale broadcast that would revert a newer score
+                        if ((match.lastUpdated ?? 0) < (m.lastUpdated ?? 0)) return m;
+                        return match;
+                    }),
                 };
             });
         });
@@ -398,8 +403,15 @@ function App() {
             if (!fresh) return;
             setCurrentTournament((prev) => {
                 if (!prev || prev.id !== id) return prev;
-                // Only update if data actually changed (compare updated_at or match count)
-                return fresh;
+                // Keep any locally-newer match so a stale poll (read before our
+                // save propagated) can't revert a freshly scored point.
+                return {
+                    ...fresh,
+                    matches: fresh.matches.map((fm) => {
+                        const pm = prev.matches.find((m) => m.id === fm.id);
+                        return pm && (pm.lastUpdated ?? 0) > (fm.lastUpdated ?? 0) ? pm : fm;
+                    }),
+                };
             });
         }, 20000);
         return () => clearInterval(interval);
