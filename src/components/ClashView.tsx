@@ -1,7 +1,12 @@
 import { useState } from 'react';
-import { Trophy, Swords, BarChart2 } from 'lucide-react';
+import { Trophy, Swords, BarChart2, Network } from 'lucide-react';
 import { TournamentHeader, MatchCard, ViewProps } from './TournamentBracket';
-import { calculateClashStandings } from '../utils/tournamentLogic';
+import {
+  calculateClashStandings,
+  calculateClashPoolStandings,
+  calculateClashOverallStandings,
+  computeClashSeeds,
+} from '../utils/tournamentLogic';
 import { Tie, RubberCategory, RUBBER_CATEGORIES } from '../types/tournament';
 
 const CATEGORY_LABEL: Record<RubberCategory, string> = {
@@ -18,14 +23,27 @@ export default function ClashView({
 }: ViewProps) {
   const clubs = tournament.clubs ?? [];
   const ties = tournament.ties ?? [];
-  const standings = calculateClashStandings(tournament);
+  const isPoolKnockout = tournament.clashStructure === 'pool-knockout';
+  const standings = isPoolKnockout ? [] : calculateClashStandings(tournament);
   const clubName = (id: string) => clubs.find((c) => c.id === id)?.name ?? 'TBD';
+
+  // Display name for a tie slot: real club, else a seed/feeder placeholder.
+  const slotName = (tie: Tie, slot: 1 | 2) => {
+    const id = slot === 1 ? tie.club1Id : tie.club2Id;
+    if (id) return clubName(id);
+    if (tie.stage === 'semifinal' && slot === 1) return `Winner PO${tie.position + 1}`;
+    if (tie.stage === 'final') return slot === 1 ? 'Winner SF1' : 'Winner SF2';
+    if (tie.stage === 'third-place') return slot === 1 ? 'Loser SF1' : 'Loser SF2';
+    const seed = slot === 1 ? tie.seed1 : tie.seed2;
+    return seed ? `Seed #${seed}` : 'TBD';
+  };
 
   const rrTies = ties.filter((t) => t.stage === 'round-robin');
   const finalTie = ties.find((t) => t.stage === 'final');
   const rounds = [...new Set(rrTies.map((t) => t.round))].sort((a, b) => a - b);
 
   const [tab, setTab] = useState<'standings' | 'fixtures'>('standings');
+  const [pkTab, setPkTab] = useState<'overall' | 'pools' | 'knockout'>('overall');
 
   // Count rubbers won by each club in a tie (for the tie header score).
   const tieScore = (tie: Tie) => {
@@ -55,11 +73,11 @@ export default function ClashView({
         {/* Tie header — club vs club */}
         <div className="flex items-center justify-between mb-4">
           <div className="flex items-center gap-3 min-w-0">
-            <span className="text-lg font-bold text-[#2A2A2A] truncate">{clubName(tie.club1Id)}</span>
+            <span className="text-lg font-bold text-[#2A2A2A] truncate">{slotName(tie, 1)}</span>
             <span className="text-sm font-bold text-[#B45330] bg-[#B45330]/10 px-2 py-0.5 rounded">
               {c1} - {c2}
             </span>
-            <span className="text-lg font-bold text-[#2A2A2A] truncate">{clubName(tie.club2Id)}</span>
+            <span className="text-lg font-bold text-[#2A2A2A] truncate">{slotName(tie, 2)}</span>
           </div>
           {tie.completed && winnerName ? (
             <span className="flex items-center gap-1 text-xs font-bold text-yellow-700 bg-yellow-50 border border-yellow-300 px-2 py-1 rounded-full whitespace-nowrap">
@@ -98,6 +116,208 @@ export default function ClashView({
       </div>
     );
   };
+
+  // ── Pool-knockout (Squad Battle) layout ───────────────────────────────────
+  if (isPoolKnockout) {
+    const pools = tournament.clashPools ?? [];
+    const knockoutActive = tournament.clashStage === 'knockout' || tournament.clashStage === 'done';
+    const seeds = knockoutActive ? computeClashSeeds(tournament) : [];
+    const poTies = ties.filter((t) => t.stage === 'playoff').sort((a, b) => a.position - b.position);
+    const sfTies = ties.filter((t) => t.stage === 'semifinal').sort((a, b) => a.position - b.position);
+    const finalTie = ties.find((t) => t.stage === 'final');
+    const thirdTie = ties.find((t) => t.stage === 'third-place');
+
+    const koSection = (title: string, list: Tie[], gold = false) =>
+      list.length > 0 && (
+        <div className="space-y-4">
+          <h3 className={`text-lg font-semibold flex items-center gap-2 ${gold ? 'text-yellow-600' : 'text-gray-500'}`}>
+            {gold ? <Trophy className="w-5 h-5" /> : <Network className="w-5 h-5" />} {title}
+          </h3>
+          {list.map(renderTie)}
+        </div>
+      );
+
+    const overall = calculateClashOverallStandings(tournament);
+    const poolNameOf = (clubId: string) =>
+      pools.find((p) => p.clubIds.includes(clubId))?.name ?? '';
+
+    const tabBtn = (id: 'overall' | 'pools' | 'knockout', label: string, Icon: typeof BarChart2) => (
+      <button
+        onClick={() => setPkTab(id)}
+        className={`flex items-center gap-2 px-4 py-2 rounded-xl font-semibold text-sm transition-all ${
+          pkTab === id ? 'bg-[#B45330] text-white shadow-md' : 'bg-white/60 border border-[#F0EBE3] text-gray-500 hover:bg-white'
+        }`}
+      >
+        <Icon className="w-4 h-4" /> {label}
+      </button>
+    );
+
+    return (
+      <div className="min-h-screen bg-[#FAF8F5] text-[#2A2A2A] space-y-8 font-mono p-4 md:p-8">
+        <div className="absolute inset-0 overflow-hidden">
+          <div className="absolute top-1/4 right-1/4 w-96 h-96 bg-gradient-to-r from-[#8B7355]/20 to-[#B45330]/10 rounded-full blur-3xl animate-pulse"></div>
+        </div>
+
+        <TournamentHeader tournament={tournament} {...headerProps} />
+
+        <div className="relative z-10 flex flex-wrap gap-2">
+          {tabBtn('overall', 'Overall', Trophy)}
+          {tabBtn('pools', 'Pools', BarChart2)}
+          {tabBtn('knockout', 'Knockout', Network)}
+        </div>
+
+        {/* Overall leaderboard (all squads, pool-stage performance) */}
+        {pkTab === 'overall' && (
+          <div className="relative z-10 bg-white/80 backdrop-blur-xl border border-[#F0EBE3] rounded-2xl p-5 shadow-lg overflow-x-auto">
+            <h2 className="text-xl font-bold text-[#2A2A2A] flex items-center gap-2 mb-1">
+              <Trophy className="w-5 h-5 text-[#B45330]" /> Overall Leaderboard
+            </h2>
+            <p className="text-xs text-gray-400 mb-4">
+              Semua squad · performa fase pool · ranking PTS → GD → GF
+            </p>
+            <table className="w-full text-sm">
+              <thead>
+                <tr className="border-b border-[#F0EBE3] text-gray-400">
+                  <th className="text-left py-2 px-2 w-8">#</th>
+                  <th className="text-left py-2 px-3">Squad</th>
+                  <th className="text-left py-2 px-2">Pool</th>
+                  <th className="text-center py-2 px-2">P</th>
+                  <th className="text-center py-2 px-2">W</th>
+                  <th className="text-center py-2 px-2">L</th>
+                  <th className="text-center py-2 px-2">GF</th>
+                  <th className="text-center py-2 px-2">GA</th>
+                  <th className="text-center py-2 px-2">GD</th>
+                  <th className="text-center py-2 px-2 text-[#B45330]">PTS</th>
+                </tr>
+              </thead>
+              <tbody>
+                {overall.map((r, idx) => (
+                  <tr key={r.club.id} className={`border-b border-[#F0EBE3]/50 ${idx === 0 ? 'bg-yellow-50' : ''}`}>
+                    <td className="py-2 px-2">
+                      <span className={`w-6 h-6 rounded-full inline-flex items-center justify-center text-xs font-bold ${idx === 0 ? 'bg-yellow-400 text-black' : idx === 1 ? 'bg-[#8B7355] text-white' : idx === 2 ? 'bg-[#B45330] text-white' : 'bg-[#F0EBE3] text-gray-400'}`}>
+                        {idx + 1}
+                      </span>
+                    </td>
+                    <td className="py-2 px-3 font-bold text-[#2A2A2A]">{r.club.name}</td>
+                    <td className="py-2 px-2 text-gray-500 text-xs">{poolNameOf(r.club.id)}</td>
+                    <td className="py-2 px-2 text-center text-gray-600">{r.played}</td>
+                    <td className="py-2 px-2 text-center text-gray-600">{r.wins}</td>
+                    <td className="py-2 px-2 text-center text-gray-600">{r.losses}</td>
+                    <td className="py-2 px-2 text-center text-gray-600">{r.rubbersWon}</td>
+                    <td className="py-2 px-2 text-center text-gray-600">{r.rubbersLost}</td>
+                    <td className={`py-2 px-2 text-center font-bold ${r.rubberDiff >= 0 ? 'text-green-600' : 'text-red-500'}`}>
+                      {r.rubberDiff >= 0 ? `+${r.rubberDiff}` : r.rubberDiff}
+                    </td>
+                    <td className="py-2 px-2 text-center font-bold text-[#B45330]">{r.points}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        )}
+
+        {/* Pools */}
+        {pkTab === 'pools' && (
+          <div className="relative z-10 space-y-8">
+            {pools.map((pool) => {
+              const rows = calculateClashPoolStandings(tournament, pool.id);
+              const poolTies = ties
+                .filter((t) => t.stage === 'pool' && t.poolId === pool.id)
+                .sort((a, b) => a.round - b.round || a.position - b.position);
+              return (
+                <div key={pool.id} className="space-y-4">
+                  <div className="bg-white/80 backdrop-blur-xl border border-[#F0EBE3] rounded-2xl p-5 shadow-lg overflow-x-auto">
+                    <h2 className="text-xl font-bold text-[#2A2A2A] flex items-center gap-2 mb-4">
+                      <BarChart2 className="w-5 h-5 text-[#B45330]" /> {pool.name}
+                    </h2>
+                    <table className="w-full text-sm">
+                      <thead>
+                        <tr className="border-b border-[#F0EBE3] text-gray-400">
+                          <th className="text-left py-2 px-2 w-8">#</th>
+                          <th className="text-left py-2 px-3">Squad</th>
+                          <th className="text-center py-2 px-2">P</th>
+                          <th className="text-center py-2 px-2">W</th>
+                          <th className="text-center py-2 px-2">L</th>
+                          <th className="text-center py-2 px-2">GF</th>
+                          <th className="text-center py-2 px-2">GA</th>
+                          <th className="text-center py-2 px-2">GD</th>
+                          <th className="text-center py-2 px-2 text-[#B45330]">PTS</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {rows.map((r, idx) => (
+                          <tr key={r.club.id} className={`border-b border-[#F0EBE3]/50 ${idx < 2 ? 'bg-[#B45330]/10' : ''}`}>
+                            <td className="py-2 px-2">
+                              <span className={`w-6 h-6 rounded-full inline-flex items-center justify-center text-xs font-bold ${idx === 0 ? 'bg-yellow-400 text-black' : idx === 1 ? 'bg-[#8B7355] text-white' : 'bg-[#F0EBE3] text-gray-400'}`}>
+                                {idx + 1}
+                              </span>
+                            </td>
+                            <td className="py-2 px-3 font-bold text-[#2A2A2A]">{r.club.name}</td>
+                            <td className="py-2 px-2 text-center text-gray-600">{r.played}</td>
+                            <td className="py-2 px-2 text-center text-gray-600">{r.wins}</td>
+                            <td className="py-2 px-2 text-center text-gray-600">{r.losses}</td>
+                            <td className="py-2 px-2 text-center text-gray-600">{r.rubbersWon}</td>
+                            <td className="py-2 px-2 text-center text-gray-600">{r.rubbersLost}</td>
+                            <td className={`py-2 px-2 text-center font-bold ${r.rubberDiff >= 0 ? 'text-green-600' : 'text-red-500'}`}>
+                              {r.rubberDiff >= 0 ? `+${r.rubberDiff}` : r.rubberDiff}
+                            </td>
+                            <td className="py-2 px-2 text-center font-bold text-[#B45330]">{r.points}</td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+                    <p className="text-xs text-gray-400 mt-3">Top 2 lolos · ranking PTS → GD → GF</p>
+                  </div>
+                  <div className="space-y-4">{poolTies.map(renderTie)}</div>
+                </div>
+              );
+            })}
+          </div>
+        )}
+
+        {/* Knockout */}
+        {pkTab === 'knockout' && (
+          <div className="relative z-10 space-y-8">
+            {seeds.length > 0 && (
+              <div className="bg-white/80 backdrop-blur-xl border border-[#F0EBE3] rounded-2xl p-5 shadow-lg">
+                <h2 className="text-lg font-bold text-[#2A2A2A] flex items-center gap-2 mb-4">
+                  <Trophy className="w-5 h-5 text-[#B45330]" /> Seeding
+                </h2>
+                <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
+                  {seeds.map((club, i) => (
+                    <div key={club.id} className="flex items-center gap-2 bg-[#FAF8F5] border border-[#F0EBE3] rounded-lg px-3 py-2">
+                      <span className="w-6 h-6 rounded-full bg-[#B45330] text-white inline-flex items-center justify-center text-xs font-bold">{i + 1}</span>
+                      <span className="font-semibold text-sm text-[#2A2A2A] truncate">{club.name}</span>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+            {!knockoutActive && (
+              <div className="bg-white/80 border border-[#F0EBE3] rounded-2xl p-8 text-center text-gray-400">
+                <Network className="w-10 h-10 mx-auto mb-3 opacity-40" />
+                Bracket terbuka setelah semua pertandingan pool selesai.
+              </div>
+            )}
+            {koSection('Playoffs', poTies)}
+            {koSection('Semifinals', sfTies)}
+            {finalTie && koSection('Final', [finalTie], true)}
+            {thirdTie && koSection('3rd Place', [thirdTie])}
+          </div>
+        )}
+
+        {/* Champion */}
+        {tournament.completed && tournament.winnerClubId && (
+          <div className="relative z-10 text-center">
+            <div className="inline-flex items-center gap-3 bg-yellow-50 border border-yellow-400 text-yellow-800 px-6 py-3 rounded-full">
+              <Trophy className="w-6 h-6" />
+              <span className="text-xl font-bold">Champion: {clubName(tournament.winnerClubId)}</span>
+            </div>
+          </div>
+        )}
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-[#FAF8F5] text-[#2A2A2A] space-y-8 font-mono p-4 md:p-8">

@@ -8,6 +8,7 @@ import {
   Group,
   Club,
   Tie,
+  ClashPool,
   RUBBER_CATEGORIES,
   TournamentConfig,
   DEFAULT_MATCH_RULES,
@@ -118,10 +119,17 @@ export function createTournament(
   const qualifiersPerGroup = config?.qualifiersPerGroup ?? 2;
   const isClash = format === 'clash';
   const clubs = isClash ? config?.clubs ?? [] : undefined;
+  const clashStructure = isClash ? config?.clashStructure ?? 'rr-final' : undefined;
   // Clash teams = every club's three category teams flattened.
   const effectiveTeams = isClash && clubs
     ? clubs.flatMap((c) => RUBBER_CATEGORIES.map((cat) => c.teams[cat]))
     : teams;
+
+  // Pool-knockout: chunk clubs into pools of CLASH_POOL_SIZE (Squad Battle = 4).
+  const clashPools =
+    isClash && clashStructure === 'pool-knockout' && clubs
+      ? chunkClubsIntoPools(clubs)
+      : undefined;
 
   const tournament: Tournament = {
     id: `tournament-${Date.now()}`,
@@ -143,8 +151,16 @@ export function createTournament(
     teamsPerGroup,
     qualifiersPerGroup,
     clubs,
-    clashStructure: isClash ? config?.clashStructure ?? 'rr-final' : undefined,
-    clashStage: isClash ? 'round-robin' : undefined,
+    clashStructure,
+    clashStage: isClash
+      ? clashStructure === 'pool-knockout'
+        ? 'pool'
+        : 'round-robin'
+      : undefined,
+    clashPools,
+    clashThirdPlace: isClash && clashStructure === 'pool-knockout'
+      ? config?.clashThirdPlace ?? true
+      : undefined,
   };
   tournament.matches = generateMatches(tournament);
 
@@ -212,7 +228,9 @@ function generateMatches(tournament: Tournament): Match[] {
     case 'group-knockout':
       return generateGroupKnockoutMatches(tournament);
     case 'clash':
-      return generateClashMatches(tournament);
+      return tournament.clashStructure === 'pool-knockout'
+        ? generateClashPoolKnockout(tournament)
+        : generateClashMatches(tournament);
     default:
       return [];
   }
@@ -311,6 +329,114 @@ function generateClashMatches(tournament: Tournament): Match[] {
     buildRubbers(finalTie, null, null, maxRound + 1);
     ties.push(finalTie);
   }
+
+  tournament.ties = ties;
+  return matches;
+}
+
+// ─── Clash pool-knockout (Squad Battle) generation ───────────────────────────
+
+const CLASH_POOL_SIZE = 4; // Squad Battle: 4 squads per pool
+
+// Chunk clubs into pools of CLASH_POOL_SIZE in input order.
+function chunkClubsIntoPools(clubs: Club[]): ClashPool[] {
+  const pools: ClashPool[] = [];
+  for (let i = 0; i < clubs.length; i += CLASH_POOL_SIZE) {
+    const idx = pools.length;
+    pools.push({
+      id: `pool-${idx + 1}`,
+      name: `Pool ${idx + 1}`,
+      clubIds: clubs.slice(i, i + CLASH_POOL_SIZE).map((c) => c.id),
+    });
+  }
+  return pools;
+}
+
+// Pools (round-robin each) + a fixed 6-team seeded knockout:
+//   PO1 = S3 v S6, PO2 = S4 v S5
+//   SF1 = PO1 winner v S2, SF2 = PO2 winner v S1
+//   Final = SF1 winner v SF2 winner (+ optional 3rd place from SF losers)
+function generateClashPoolKnockout(tournament: Tournament): Match[] {
+  const clubs = tournament.clubs ?? [];
+  const pools = tournament.clashPools ?? chunkClubsIntoPools(clubs);
+  const thirdPlace = tournament.clashThirdPlace ?? true;
+  const byId = new Map(clubs.map((c) => [c.id, c]));
+  const matches: Match[] = [];
+  const ties: Tie[] = [];
+  let matchId = 1;
+  let tieId = 1;
+
+  const buildRubbers = (
+    tie: Tie,
+    club1: Club | null,
+    club2: Club | null,
+    round: number
+  ) => {
+    RUBBER_CATEGORIES.forEach((cat, idx) => {
+      const team1 = club1 ? club1.teams[cat] : { id: '', name: 'TBD' };
+      const team2 = club2 ? club2.teams[cat] : { id: '', name: 'TBD' };
+      const m = createMatch(`match-${matchId++}`, team1, team2, round, idx);
+      m.tieId = tie.id;
+      m.category = cat;
+      applyRubberScoring(m, tournament);
+      tie.matchIds.push(m.id);
+      matches.push(m);
+    });
+  };
+
+  // Pool round-robin ties
+  pools.forEach((pool) => {
+    const poolClubs = pool.clubIds
+      .map((id) => byId.get(id))
+      .filter((c): c is Club => Boolean(c));
+    roundRobinClubPairings(poolClubs).forEach((p, idx) => {
+      const tie: Tie = {
+        id: `tie-${tieId++}`,
+        club1Id: p.a.id,
+        club2Id: p.b.id,
+        round: p.round,
+        stage: 'pool',
+        poolId: pool.id,
+        position: idx,
+        matchIds: [],
+        completed: false,
+      };
+      buildRubbers(tie, p.a, p.b, p.round);
+      ties.push(tie);
+    });
+  });
+
+  // Knockout placeholders (filled by advanceClashTournament).
+  // round: 1 = playoff, 2 = semifinal, 3 = final / third-place.
+  const koTie = (
+    stage: Tie['stage'],
+    position: number,
+    round: number,
+    seed1?: number,
+    seed2?: number
+  ) => {
+    const tie: Tie = {
+      id: `tie-${tieId++}`,
+      club1Id: '',
+      club2Id: '',
+      round,
+      stage,
+      position,
+      matchIds: [],
+      completed: false,
+      seed1,
+      seed2,
+    };
+    buildRubbers(tie, null, null, round);
+    ties.push(tie);
+  };
+
+  koTie('playoff', 0, 1, 3, 6);
+  koTie('playoff', 1, 1, 4, 5);
+  koTie('semifinal', 0, 2, undefined, 2); // club1 = PO1 winner
+  koTie('semifinal', 1, 2, undefined, 1); // club1 = PO2 winner
+  koTie('final', 0, 3);
+  if (thirdPlace) koTie('third-place', 1, 3);
 
   tournament.ties = ties;
   return matches;
@@ -561,6 +687,126 @@ export function calculateClashStandings(tournament: Tournament): Club[] {
   });
 }
 
+// ─── Clash pool-knockout standings & seeding (Squad Battle) ───────────────────
+
+// One row of a pool table. GF/GA/GD are in disciplines (rubbers).
+export interface ClashPoolRow {
+  club: Club;
+  played: number; // completed ties
+  wins: number;
+  draws: number;
+  losses: number;
+  points: number; // wins × 3
+  rubbersWon: number; // GF
+  rubbersLost: number; // GA
+  rubberDiff: number; // GD
+}
+
+// Pool ranking: PTS (tie wins ×3) → GD (rubber diff) → GF (rubbers won).
+function compareClashPoolRows(a: ClashPoolRow, b: ClashPoolRow): number {
+  if (b.points !== a.points) return b.points - a.points;
+  if (b.rubberDiff !== a.rubberDiff) return b.rubberDiff - a.rubberDiff;
+  return b.rubbersWon - a.rubbersWon;
+}
+
+export function calculateClashPoolStandings(
+  tournament: Tournament,
+  poolId: string
+): ClashPoolRow[] {
+  const pool = (tournament.clashPools ?? []).find((p) => p.id === poolId);
+  const rows = new Map<string, ClashPoolRow>();
+  (pool?.clubIds ?? []).forEach((id) => {
+    const club = (tournament.clubs ?? []).find((c) => c.id === id);
+    if (club) {
+      rows.set(id, {
+        club,
+        played: 0,
+        wins: 0,
+        draws: 0,
+        losses: 0,
+        points: 0,
+        rubbersWon: 0,
+        rubbersLost: 0,
+        rubberDiff: 0,
+      });
+    }
+  });
+
+  const poolTies = (tournament.ties ?? []).filter(
+    (t) => t.stage === 'pool' && t.poolId === poolId
+  );
+  poolTies.forEach((tie) => {
+    const r1 = rows.get(tie.club1Id);
+    const r2 = rows.get(tie.club2Id);
+    if (!r1 || !r2) return;
+
+    let c1 = 0;
+    let c2 = 0;
+    let done = 0;
+    tie.matchIds.forEach((mid) => {
+      const m = tournament.matches.find((x) => x.id === mid);
+      if (!m || !m.completed || !m.winner) return;
+      done++;
+      if (m.winner.id === m.team1.id) c1++;
+      else c2++;
+    });
+
+    r1.rubbersWon += c1;
+    r1.rubbersLost += c2;
+    r2.rubbersWon += c2;
+    r2.rubbersLost += c1;
+
+    if (tie.matchIds.length > 0 && done === tie.matchIds.length) {
+      r1.played++;
+      r2.played++;
+      if (c1 > c2) {
+        r1.wins++;
+        r2.losses++;
+      } else if (c2 > c1) {
+        r2.wins++;
+        r1.losses++;
+      } else {
+        r1.draws++;
+        r2.draws++;
+      }
+    }
+  });
+
+  rows.forEach((r) => {
+    r.points = r.wins * 3;
+    r.rubberDiff = r.rubbersWon - r.rubbersLost;
+  });
+
+  return [...rows.values()].sort(compareClashPoolRows);
+}
+
+// Seed order for the knockout: champions of each pool ranked across pools
+// (Seed #1..#3), then runners-up ranked across pools (Seed #4..#6).
+// Returns clubs in seed order (index 0 = Seed #1).
+export function computeClashSeeds(tournament: Tournament): Club[] {
+  const pools = tournament.clashPools ?? [];
+  const champions: ClashPoolRow[] = [];
+  const runnersUp: ClashPoolRow[] = [];
+  pools.forEach((pool) => {
+    const standings = calculateClashPoolStandings(tournament, pool.id);
+    if (standings[0]) champions.push(standings[0]);
+    if (standings[1]) runnersUp.push(standings[1]);
+  });
+  champions.sort(compareClashPoolRows);
+  runnersUp.sort(compareClashPoolRows);
+  return [...champions, ...runnersUp].map((r) => r.club);
+}
+
+// Flat leaderboard of every squad across all pools, ranked PTS → GD → GF.
+// Pool-stage performance only (the true overall winner is the bracket champion).
+export function calculateClashOverallStandings(
+  tournament: Tournament
+): ClashPoolRow[] {
+  const pools = tournament.clashPools ?? [];
+  const all = pools.flatMap((p) => calculateClashPoolStandings(tournament, p.id));
+  return all.sort(compareClashPoolRows);
+}
+
 function advanceClashTournament(tournament: Tournament): Tournament {
   // Recompute completion + winner of every tie (a tie = 3 rubbers).
   const ties: Tie[] = (tournament.ties ?? []).map((tie) => {
@@ -584,6 +830,11 @@ function advanceClashTournament(tournament: Tournament): Tournament {
 
   let updated: Tournament = { ...tournament, ties };
   const structure = tournament.clashStructure ?? 'rr-final';
+
+  if (structure === 'pool-knockout') {
+    return advanceClashPoolKnockout(updated);
+  }
+
   const standings = calculateClashStandings(updated);
   const rrTies = ties.filter((t) => t.stage === 'round-robin');
   const rrDone = rrTies.length > 0 && rrTies.every((t) => t.completed);
@@ -622,6 +873,113 @@ function advanceClashTournament(tournament: Tournament): Tournament {
     updated.completed = true;
     updated.winnerClubId = freshFinal.winnerClubId;
     updated.clashStage = 'done';
+  }
+
+  return updated;
+}
+
+// Fills the pool-knockout bracket per-pairing as results come in. Receives a
+// tournament whose ties already have fresh completed/winnerClubId values.
+// Already-filled slots are never overwritten, so an in-progress tie is safe.
+function advanceClashPoolKnockout(tournament: Tournament): Tournament {
+  let updated: Tournament = { ...tournament };
+
+  const tieAt = (stage: Tie['stage'], position: number) =>
+    (updated.ties ?? []).find((t) => t.stage === stage && t.position === position);
+  const clubById = (id: string) => (updated.clubs ?? []).find((c) => c.id === id);
+
+  // Set a club into a tie slot (1 or 2) and its 3 rubber matches.
+  const fillSlot = (tieId: string, slot: 1 | 2, club: Club) => {
+    updated = {
+      ...updated,
+      ties: (updated.ties ?? []).map((t) =>
+        t.id === tieId
+          ? slot === 1
+            ? { ...t, club1Id: club.id }
+            : { ...t, club2Id: club.id }
+          : t
+      ),
+      matches: updated.matches.map((m) =>
+        m.tieId === tieId && m.category
+          ? slot === 1
+            ? { ...m, team1: club.teams[m.category] }
+            : { ...m, team2: club.teams[m.category] }
+          : m
+      ),
+    };
+  };
+
+  const poolTies = (updated.ties ?? []).filter((t) => t.stage === 'pool');
+  const poolsDone = poolTies.length > 0 && poolTies.every((t) => t.completed);
+
+  // 1) Pools done → seed playoffs (S3vS6, S4vS5) + semifinal byes (S2, S1).
+  if (poolsDone) {
+    const seeds = computeClashSeeds(updated);
+    const seed = (n: number) => seeds[n - 1]; // 1-indexed
+    const po1 = tieAt('playoff', 0);
+    const po2 = tieAt('playoff', 1);
+    const sf1 = tieAt('semifinal', 0);
+    const sf2 = tieAt('semifinal', 1);
+    if (po1 && !po1.club1Id && seed(3) && seed(6)) {
+      fillSlot(po1.id, 1, seed(3));
+      fillSlot(po1.id, 2, seed(6));
+    }
+    if (po2 && !po2.club1Id && seed(4) && seed(5)) {
+      fillSlot(po2.id, 1, seed(4));
+      fillSlot(po2.id, 2, seed(5));
+    }
+    if (sf1 && !sf1.club2Id && seed(2)) fillSlot(sf1.id, 2, seed(2));
+    if (sf2 && !sf2.club2Id && seed(1)) fillSlot(sf2.id, 2, seed(1));
+    if (updated.clashStage === 'pool') updated = { ...updated, clashStage: 'knockout' };
+  }
+
+  // 2) Playoff winners → semifinal club1 slot.
+  const po1d = tieAt('playoff', 0);
+  const po2d = tieAt('playoff', 1);
+  const sf1d = tieAt('semifinal', 0);
+  const sf2d = tieAt('semifinal', 1);
+  if (po1d?.completed && po1d.winnerClubId && sf1d && !sf1d.club1Id) {
+    const w = clubById(po1d.winnerClubId);
+    if (w) fillSlot(sf1d.id, 1, w);
+  }
+  if (po2d?.completed && po2d.winnerClubId && sf2d && !sf2d.club1Id) {
+    const w = clubById(po2d.winnerClubId);
+    if (w) fillSlot(sf2d.id, 1, w);
+  }
+
+  // 3) Semifinal winners → final; losers → third-place (if present).
+  const sf1e = tieAt('semifinal', 0);
+  const sf2e = tieAt('semifinal', 1);
+  if (sf1e?.completed && sf2e?.completed && sf1e.winnerClubId && sf2e.winnerClubId) {
+    const w1 = clubById(sf1e.winnerClubId);
+    const w2 = clubById(sf2e.winnerClubId);
+    const finalTie = tieAt('final', 0);
+    if (finalTie && !finalTie.club1Id && w1 && w2) {
+      fillSlot(finalTie.id, 1, w1);
+      fillSlot(finalTie.id, 2, w2);
+    }
+    const l1 = clubById(
+      sf1e.winnerClubId === sf1e.club1Id ? sf1e.club2Id : sf1e.club1Id
+    );
+    const l2 = clubById(
+      sf2e.winnerClubId === sf2e.club1Id ? sf2e.club2Id : sf2e.club1Id
+    );
+    const thirdTie = tieAt('third-place', 1);
+    if (thirdTie && !thirdTie.club1Id && l1 && l2) {
+      fillSlot(thirdTie.id, 1, l1);
+      fillSlot(thirdTie.id, 2, l2);
+    }
+  }
+
+  // 4) Final done → champion.
+  const finalDone = tieAt('final', 0);
+  if (finalDone?.completed && finalDone.winnerClubId) {
+    updated = {
+      ...updated,
+      completed: true,
+      winnerClubId: finalDone.winnerClubId,
+      clashStage: 'done',
+    };
   }
 
   return updated;
