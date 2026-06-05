@@ -816,8 +816,11 @@ function CourtPickerModal({
                             <button
                                 key={court.id}
                                 onClick={() => setSelectedCourtId(court.id)}
+                                disabled={isLive}
                                 className={`w-full text-left p-4 rounded-xl border-2 transition-all ${
-                                    isSelected
+                                    isLive
+                                        ? 'border-[#F0EBE3] bg-gray-50 opacity-60 cursor-not-allowed'
+                                        : isSelected
                                         ? 'border-[#B45330] bg-[#B45330]/10'
                                         : 'border-[#F0EBE3] hover:border-[#8B7355] bg-white'
                                 }`}
