@@ -44,6 +44,7 @@ export default function ClashView({
 
   const [tab, setTab] = useState<'standings' | 'fixtures'>('standings');
   const [pkTab, setPkTab] = useState<'overall' | 'pools' | 'knockout'>('overall');
+  const [openTieId, setOpenTieId] = useState<string | null>(null);
 
   // Count rubbers won by each club in a tie (for the tie header score).
   const tieScore = (tie: Tie) => {
@@ -57,6 +58,32 @@ export default function ClashView({
     });
     return { c1, c2 };
   };
+
+  // The 3 rubber cards (men/women/mix) for a tie.
+  const renderRubbers = (tie: Tie) => (
+    <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
+      {RUBBER_CATEGORIES.map((cat) => {
+        const m = tie.matchIds
+          .map((id) => tournament.matches.find((x) => x.id === id))
+          .find((x) => x?.category === cat);
+        if (!m) return null;
+        return (
+          <div key={cat}>
+            <div className="text-[10px] font-bold uppercase tracking-widest text-[#8B7355] mb-1 text-center">
+              {CATEGORY_LABEL[cat]}
+            </div>
+            <MatchCard
+              match={m}
+              onSelect={() => onMatchSelect(m)}
+              isSelected={selectedMatch?.id === m.id}
+              tournament={tournament}
+              isContestantView={headerProps.isContestantView}
+            />
+          </div>
+        );
+      })}
+    </div>
+  );
 
   const renderTie = (tie: Tie) => {
     const { c1, c2 } = tieScore(tie);
@@ -91,28 +118,7 @@ export default function ClashView({
         </div>
 
         {/* 3 rubbers */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
-          {RUBBER_CATEGORIES.map((cat) => {
-            const m = tie.matchIds
-              .map((id) => tournament.matches.find((x) => x.id === id))
-              .find((x) => x?.category === cat);
-            if (!m) return null;
-            return (
-              <div key={cat}>
-                <div className="text-[10px] font-bold uppercase tracking-widest text-[#8B7355] mb-1 text-center">
-                  {CATEGORY_LABEL[cat]}
-                </div>
-                <MatchCard
-                  match={m}
-                  onSelect={() => onMatchSelect(m)}
-                  isSelected={selectedMatch?.id === m.id}
-                  tournament={tournament}
-                  isContestantView={headerProps.isContestantView}
-                />
-              </div>
-            );
-          })}
-        </div>
+        {renderRubbers(tie)}
       </div>
     );
   };
@@ -127,15 +133,57 @@ export default function ClashView({
     const finalTie = ties.find((t) => t.stage === 'final');
     const thirdTie = ties.find((t) => t.stage === 'third-place');
 
-    const koSection = (title: string, list: Tie[], gold = false) =>
-      list.length > 0 && (
-        <div className="space-y-4">
-          <h3 className={`text-lg font-semibold flex items-center gap-2 ${gold ? 'text-yellow-600' : 'text-gray-500'}`}>
-            {gold ? <Trophy className="w-5 h-5" /> : <Network className="w-5 h-5" />} {title}
-          </h3>
-          {list.map(renderTie)}
+    const [po1, po2] = poTies;
+    const [sf1, sf2] = sfTies;
+    const openTie = ties.find((t) => t.id === openTieId) ?? null;
+
+    const winnerSlot = (tie: Tie, slot: 1 | 2) =>
+      tie.completed && tie.winnerClubId === (slot === 1 ? tie.club1Id : tie.club2Id);
+
+    // Compact, clickable bracket node (2 slots + aggregate tie score).
+    const NodeCard = ({ tie, accent }: { tie?: Tie; accent?: boolean }) => {
+      if (!tie) return <div className="w-44" />;
+      const { c1, c2 } = tieScore(tie);
+      const open = openTieId === tie.id;
+      const row = (name: string, score: number, win: boolean) => (
+        <div className={`flex items-center justify-between gap-2 px-3 py-2 ${win ? 'bg-[#B45330]/10 text-[#B45330] font-bold' : 'text-[#2A2A2A]'}`}>
+          <span className="truncate text-sm">{name}</span>
+          <span className="tabular-nums text-sm">{score}</span>
         </div>
       );
+      return (
+        <button
+          type="button"
+          onClick={() => setOpenTieId(open ? null : tie.id)}
+          className={`w-44 rounded-xl border bg-white overflow-hidden text-left transition-all shadow-sm hover:shadow-md ${
+            open ? 'border-[#B45330] ring-2 ring-[#B45330]/30' : accent ? 'border-yellow-400/70' : 'border-[#F0EBE3]'
+          }`}
+        >
+          {row(slotName(tie, 1), c1, winnerSlot(tie, 1))}
+          <div className="border-t border-[#F0EBE3]" />
+          {row(slotName(tie, 2), c2, winnerSlot(tie, 2))}
+        </button>
+      );
+    };
+
+    const line = 'border-[#E5DDD3]';
+    const StraightConnector = () => (
+      <div className="relative w-8 self-stretch">
+        <div className={`absolute left-0 right-0 top-1/4 border-t-2 ${line}`} />
+        <div className={`absolute left-0 right-0 bottom-1/4 border-t-2 ${line}`} />
+      </div>
+    );
+    const ElbowConnector = () => (
+      <div className="relative w-8 self-stretch">
+        <div className={`absolute left-0 w-1/2 top-1/4 border-t-2 ${line}`} />
+        <div className={`absolute left-0 w-1/2 bottom-1/4 border-t-2 ${line}`} />
+        <div className={`absolute left-1/2 top-1/4 bottom-1/4 border-l-2 ${line}`} />
+        <div className={`absolute left-1/2 right-0 top-1/2 border-t-2 ${line}`} />
+      </div>
+    );
+    const colLabel = (l: string) => (
+      <div className="w-44 text-center text-[10px] font-bold uppercase tracking-widest text-[#8B7355]">{l}</div>
+    );
 
     const overall = calculateClashOverallStandings(tournament);
     const poolNameOf = (clubId: string) =>
@@ -294,15 +342,64 @@ export default function ClashView({
               </div>
             )}
             {!knockoutActive && (
-              <div className="bg-white/80 border border-[#F0EBE3] rounded-2xl p-8 text-center text-gray-400">
-                <Network className="w-10 h-10 mx-auto mb-3 opacity-40" />
-                Bracket terbuka setelah semua pertandingan pool selesai.
+              <p className="text-xs text-gray-400 flex items-center gap-2">
+                <Network className="w-4 h-4" /> Preview bagan — terisi otomatis setelah fase pool selesai.
+              </p>
+            )}
+
+            {/* Bracket tree */}
+            <div className="bg-white/80 backdrop-blur-xl border border-[#F0EBE3] rounded-2xl p-5 shadow-lg overflow-x-auto">
+              <div className="inline-flex flex-col gap-2 min-w-max">
+                <div className="inline-flex">
+                  {colLabel('Playoff')}
+                  <div className="w-8" />
+                  {colLabel('Semifinal')}
+                  <div className="w-8" />
+                  {colLabel('Final')}
+                </div>
+                <div className="inline-flex items-stretch" style={{ minHeight: 220 }}>
+                  <div className="flex flex-col justify-around">
+                    <NodeCard tie={po1} />
+                    <NodeCard tie={po2} />
+                  </div>
+                  <StraightConnector />
+                  <div className="flex flex-col justify-around">
+                    <NodeCard tie={sf1} />
+                    <NodeCard tie={sf2} />
+                  </div>
+                  <ElbowConnector />
+                  <div className="flex flex-col justify-center">
+                    <NodeCard tie={finalTie} accent />
+                  </div>
+                </div>
+              </div>
+
+              {thirdTie && (
+                <div className="mt-6 pt-4 border-t border-[#F0EBE3]">
+                  <div className="mb-2 text-[10px] font-bold uppercase tracking-widest text-[#8B7355] flex items-center gap-1">
+                    🥉 3rd Place
+                  </div>
+                  <NodeCard tie={thirdTie} />
+                </div>
+              )}
+
+              <p className="text-xs text-gray-400 mt-4">Klik node buat lihat 3 rubber (Men/Women/Mix).</p>
+            </div>
+
+            {/* Expanded rubbers for the selected tie */}
+            {openTie && (
+              <div className="bg-white/80 backdrop-blur-xl border border-[#B45330]/40 rounded-2xl p-5 shadow-lg">
+                <div className="flex items-center justify-between mb-4">
+                  <span className="font-bold text-[#2A2A2A]">
+                    {slotName(openTie, 1)} <span className="text-[#B45330]">vs</span> {slotName(openTie, 2)}
+                  </span>
+                  <button onClick={() => setOpenTieId(null)} className="text-xs text-gray-400 hover:text-[#B45330] transition-colors">
+                    Tutup ✕
+                  </button>
+                </div>
+                {renderRubbers(openTie)}
               </div>
             )}
-            {koSection('Playoffs', poTies)}
-            {koSection('Semifinals', sfTies)}
-            {finalTie && koSection('Final', [finalTie], true)}
-            {thirdTie && koSection('3rd Place', [thirdTie])}
           </div>
         )}
 
