@@ -139,14 +139,25 @@ export interface Tie {
   club1Id: string;
   club2Id: string;
   round: number;
-  stage: 'round-robin' | 'final' | 'knockout';
+  stage: 'round-robin' | 'final' | 'knockout' | 'pool' | 'playoff' | 'semifinal' | 'third-place';
   position: number; // bracket position (knockout) or schedule slot
   matchIds: string[]; // the 3 rubber match ids
   completed: boolean;
   winnerClubId?: string;
+  // Pool-knockout additions
+  poolId?: string; // set for stage 'pool'
+  seed1?: number; // seed number filling club1 slot (knockout display)
+  seed2?: number; // seed number filling club2 slot (knockout display)
 }
 
-export type ClashStructure = 'round-robin' | 'rr-final' | 'knockout';
+// A pool is a round-robin group of clubs in the pool-knockout structure.
+export interface ClashPool {
+  id: string;
+  name: string; // "Pool 1", "Pool A", etc.
+  clubIds: string[];
+}
+
+export type ClashStructure = 'round-robin' | 'rr-final' | 'knockout' | 'pool-knockout';
 
 export interface Tournament {
   id: string;
@@ -177,8 +188,11 @@ export interface Tournament {
   clubs?: Club[];
   ties?: Tie[];
   clashStructure?: ClashStructure; // default 'rr-final'
-  clashStage?: 'round-robin' | 'final' | 'done'; // progress within rr-final
+  clashStage?: 'round-robin' | 'final' | 'pool' | 'knockout' | 'done'; // progress
   winnerClubId?: string; // clash champion club
+  // Pool-knockout additions
+  clashPools?: ClashPool[];
+  clashThirdPlace?: boolean; // include a 3rd-place tie
 }
 
 export interface TournamentConfig {
@@ -188,6 +202,7 @@ export interface TournamentConfig {
   // Clash format
   clubs?: Club[];
   clashStructure?: ClashStructure;
+  clashThirdPlace?: boolean;
 }
 
 export type TournamentFormat =
