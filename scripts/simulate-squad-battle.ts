@@ -66,6 +66,12 @@ const courts: Court[] = [1, 2, 3].map((n) => ({
 }));
 
 // ─── Build tournament ─────────────────────────────────────────────────────────
+// Fixed id so re-running a later stage updates the SAME tournament (upsert).
+const SIM_ID = 'sim-squad-battle';
+// How far to play: pools | playoffs | semis | full (default full)
+const STAGE = (process.argv.find((a) => a.startsWith('--stage='))?.split('=')[1] ?? 'full') as
+  | 'pools' | 'playoffs' | 'semis' | 'full';
+
 let t: Tournament = createTournament(
   'WePadl Squad Battle Vol. 1 (SIM)',
   'clash',
@@ -75,6 +81,7 @@ let t: Tournament = createTournament(
   4,
   { clubs, clashStructure: 'pool-knockout', clashThirdPlace: true }
 );
+t = { ...t, id: SIM_ID };
 
 // ─── Simulate a tie (3 rubbers) with realistic race-to-4 scores ──────────────
 const sigmoid = (x: number) => 1 / (1 + Math.exp(-x));
@@ -118,20 +125,26 @@ function playTie(tie: Tie) {
 const tiesOf = (stage: Tie['stage']) =>
   (t.ties ?? []).filter((x) => x.stage === stage).sort((a, b) => a.round - b.round || a.position - b.position);
 
-// 1) Pool stage
+// 1) Pool stage (always)
 tiesOf('pool').forEach(playTie);
 t = advanceTournament(t);
 // 2) Playoffs
-tiesOf('playoff').forEach(playTie);
-t = advanceTournament(t);
+if (STAGE !== 'pools') {
+  tiesOf('playoff').forEach(playTie);
+  t = advanceTournament(t);
+}
 // 3) Semifinals
-tiesOf('semifinal').forEach(playTie);
-t = advanceTournament(t);
+if (STAGE === 'semis' || STAGE === 'full') {
+  tiesOf('semifinal').forEach(playTie);
+  t = advanceTournament(t);
+}
 // 4) Final + 3rd place
-[...tiesOf('final'), ...tiesOf('third-place')].forEach(playTie);
-t = advanceTournament(t);
+if (STAGE === 'full') {
+  [...tiesOf('final'), ...tiesOf('third-place')].forEach(playTie);
+  t = advanceTournament(t);
+}
 
-// Stamp a fresh id/createdAt so it sorts to the top and is easy to spot.
+// Bump createdAt so it sorts to the top of the list.
 t = { ...t, createdAt: new Date().toISOString() };
 
 // ─── Report ───────────────────────────────────────────────────────────────────
@@ -140,6 +153,7 @@ const finalTie = (t.ties ?? []).find((x) => x.stage === 'final');
 const thirdTie = (t.ties ?? []).find((x) => x.stage === 'third-place');
 
 console.log('\n=== Squad Battle simulation ===');
+console.log('played to: ', STAGE);
 console.log('id:        ', t.id);
 console.log('name:      ', t.name);
 console.log('completed: ', t.completed, '| stage:', t.clashStage);
@@ -154,24 +168,23 @@ console.log('CHAMPION:  ', clubName(t.winnerClubId));
 
 // ─── Persist / delete ──────────────────────────────────────────────────────────
 async function main() {
-  const arg = process.argv[2];
+  const argv = process.argv.slice(2);
 
-  if (arg === 'delete') {
-    const id = process.argv[3];
-    if (!id) { console.error('Usage: ... delete <tournamentId>'); process.exit(1); }
+  if (argv.includes('delete')) {
+    const id = argv[argv.indexOf('delete') + 1] || SIM_ID;
     const { error } = await supabase.from('tournaments').delete().eq('id', id);
     if (error) { console.error('Delete failed:', error.message); process.exit(1); }
     console.log('\nDeleted tournament', id);
     process.exit(0);
   }
 
-  if (arg === '--dry') {
+  if (argv.includes('--dry')) {
     console.log('\n[--dry] not inserting. Remove --dry to push to Supabase.');
     process.exit(0);
   }
 
   // Print an INSERT statement to paste into the Supabase SQL Editor.
-  if (arg === '--sql') {
+  if (argv.includes('--sql')) {
     const json = JSON.stringify(t).replace(/'/g, "''");
     const name = t.name.replace(/'/g, "''");
     console.log('\n-- Paste into Supabase SQL Editor --');
