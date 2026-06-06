@@ -155,6 +155,7 @@ export function createTournament(
     matchRules,
     teamsPerGroup,
     qualifiersPerGroup,
+    thirdPlace: config?.thirdPlace ?? false,
     clubs,
     clashStructure,
     clashStage: isClash
@@ -230,7 +231,7 @@ function generateMatches(tournament: Tournament): Match[] {
     case 'round-robin':
       return generateRoundRobinMatches(tournament.teams);
     case 'single-elimination':
-      return generateEliminationMatches(tournament.teams, tournament.scoringMode, tournament.raceTarget);
+      return generateEliminationMatches(tournament.teams, tournament.scoringMode, tournament.raceTarget, tournament.thirdPlace);
     case 'group-knockout':
       return generateGroupKnockoutMatches(tournament);
     case 'clash':
@@ -476,7 +477,8 @@ function generateRoundRobinMatches(teams: Team[]): Match[] {
 function generateEliminationMatches(
   teams: Team[],
   scoringMode?: 'padel' | 'race',
-  raceTarget?: number
+  raceTarget?: number,
+  thirdPlace?: boolean
 ): Match[] {
   const matches: Match[] = [];
   let matchId = 1;
@@ -528,6 +530,34 @@ function generateEliminationMatches(
       });
     }
     round++;
+  }
+
+  // 3rd-place match (needs a semifinal round, i.e. 4+ teams). round-1 = final.
+  if (thirdPlace && teams.length >= 4) {
+    matches.push({
+      id: `match-${matchId++}`,
+      team1: { id: '', name: 'TBD' },
+      team2: { id: '', name: 'TBD' },
+      team1Score: createEmptyScore(),
+      team2Score: createEmptyScore(),
+      completed: false,
+      round: round - 1,
+      position: 1,
+      currentSet: 1,
+      currentGame: 0,
+      servingTeam: 'team1',
+      isDeuce: false,
+      isTiebreaker: false,
+      pointsInGame: 0,
+      status: 'scheduled' as MatchStatus,
+      schedule: {},
+      isThirdPlace: true,
+      scoringMode: scoringMode,
+      raceTarget: scoringMode === 'race' ? (raceTarget || 4) : undefined,
+      team1RaceScore: scoringMode === 'race' ? 0 : undefined,
+      team2RaceScore: scoringMode === 'race' ? 0 : undefined,
+      isGoldenPoint: false,
+    });
   }
   return matches;
 }
@@ -603,7 +633,8 @@ function generateGroupKnockoutMatches(tournament: Tournament): Match[] {
     knockoutRounds,
     matchIdCounter,
     tournament.scoringMode,
-    tournament.raceTarget
+    tournament.raceTarget,
+    tournament.thirdPlace
   );
 
   return allMatches;
@@ -617,11 +648,13 @@ function generateKnockoutPlaceholders(
   knockoutRounds: number,
   startingMatchId: number,
   scoringMode?: 'padel' | 'race',
-  raceTarget?: number
+  raceTarget?: number,
+  thirdPlace?: boolean
 ): void {
   let matchId = startingMatchId;
   let teamsInRound = qualifiedTeamsCount;
-  for (let round = 2; round <= knockoutRounds + 1; round++) {
+  const finalRound = knockoutRounds + 1;
+  for (let round = 2; round <= finalRound; round++) {
     const matchesInRound = teamsInRound / 2;
     const isFinal = matchesInRound === 1;
     for (let pos = 0; pos < matchesInRound; pos++) {
@@ -651,6 +684,35 @@ function generateKnockoutPlaceholders(
       });
     }
     teamsInRound = matchesInRound;
+  }
+
+  // 3rd-place match (only when a semifinal round exists): same round as the
+  // final, position 1, filled from the two semifinal losers on advancement.
+  if (thirdPlace && knockoutRounds >= 2) {
+    matches.push({
+      id: `match-${matchId++}`,
+      team1: { id: '', name: 'TBD' },
+      team2: { id: '', name: 'TBD' },
+      team1Score: createEmptyScore(),
+      team2Score: createEmptyScore(),
+      completed: false,
+      round: finalRound,
+      position: 1,
+      currentSet: 1,
+      currentGame: 0,
+      servingTeam: 'team1',
+      isDeuce: false,
+      isTiebreaker: false,
+      pointsInGame: 0,
+      status: 'scheduled' as MatchStatus,
+      schedule: {},
+      isThirdPlace: true,
+      scoringMode: scoringMode,
+      raceTarget: scoringMode === 'race' ? (raceTarget || 4) : undefined,
+      team1RaceScore: scoringMode === 'race' ? 0 : undefined,
+      team2RaceScore: scoringMode === 'race' ? 0 : undefined,
+      isGoldenPoint: false,
+    });
   }
 }
 
@@ -1272,15 +1334,33 @@ function advanceEliminationTournament(tournament: Tournament): Tournament {
   // D beats C, the A vs D semifinal is ready even while E/F and G/H play on.
   // Already-assigned slots (same team id) are left untouched so an in-progress
   // match is never reset.
+  // The two semifinals feed both the final and the (optional) 3rd-place match.
+  const loserOf = (m?: Match): Team | undefined => {
+    if (!m?.completed || !m.winner) return undefined;
+    return m.winner.id === m.team1.id ? m.team2 : m.team1;
+  };
+  const sf1 = knockoutMatches.find((m) => m.round === maxRound - 1 && m.position === 0);
+  const sf2 = knockoutMatches.find((m) => m.round === maxRound - 1 && m.position === 1);
+
   const newMatches = tournament.matches.map((match) => {
     if (match.groupId || match.round <= firstKnockoutRound) return match;
 
+    // 3rd-place match: fill from the two semifinal losers (not bracket feeders).
+    if (match.isThirdPlace) {
+      const l1 = loserOf(sf1);
+      const l2 = loserOf(sf2);
+      let updated = match;
+      if (l1 && match.team1?.id !== l1.id) updated = { ...updated, team1: l1 };
+      if (l2 && match.team2?.id !== l2.id) updated = { ...updated, team2: l2 };
+      return updated;
+    }
+
     const prevRound = match.round - 1;
     const feeder1 = knockoutMatches.find(
-      (m) => m.round === prevRound && m.position === match.position * 2
+      (m) => m.round === prevRound && m.position === match.position * 2 && !m.isThirdPlace
     );
     const feeder2 = knockoutMatches.find(
-      (m) => m.round === prevRound && m.position === match.position * 2 + 1
+      (m) => m.round === prevRound && m.position === match.position * 2 + 1 && !m.isThirdPlace
     );
 
     let updated = match;
@@ -1301,8 +1381,10 @@ function advanceEliminationTournament(tournament: Tournament): Tournament {
     return updated;
   });
 
-  // Tournament is complete once the final (highest-round) match is done.
-  const finalMatch = newMatches.find((m) => !m.groupId && m.round === maxRound);
+  // Tournament is complete once the FINAL (not the 3rd-place match) is done.
+  const finalMatch = newMatches.find(
+    (m) => !m.groupId && m.round === maxRound && !m.isThirdPlace
+  );
   const completed = !!finalMatch?.completed;
 
   // currentRound = furthest round that has both teams assigned (informational).

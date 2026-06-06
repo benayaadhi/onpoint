@@ -82,6 +82,8 @@ export interface Match {
   // Group system additions
   groupId?: string;
   setHistory?: SetHistory[];
+  // Knockout 3rd-place match (filled from the two semifinal losers)
+  isThirdPlace?: boolean;
   // Clash (club vs club) additions — a rubber inside a tie
   tieId?: string;
   category?: RubberCategory;
@@ -184,6 +186,7 @@ export interface Tournament {
   matchRules?: MatchRules;
   teamsPerGroup?: number; // default 4
   qualifiersPerGroup?: number; // teams advancing from each group, default 2
+  thirdPlace?: boolean; // knockout: add a 3rd-place match (SF losers)
   // Clash format additions
   clubs?: Club[];
   ties?: Tie[];
@@ -200,6 +203,7 @@ export interface TournamentConfig {
   matchRules: MatchRules;
   teamsPerGroup: number;
   qualifiersPerGroup: number;
+  thirdPlace?: boolean;
   // Clash format
   clubs?: Club[];
   clashStructure?: ClashStructure;

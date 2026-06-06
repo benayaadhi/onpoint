@@ -27,6 +27,7 @@ export default function TournamentSetup({ onCreateTournament }: TournamentSetupP
   // Group config
   const [teamsPerGroup, setTeamsPerGroup] = useState(4);
   const [qualifiersPerGroup, setQualifiersPerGroup] = useState(2);
+  const [thirdPlace, setThirdPlace] = useState(false);
   // Clash config — each club fields a Men/Women/Mix team
   const [clashStructure, setClashStructure] = useState<ClashStructure>('rr-final');
   const [clashThirdPlace, setClashThirdPlace] = useState(true);
@@ -217,6 +218,7 @@ export default function TournamentSetup({ onCreateTournament }: TournamentSetupP
       ...rules,
       teamsPerGroup,
       qualifiersPerGroup,
+      thirdPlace: format === 'group-knockout' || format === 'single-elimination' ? thirdPlace : undefined,
     });
   };
 
@@ -478,6 +480,19 @@ export default function TournamentSetup({ onCreateTournament }: TournamentSetupP
                 )}
               </div>
             </div>
+          )}
+
+          {/* 3rd-place toggle (knockout formats) */}
+          {(format === 'group-knockout' || format === 'single-elimination') && (
+            <label className="flex items-center gap-2 text-sm font-medium text-gray-700 cursor-pointer">
+              <input
+                type="checkbox"
+                checked={thirdPlace}
+                onChange={(e) => setThirdPlace(e.target.checked)}
+                className="w-4 h-4 accent-[#B45330]"
+              />
+              Match perebutan Juara 3 (yang kalah semifinal)
+            </label>
           )}
 
           {/* Clash Setup (clash only) */}
