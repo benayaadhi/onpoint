@@ -126,9 +126,13 @@ export function createTournament(
     : teams;
 
   // Pool-knockout: split clubs into 2 or 3 balanced pools.
+  const clashLadder8 =
+    isClash && clashStructure === 'pool-knockout' ? config?.clashLadder8 ?? false : undefined;
   const clashPoolCount =
     isClash && clashStructure === 'pool-knockout'
-      ? config?.clashPoolCount ?? 3
+      ? clashLadder8
+        ? 2 // Squad Battle 8 = 2 pools of 4
+        : config?.clashPoolCount ?? 3
       : undefined;
   const clashPools =
     isClash && clashStructure === 'pool-knockout' && clubs
@@ -165,8 +169,11 @@ export function createTournament(
       : undefined,
     clashPools,
     clashPoolCount,
+    clashLadder8,
     clashThirdPlace: isClash && clashStructure === 'pool-knockout'
-      ? config?.clashThirdPlace ?? true
+      ? clashLadder8
+        ? true // ladder always has a 3rd-place match
+        : config?.clashThirdPlace ?? true
       : undefined,
   };
   tournament.matches = generateMatches(tournament);
@@ -236,7 +243,9 @@ function generateMatches(tournament: Tournament): Match[] {
       return generateGroupKnockoutMatches(tournament);
     case 'clash':
       return tournament.clashStructure === 'pool-knockout'
-        ? generateClashPoolKnockout(tournament)
+        ? tournament.clashLadder8
+          ? generateClashLadder8(tournament)
+          : generateClashPoolKnockout(tournament)
         : generateClashMatches(tournament);
     default:
       return [];
@@ -465,6 +474,99 @@ function generateClashPoolKnockout(tournament: Tournament): Match[] {
   koTie('semifinal', 1, 2, undefined, 1); // club1 = PO2 winner
   koTie('final', 0, 3);
   if (thirdPlace) koTie('third-place', 1, 3);
+
+  tournament.ties = ties;
+  return matches;
+}
+
+// Squad Battle 8: 2 pools × 4, all 8 qualify into a staggered ladder.
+//   Each half: R1 (P3 vs P4) → QF (RU bye + R1 winner) → SF (pool winner bye + QF winner)
+//   Final = SF-top winner vs SF-bottom winner; 3rd place = the two SF losers.
+//   Group rubbers: best of 5 (fixed). KO race targets: R1/QF 4, SF 5, Final/3rd 6.
+function generateClashLadder8(tournament: Tournament): Match[] {
+  const clubs = tournament.clubs ?? [];
+  const pools = tournament.clashPools ?? balancedPools(clubs, 2);
+  const byId = new Map(clubs.map((c) => [c.id, c]));
+  const matches: Match[] = [];
+  const ties: Tie[] = [];
+  let matchId = 1;
+  let tieId = 1;
+
+  const koTarget = (stage: Tie['stage']): number => {
+    switch (stage) {
+      case 'semifinal': return 5;
+      case 'final': return 6;
+      case 'third-place': return 6;
+      default: return 4; // round1, quarterfinal
+    }
+  };
+
+  const buildRubbers = (tie: Tie, club1: Club | null, club2: Club | null, round: number) => {
+    RUBBER_CATEGORIES.forEach((cat, idx) => {
+      const team1 = club1 ? club1.teams[cat] : { id: '', name: 'TBD' };
+      const team2 = club2 ? club2.teams[cat] : { id: '', name: 'TBD' };
+      const m = createMatch(`match-${matchId++}`, team1, team2, round, idx);
+      m.tieId = tie.id;
+      m.category = cat;
+      applyRubberScoring(m, tournament);
+      m.scoringMode = 'race';
+      if (tie.stage === 'pool') {
+        m.gamesFixed = 5; // best of 5 (play all 5 games)
+        m.raceTarget = undefined;
+      } else {
+        m.raceTarget = koTarget(tie.stage);
+      }
+      tie.matchIds.push(m.id);
+      matches.push(m);
+    });
+  };
+
+  // Pool round-robin ties
+  pools.forEach((pool) => {
+    const poolClubs = pool.clubIds
+      .map((id) => byId.get(id))
+      .filter((c): c is Club => Boolean(c));
+    roundRobinClubPairings(poolClubs).forEach((p, idx) => {
+      const tie: Tie = {
+        id: `tie-${tieId++}`,
+        club1Id: p.a.id,
+        club2Id: p.b.id,
+        round: p.round,
+        stage: 'pool',
+        poolId: pool.id,
+        position: idx,
+        matchIds: [],
+        completed: false,
+      };
+      buildRubbers(tie, p.a, p.b, p.round);
+      ties.push(tie);
+    });
+  });
+
+  // Ladder placeholders (filled on advancement). position 0 = top half, 1 = bottom.
+  const koTie = (stage: Tie['stage'], position: number, round: number) => {
+    const tie: Tie = {
+      id: `tie-${tieId++}`,
+      club1Id: '',
+      club2Id: '',
+      round,
+      stage,
+      position,
+      matchIds: [],
+      completed: false,
+    };
+    buildRubbers(tie, null, null, round);
+    ties.push(tie);
+  };
+
+  koTie('round1', 0, 1);       // top:    P3 A vs P4 B
+  koTie('round1', 1, 1);       // bottom: P3 B vs P4 A
+  koTie('quarterfinal', 0, 2); // top:    R1-top winner vs Runner-up B
+  koTie('quarterfinal', 1, 2); // bottom: R1-bottom winner vs Runner-up A
+  koTie('semifinal', 0, 3);    // top:    QF-top winner vs Juara A
+  koTie('semifinal', 1, 3);    // bottom: QF-bottom winner vs Juara B
+  koTie('final', 0, 4);
+  koTie('third-place', 1, 4);
 
   tournament.ties = ties;
   return matches;
@@ -938,7 +1040,9 @@ function advanceClashTournament(tournament: Tournament): Tournament {
   const structure = tournament.clashStructure ?? 'rr-final';
 
   if (structure === 'pool-knockout') {
-    return advanceClashPoolKnockout(updated);
+    return tournament.clashLadder8
+      ? advanceClashLadder8(updated)
+      : advanceClashPoolKnockout(updated);
   }
 
   const standings = calculateClashStandings(updated);
@@ -1086,6 +1190,97 @@ function advanceClashPoolKnockout(tournament: Tournament): Tournament {
       winnerClubId: finalDone.winnerClubId,
       clashStage: 'done',
     };
+  }
+
+  return updated;
+}
+
+// Squad Battle 8 ladder advancement (staggered byes). Already-filled slots are
+// never overwritten, so an in-progress tie is safe.
+function advanceClashLadder8(tournament: Tournament): Tournament {
+  let updated: Tournament = { ...tournament };
+  const pools = updated.clashPools ?? [];
+
+  const tieAt = (stage: Tie['stage'], position: number) =>
+    (updated.ties ?? []).find((t) => t.stage === stage && t.position === position);
+  const clubById = (id?: string) => (updated.clubs ?? []).find((c) => c.id === id);
+  const loserClubId = (t?: Tie) =>
+    t?.completed && t.winnerClubId
+      ? t.winnerClubId === t.club1Id ? t.club2Id : t.club1Id
+      : undefined;
+
+  const fillSlot = (tieId: string, slot: 1 | 2, club: Club) => {
+    updated = {
+      ...updated,
+      ties: (updated.ties ?? []).map((t) =>
+        t.id === tieId
+          ? slot === 1 ? { ...t, club1Id: club.id } : { ...t, club2Id: club.id }
+          : t
+      ),
+      matches: updated.matches.map((m) =>
+        m.tieId === tieId && m.category
+          ? slot === 1
+            ? { ...m, team1: club.teams[m.category] }
+            : { ...m, team2: club.teams[m.category] }
+          : m
+      ),
+    };
+  };
+
+  const poolTies = (updated.ties ?? []).filter((t) => t.stage === 'pool');
+  const poolsDone = poolTies.length > 0 && poolTies.every((t) => t.completed);
+
+  // 1) Pools done → seed Round 1, plus QF and SF byes (cross-pool).
+  if (poolsDone && pools[0] && pools[1]) {
+    const a = calculateClashPoolStandings(updated, pools[0].id); // [J1, RU, P3, P4]
+    const b = calculateClashPoolStandings(updated, pools[1].id);
+    const r1t = tieAt('round1', 0), r1b = tieAt('round1', 1);
+    const qft = tieAt('quarterfinal', 0), qfb = tieAt('quarterfinal', 1);
+    const sft = tieAt('semifinal', 0), sfb = tieAt('semifinal', 1);
+    if (r1t && !r1t.club1Id && a[2] && b[3]) { fillSlot(r1t.id, 1, a[2].club); fillSlot(r1t.id, 2, b[3].club); }
+    if (r1b && !r1b.club1Id && b[2] && a[3]) { fillSlot(r1b.id, 1, b[2].club); fillSlot(r1b.id, 2, a[3].club); }
+    if (qft && !qft.club2Id && b[1]) fillSlot(qft.id, 2, b[1].club); // Runner-up B
+    if (qfb && !qfb.club2Id && a[1]) fillSlot(qfb.id, 2, a[1].club); // Runner-up A
+    if (sft && !sft.club2Id && a[0]) fillSlot(sft.id, 2, a[0].club); // Juara A
+    if (sfb && !sfb.club2Id && b[0]) fillSlot(sfb.id, 2, b[0].club); // Juara B
+    if (updated.clashStage === 'pool') updated = { ...updated, clashStage: 'knockout' };
+  }
+
+  // 2) Round 1 winners → QF club1.
+  for (const pos of [0, 1] as const) {
+    const r1 = tieAt('round1', pos);
+    const qf = tieAt('quarterfinal', pos);
+    if (r1?.completed && r1.winnerClubId && qf && !qf.club1Id) {
+      const w = clubById(r1.winnerClubId);
+      if (w) fillSlot(qf.id, 1, w);
+    }
+  }
+
+  // 3) QF winners → SF club1.
+  for (const pos of [0, 1] as const) {
+    const qf = tieAt('quarterfinal', pos);
+    const sf = tieAt('semifinal', pos);
+    if (qf?.completed && qf.winnerClubId && sf && !sf.club1Id) {
+      const w = clubById(qf.winnerClubId);
+      if (w) fillSlot(sf.id, 1, w);
+    }
+  }
+
+  // 4) Both SF done → Final (winners) + 3rd place (losers).
+  const sf1 = tieAt('semifinal', 0), sf2 = tieAt('semifinal', 1);
+  if (sf1?.completed && sf2?.completed && sf1.winnerClubId && sf2.winnerClubId) {
+    const finalTie = tieAt('final', 0);
+    const w1 = clubById(sf1.winnerClubId), w2 = clubById(sf2.winnerClubId);
+    if (finalTie && !finalTie.club1Id && w1 && w2) { fillSlot(finalTie.id, 1, w1); fillSlot(finalTie.id, 2, w2); }
+    const third = tieAt('third-place', 1);
+    const l1 = clubById(loserClubId(sf1)), l2 = clubById(loserClubId(sf2));
+    if (third && !third.club1Id && l1 && l2) { fillSlot(third.id, 1, l1); fillSlot(third.id, 2, l2); }
+  }
+
+  // 5) Final done → champion.
+  const finalDone = tieAt('final', 0);
+  if (finalDone?.completed && finalDone.winnerClubId) {
+    updated = { ...updated, completed: true, winnerClubId: finalDone.winnerClubId, clashStage: 'done' };
   }
 
   return updated;

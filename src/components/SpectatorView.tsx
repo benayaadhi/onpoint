@@ -117,7 +117,7 @@ export default function SpectatorView({
             <div className="text-[#B45330] text-5xl font-bold tracking-wider mb-2">
               {tournamentName?.toUpperCase()}
             </div>
-            <div className="text-gray-600 text-3xl">RACE TO {raceTarget}</div>
+            <div className="text-gray-600 text-3xl">{currentMatch.gamesFixed ? `BEST OF ${currentMatch.gamesFixed}` : `RACE TO ${raceTarget}`}</div>
           </div>
 
           {/* Golden Point Banner */}

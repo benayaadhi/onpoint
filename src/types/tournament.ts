@@ -93,6 +93,9 @@ export interface Match {
   team1RaceScore?: number;
   team2RaceScore?: number;
   isGoldenPoint?: boolean;
+  // "Best of N" fixed-games rubber: play exactly N games, winner = more games
+  // (no race-target early stop, no tiebreak). Used by Squad Battle 8 group stage.
+  gamesFixed?: number;
   // Configurable padel rules (falls back to DEFAULT_MATCH_RULES when absent)
   rules?: MatchRules;
   // Monotonic stamp (ms) of the last score change — used to reject stale
@@ -141,7 +144,7 @@ export interface Tie {
   club1Id: string;
   club2Id: string;
   round: number;
-  stage: 'round-robin' | 'final' | 'knockout' | 'pool' | 'playoff' | 'semifinal' | 'third-place';
+  stage: 'round-robin' | 'final' | 'knockout' | 'pool' | 'playoff' | 'semifinal' | 'third-place' | 'round1' | 'quarterfinal';
   position: number; // bracket position (knockout) or schedule slot
   matchIds: string[]; // the 3 rubber match ids
   completed: boolean;
@@ -197,6 +200,9 @@ export interface Tournament {
   clashPools?: ClashPool[];
   clashThirdPlace?: boolean; // include a 3rd-place tie
   clashPoolCount?: number; // 2 (→ 4-team KO) or 3 (→ 6-team KO), default 3
+  // Squad Battle 8: 2 pools × 4, all 8 qualify into a staggered ladder bracket
+  // (pool winners bye to SF, runners-up bye to QF, 3rd/4th start Round 1).
+  clashLadder8?: boolean;
 }
 
 export interface TournamentConfig {
@@ -209,6 +215,7 @@ export interface TournamentConfig {
   clashStructure?: ClashStructure;
   clashThirdPlace?: boolean;
   clashPoolCount?: number;
+  clashLadder8?: boolean;
 }
 
 export type TournamentFormat =

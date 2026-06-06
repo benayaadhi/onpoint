@@ -287,6 +287,7 @@ export default function MatchScoring({
     // Deciding game (both one game from winning) reaching 40-40 → tiebreak
     // instead of a single golden point.
     if (
+      !updatedMatch.gamesFixed &&
       updatedMatch.isGoldenPoint &&
       !updatedMatch.completed &&
       r1 === raceTarget - 1 &&
@@ -677,7 +678,7 @@ export default function MatchScoring({
               {isRaceMode ? (
                 <div className="flex items-center gap-1.5 text-sm">
                   <Target className="w-3.5 h-3.5 text-[#B45330]" />
-                  <span className="text-gray-600">Race to {raceTarget}</span>
+                  <span className="text-gray-600">{currentMatch.gamesFixed ? `Best of ${currentMatch.gamesFixed}` : `Race to ${raceTarget}`}</span>
                 </div>
               ) : (
                 <p className="text-gray-600 text-sm">

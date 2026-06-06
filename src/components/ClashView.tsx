@@ -24,13 +24,27 @@ export default function ClashView({
   const clubs = tournament.clubs ?? [];
   const ties = tournament.ties ?? [];
   const isPoolKnockout = tournament.clashStructure === 'pool-knockout';
+  const isLadder = !!tournament.clashLadder8;
   const standings = isPoolKnockout ? [] : calculateClashStandings(tournament);
   const clubName = (id: string) => clubs.find((c) => c.id === id)?.name ?? 'TBD';
+  const poolName = (i: number) => tournament.clashPools?.[i]?.name ?? (i === 0 ? 'Pool A' : 'Pool B');
 
   // Display name for a tie slot: real club, else a seed/feeder placeholder.
   const slotName = (tie: Tie, slot: 1 | 2) => {
     const id = slot === 1 ? tie.club1Id : tie.club2Id;
     if (id) return clubName(id);
+    if (isLadder) {
+      const A = poolName(0), B = poolName(1);
+      const top = tie.position === 0;
+      if (tie.stage === 'round1')
+        return slot === 1 ? `Peringkat 3 ${top ? A : B}` : `Peringkat 4 ${top ? B : A}`;
+      if (tie.stage === 'quarterfinal')
+        return slot === 1 ? `Winner R1 ${top ? 'atas' : 'bawah'}` : `Runner-up ${top ? B : A}`;
+      if (tie.stage === 'semifinal')
+        return slot === 1 ? `Winner QF ${top ? 'atas' : 'bawah'}` : `Juara ${top ? A : B}`;
+      if (tie.stage === 'final') return slot === 1 ? 'Winner SF atas' : 'Winner SF bawah';
+      if (tie.stage === 'third-place') return slot === 1 ? 'Loser SF atas' : 'Loser SF bawah';
+    }
     if (tie.stage === 'semifinal' && slot === 1) return `Winner PO${tie.position + 1}`;
     if (tie.stage === 'final') return slot === 1 ? 'Winner SF1' : 'Winner SF2';
     if (tie.stage === 'third-place') return slot === 1 ? 'Loser SF1' : 'Loser SF2';
@@ -127,7 +141,7 @@ export default function ClashView({
   if (isPoolKnockout) {
     const pools = tournament.clashPools ?? [];
     const knockoutActive = tournament.clashStage === 'knockout' || tournament.clashStage === 'done';
-    const seeds = knockoutActive ? computeClashSeeds(tournament) : [];
+    const seeds = knockoutActive && !isLadder ? computeClashSeeds(tournament) : [];
     const poTies = ties.filter((t) => t.stage === 'playoff').sort((a, b) => a.position - b.position);
     const sfTies = ties.filter((t) => t.stage === 'semifinal').sort((a, b) => a.position - b.position);
     const finalTie = ties.find((t) => t.stage === 'final');
@@ -136,6 +150,10 @@ export default function ClashView({
     const [po1, po2] = poTies;
     const [sf1, sf2] = sfTies;
     const openTie = ties.find((t) => t.id === openTieId) ?? null;
+    // Ladder (Squad Battle 8) ties
+    const atPos = (stage: Tie['stage'], pos: number) => ties.find((t) => t.stage === stage && t.position === pos);
+    const r1t = atPos('round1', 0), r1b = atPos('round1', 1);
+    const qft = atPos('quarterfinal', 0), qfb = atPos('quarterfinal', 1);
 
     const winnerSlot = (tie: Tie, slot: 1 | 2) =>
       tie.completed && tie.winnerClubId === (slot === 1 ? tie.club1Id : tie.club2Id);
@@ -349,6 +367,39 @@ export default function ClashView({
 
             {/* Bracket tree */}
             <div className="bg-white/80 backdrop-blur-xl border border-[#F0EBE3] rounded-2xl p-5 shadow-lg overflow-x-auto">
+              {isLadder ? (
+                <div className="inline-flex flex-col gap-2 min-w-max">
+                  <div className="inline-flex">
+                    {colLabel('Round 1')}
+                    <div className="w-8" />
+                    {colLabel('Quarterfinal')}
+                    <div className="w-8" />
+                    {colLabel('Semifinal')}
+                    <div className="w-8" />
+                    {colLabel('Final')}
+                  </div>
+                  <div className="inline-flex items-stretch" style={{ minHeight: 260 }}>
+                    <div className="flex flex-col justify-around">
+                      <NodeCard tie={r1t} />
+                      <NodeCard tie={r1b} />
+                    </div>
+                    <StraightConnector />
+                    <div className="flex flex-col justify-around">
+                      <NodeCard tie={qft} />
+                      <NodeCard tie={qfb} />
+                    </div>
+                    <StraightConnector />
+                    <div className="flex flex-col justify-around">
+                      <NodeCard tie={sf1} />
+                      <NodeCard tie={sf2} />
+                    </div>
+                    <ElbowConnector />
+                    <div className="flex flex-col justify-center">
+                      <NodeCard tie={finalTie} accent />
+                    </div>
+                  </div>
+                </div>
+              ) : (
               <div className="inline-flex flex-col gap-2 min-w-max">
                 <div className="inline-flex">
                   {colLabel('Playoff')}
@@ -373,6 +424,7 @@ export default function ClashView({
                   </div>
                 </div>
               </div>
+              )}
 
               {thirdTie && (
                 <div className="mt-6 pt-4 border-t border-[#F0EBE3]">

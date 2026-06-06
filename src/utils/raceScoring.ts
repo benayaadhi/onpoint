@@ -61,12 +61,23 @@ export function addRacePoint(match: Match, team: 'team1' | 'team2'): Match {
       updated.team2RaceScore = (updated.team2RaceScore || 0) + 1;
     }
 
-    // Check match win
-    if ((updated.team1RaceScore || 0) >= target) {
+    const g1 = updated.team1RaceScore || 0;
+    const g2 = updated.team2RaceScore || 0;
+
+    if (updated.gamesFixed) {
+      // Best of N: play all N games, winner = more games (no early stop).
+      if (g1 + g2 >= updated.gamesFixed) {
+        updated.winner = g1 >= g2 ? updated.team1 : updated.team2;
+        updated.completed = true;
+        updated.status = 'completed';
+      } else {
+        updated.servingTeam = updated.servingTeam === 'team1' ? 'team2' : 'team1';
+      }
+    } else if (g1 >= target) {
       updated.winner = updated.team1;
       updated.completed = true;
       updated.status = 'completed';
-    } else if ((updated.team2RaceScore || 0) >= target) {
+    } else if (g2 >= target) {
       updated.winner = updated.team2;
       updated.completed = true;
       updated.status = 'completed';
