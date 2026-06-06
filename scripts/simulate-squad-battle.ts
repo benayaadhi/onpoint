@@ -40,7 +40,14 @@ const man = () => `${MALE[mIdx++ % MALE.length]} ${LAST[lIdx++ % LAST.length]}`;
 const woman = () => `${FEMALE[fIdx++ % FEMALE.length]} ${LAST[lIdx++ % LAST.length]}`;
 const pair = (a: () => string, b: () => string) => `${a()} / ${b()}`;
 
-const clubs: Club[] = SQUAD_NAMES.map((name, i) => {
+// --pools=2|3 (default 3), --teams=N (default 12, capped to available names)
+const POOLS = Number(process.argv.find((a) => a.startsWith('--pools='))?.split('=')[1] ?? 3);
+const TEAMS = Math.min(
+  Number(process.argv.find((a) => a.startsWith('--teams='))?.split('=')[1] ?? 12),
+  SQUAD_NAMES.length
+);
+
+const clubs: Club[] = SQUAD_NAMES.slice(0, TEAMS).map((name, i) => {
   const id = `club-${i + 1}`;
   return {
     id,
@@ -79,7 +86,7 @@ let t: Tournament = createTournament(
   courts,
   'race',
   4,
-  { clubs, clashStructure: 'pool-knockout', clashThirdPlace: true }
+  { clubs, clashStructure: 'pool-knockout', clashPoolCount: POOLS, clashThirdPlace: true }
 );
 t = { ...t, id: SIM_ID };
 
@@ -101,16 +108,17 @@ function playTie(tie: Tie) {
   const courtId = courtForTie(tie);
   tie.matchIds.forEach((mid, i) => {
     const m = t.matches.find((x) => x.id === mid) as Match;
+    const target = m.raceTarget || 4; // per-stage: 3 group/playoff, 5 semi, 6 final
     const p = sigmoid((r1 - r2) / 3 + (rng() - 0.5) * 0.8); // per-rubber variance
     const team1Wins = rng() < p;
-    const loser = Math.floor(rng() * 4); // 0..3 (3 = golden-point thriller)
+    const loser = Math.floor(rng() * target); // 0..target-1 (target-1 = thriller)
     const start = new Date(clock.getTime() + i * 16 * 60000);
     const end = new Date(start.getTime() + 14 * 60000);
     m.completed = true;
     m.status = 'completed';
     m.courtId = courtId;
-    m.team1RaceScore = team1Wins ? 4 : loser;
-    m.team2RaceScore = team1Wins ? loser : 4;
+    m.team1RaceScore = team1Wins ? target : loser;
+    m.team2RaceScore = team1Wins ? loser : target;
     m.winner = team1Wins ? m.team1 : m.team2;
     m.schedule = {
       scheduledTime: start.toISOString(),
