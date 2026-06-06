@@ -342,7 +342,7 @@ function RaceScoreboard({ match, court, tournament }: { match: Match; court: Cou
     <div className="flex-1 flex flex-col px-6 md:px-10 py-2">
       {/* Header — minimal */}
       <div className="grid grid-cols-3 items-center mb-2 flex-shrink-0">
-        <div className="text-gray-400 text-sm uppercase tracking-widest">{court.name} · RACE TO {raceTarget}</div>
+        <div className="text-gray-400 text-sm uppercase tracking-widest">{court.name} · {match.gamesFixed ? `BEST OF ${match.gamesFixed}` : `RACE TO ${raceTarget}`}</div>
         <div className="flex justify-center">
           <span className="text-2xl font-black tracking-[0.25em] uppercase text-[#2A2A2A]">ONPOINT</span>
         </div>

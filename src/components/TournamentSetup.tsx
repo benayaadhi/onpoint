@@ -32,6 +32,7 @@ export default function TournamentSetup({ onCreateTournament }: TournamentSetupP
   const [clashStructure, setClashStructure] = useState<ClashStructure>('rr-final');
   const [clashThirdPlace, setClashThirdPlace] = useState(true);
   const [clashPoolCount, setClashPoolCount] = useState(3);
+  const [clashLadder8, setClashLadder8] = useState(false);
   const [clashClubs, setClashClubs] = useState(
     Array.from({ length: 4 }, (_, i) => ({
       name: `Club ${String.fromCharCode(65 + i)}`,
@@ -45,6 +46,7 @@ export default function TournamentSetup({ onCreateTournament }: TournamentSetupP
   const isPoolKnockout = clashStructure === 'pool-knockout';
   const PK_MAX = 16;
   const pkMin = 6; // need 6 qualifiers (6/poolCount per pool)
+  const effPoolCount = clashLadder8 ? 2 : clashPoolCount;
 
   // Grow/shrink the club list to exactly n entries.
   const ensureClubCount = (n: number) => {
@@ -71,11 +73,16 @@ export default function TournamentSetup({ onCreateTournament }: TournamentSetupP
     ensureClubCount(Math.max(clashClubs.length, 6)); // need 6 qualifiers
   };
 
+  const selectLadder8 = (on: boolean) => {
+    setClashLadder8(on);
+    if (on) ensureClubCount(8); // 2 pools × 4
+  };
+
   // Balanced pool sizes (sizes differ by ≤1), matches the engine's split.
   const poolSizes = () => {
-    const base = Math.floor(clashClubs.length / clashPoolCount);
-    const extra = clashClubs.length % clashPoolCount;
-    return Array.from({ length: clashPoolCount }, (_, p) => base + (p < extra ? 1 : 0));
+    const base = Math.floor(clashClubs.length / effPoolCount);
+    const extra = clashClubs.length % effPoolCount;
+    return Array.from({ length: effPoolCount }, (_, p) => base + (p < extra ? 1 : 0));
   };
   // Pool index (0-based) for a given club index, using the balanced split.
   const poolOfIndex = (idx: number) => {
@@ -91,8 +98,8 @@ export default function TournamentSetup({ onCreateTournament }: TournamentSetupP
   const updateClub = (idx: number, field: 'name' | 'men' | 'women' | 'mix', value: string) => {
     setClashClubs((prev) => prev.map((c, i) => (i === idx ? { ...c, [field]: value } : c)));
   };
-  const maxClubs = isPoolKnockout ? PK_MAX : 8;
-  const minClubs = isPoolKnockout ? pkMin : 2;
+  const maxClubs = clashLadder8 ? 8 : isPoolKnockout ? PK_MAX : 8;
+  const minClubs = clashLadder8 ? 8 : isPoolKnockout ? pkMin : 2;
   const addClub = () => {
     setClashClubs((prev) =>
       prev.length >= maxClubs
@@ -170,7 +177,9 @@ export default function TournamentSetup({ onCreateTournament }: TournamentSetupP
   };
 
   const clashValid =
-    (isPoolKnockout
+    (clashLadder8
+      ? clashClubs.length === 8
+      : isPoolKnockout
       ? clashClubs.length >= pkMin && clashClubs.length <= PK_MAX
       : clashClubs.length >= 2) &&
     clashClubs.every(
@@ -209,7 +218,8 @@ export default function TournamentSetup({ onCreateTournament }: TournamentSetupP
         clubs,
         clashStructure,
         clashThirdPlace: isPoolKnockout ? clashThirdPlace : undefined,
-        clashPoolCount: isPoolKnockout ? clashPoolCount : undefined,
+        clashPoolCount: isPoolKnockout ? effPoolCount : undefined,
+        clashLadder8: isPoolKnockout ? clashLadder8 : undefined,
       });
       return;
     }
@@ -530,57 +540,82 @@ export default function TournamentSetup({ onCreateTournament }: TournamentSetupP
               {/* Squad Battle options */}
               {isPoolKnockout && (
                 <div className="space-y-3">
-                  {/* Pool count */}
+                  {/* Format */}
                   <div>
-                    <label className="block text-xs font-semibold text-gray-600 mb-2">Jumlah Pool</label>
+                    <label className="block text-xs font-semibold text-gray-600 mb-2">Format</label>
                     <div className="flex flex-wrap gap-2">
-                      {[
-                        { n: 2, l: '2 Pool → bracket 4 tim' },
-                        { n: 3, l: '3 Pool → bracket 6 tim' },
-                      ].map(({ n, l }) => (
-                        <button
-                          key={n}
-                          type="button"
-                          onClick={() => selectPoolCount(n)}
-                          className={`px-3 py-2 rounded-lg text-sm font-medium transition-all ${
-                            clashPoolCount === n
-                              ? 'bg-[#B45330] text-white'
-                              : 'bg-white text-gray-600 border border-[#F0EBE3] hover:border-[#B45330]'
-                          }`}
-                        >
-                          {l}
-                        </button>
-                      ))}
+                      <button
+                        type="button"
+                        onClick={() => selectLadder8(false)}
+                        className={`px-3 py-2 rounded-lg text-sm font-medium transition-all ${!clashLadder8 ? 'bg-[#B45330] text-white' : 'bg-white text-gray-600 border border-[#F0EBE3] hover:border-[#B45330]'}`}
+                      >
+                        6-tim (2/3 pool, top lolos)
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => selectLadder8(true)}
+                        className={`px-3 py-2 rounded-lg text-sm font-medium transition-all ${clashLadder8 ? 'bg-[#B45330] text-white' : 'bg-white text-gray-600 border border-[#F0EBE3] hover:border-[#B45330]'}`}
+                      >
+                        Squad Battle 8 (ladder, semua lolos)
+                      </button>
                     </div>
                   </div>
 
+                  {/* Pool count (6-team only) */}
+                  {!clashLadder8 && (
+                    <div>
+                      <label className="block text-xs font-semibold text-gray-600 mb-2">Jumlah Pool</label>
+                      <div className="flex flex-wrap gap-2">
+                        {[
+                          { n: 2, l: '2 Pool → bracket 4 tim' },
+                          { n: 3, l: '3 Pool → bracket 6 tim' },
+                        ].map(({ n, l }) => (
+                          <button
+                            key={n}
+                            type="button"
+                            onClick={() => selectPoolCount(n)}
+                            className={`px-3 py-2 rounded-lg text-sm font-medium transition-all ${clashPoolCount === n ? 'bg-[#B45330] text-white' : 'bg-white text-gray-600 border border-[#F0EBE3] hover:border-[#B45330]'}`}
+                          >
+                            {l}
+                          </button>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+
                   <div className="text-xs text-gray-600 bg-white border border-[#F0EBE3] rounded-lg p-3">
                     <p className="font-semibold text-[#B45330] mb-1">
-                      {clashClubs.length} squad · {clashPoolCount} pool ({poolSizes().join(' / ')})
+                      {clashClubs.length} squad · {effPoolCount} pool ({poolSizes().join(' / ')})
                     </p>
-                    <p>
-                      Tiap pool round-robin. Lolos 6 ({clashPoolCount === 3 ? 'juara + runner-up' : 'top 3'} tiap pool) → bracket 6 tim.
-                    </p>
-                    <p className="mt-1">
-                      Bracket: 2 juara pool teratas bye ke semifinal; PO1 (S3 v S6), PO2 (S4 v S5) → SF1 (PO1 v S2), SF2 (PO2 v S1) → Final.
-                    </p>
-                    <p className="mt-1 text-gray-500">
-                      Scoring (otomatis): pool & playoff race-to-3, semifinal race-to-5, final race-to-6. Golden point tiap game; di (N-1)-(N-1) → tiebreak ke 7 (golden @6-6).
-                    </p>
-                    {poolSizes().some((s) => s !== poolSizes()[0]) && (
-                      <p className="mt-1 text-[#B45330]">Pool ukurannya beda — seeding lintas-pool pakai rata-rata per match biar adil.</p>
+                    {clashLadder8 ? (
+                      <>
+                        <p>8 squad · 2 pool × 4 · <b>semua lolos</b> ke bracket tangga.</p>
+                        <p className="mt-1">Juara pool → bye Semifinal; Runner-up → bye Perempat Final; Peringkat 3 & 4 → Round 1. + perebutan Juara 3.</p>
+                        <p className="mt-1 text-gray-500">Scoring: group <b>best of 5</b> (main 5 game penuh); R1 & QF race-to-4; semifinal race-to-5; final & juara-3 race-to-6.</p>
+                      </>
+                    ) : (
+                      <>
+                        <p>Tiap pool round-robin. Lolos 6 ({clashPoolCount === 3 ? 'juara + runner-up' : 'top 3'} tiap pool) → bracket 6 tim.</p>
+                        <p className="mt-1">Bracket: 2 juara pool teratas bye ke semifinal; PO1 (S3 v S6), PO2 (S4 v S5) → SF1/SF2 → Final.</p>
+                        <p className="mt-1 text-gray-500">Scoring: pool & playoff race-to-3, semifinal race-to-5, final race-to-6. Golden point; tiebreak ke 7 @ (N-1)-(N-1).</p>
+                        {poolSizes().some((s) => s !== poolSizes()[0]) && (
+                          <p className="mt-1 text-[#B45330]">Pool ukurannya beda — seeding lintas-pool pakai rata-rata per match biar adil.</p>
+                        )}
+                      </>
                     )}
                   </div>
 
-                  <label className="flex items-center gap-2 text-sm font-medium text-gray-700 cursor-pointer">
-                    <input
-                      type="checkbox"
-                      checked={clashThirdPlace}
-                      onChange={(e) => setClashThirdPlace(e.target.checked)}
-                      className="w-4 h-4 accent-[#B45330]"
-                    />
-                    Match perebutan Juara 3 (yang kalah SF1 vs SF2)
-                  </label>
+                  {!clashLadder8 && (
+                    <label className="flex items-center gap-2 text-sm font-medium text-gray-700 cursor-pointer">
+                      <input
+                        type="checkbox"
+                        checked={clashThirdPlace}
+                        onChange={(e) => setClashThirdPlace(e.target.checked)}
+                        className="w-4 h-4 accent-[#B45330]"
+                      />
+                      Match perebutan Juara 3 (yang kalah SF1 vs SF2)
+                    </label>
+                  )}
                 </div>
               )}
 
@@ -636,7 +671,7 @@ export default function TournamentSetup({ onCreateTournament }: TournamentSetupP
                 <p className="text-xs text-gray-400 mt-2">
                   Tiap klub turunkan 3 tim (Men/Women/Mix). Pas dua klub ketemu, mainnya per kategori.{' '}
                   {isPoolKnockout
-                    ? `${clashPoolCount} pool (${poolSizes().join('/')}) → ${poolSizes().reduce((s, n) => s + (n * (n - 1)) / 2, 0)} tie pool + ${5 + (clashThirdPlace ? 1 : 0)} tie knockout.`
+                    ? `${effPoolCount} pool (${poolSizes().join('/')}) → ${poolSizes().reduce((s, n) => s + (n * (n - 1)) / 2, 0)} tie pool + ${clashLadder8 ? 8 : 5 + (clashThirdPlace ? 1 : 0)} tie knockout.`
                     : `${clashClubs.length} klub → ${(clashClubs.length * (clashClubs.length - 1)) / 2} tie${clashStructure === 'rr-final' ? ' RR + final' : ''}.`}
                 </p>
               </div>

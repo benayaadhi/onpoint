@@ -161,7 +161,7 @@ export default function StandaloneSpectatorView({ matchId, tournamentName = "PAD
         <main className="relative z-10 flex-1 flex flex-col justify-center px-4 md:px-8">
           <div className="text-center mb-6">
             <div className="text-[#B45330] text-4xl font-bold tracking-wider mb-2">{tournamentName?.toUpperCase()}</div>
-            <div className="text-gray-600 text-lg">RACE TO {raceTarget}</div>
+            <div className="text-gray-600 text-lg">{currentMatch?.gamesFixed ? `BEST OF ${currentMatch.gamesFixed}` : `RACE TO ${raceTarget}`}</div>
           </div>
 
           {/* Golden Point Banner */}
