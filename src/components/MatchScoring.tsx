@@ -831,7 +831,7 @@ export default function MatchScoring({
                         : getRacePointDisplay(currentMatch.team1Score.points)}
                     </div>
                     <div className="text-sm text-gray-600">
-                      Games: <span className="text-[#2A2A2A] font-bold">{currentMatch.team1RaceScore || 0}</span> / {raceTarget}
+                      Games: <span className="text-[#2A2A2A] font-bold">{currentMatch.team1RaceScore || 0}</span> / {currentMatch.gamesFixed || raceTarget}
                     </div>
                   </>
                 ) : (
@@ -878,7 +878,7 @@ export default function MatchScoring({
                         : getRacePointDisplay(currentMatch.team2Score.points)}
                     </div>
                     <div className="text-sm text-gray-600">
-                      Games: <span className="text-[#2A2A2A] font-bold">{currentMatch.team2RaceScore || 0}</span> / {raceTarget}
+                      Games: <span className="text-[#2A2A2A] font-bold">{currentMatch.team2RaceScore || 0}</span> / {currentMatch.gamesFixed || raceTarget}
                     </div>
                   </>
                 ) : (
