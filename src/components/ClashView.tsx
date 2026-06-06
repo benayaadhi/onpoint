@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Trophy, Swords, BarChart2, Network } from 'lucide-react';
+import { Trophy, Swords, BarChart2, Network, Search } from 'lucide-react';
 import { TournamentHeader, MatchCard, ViewProps } from './TournamentBracket';
 import {
   calculateClashStandings,
@@ -59,6 +59,17 @@ export default function ClashView({
   const [tab, setTab] = useState<'standings' | 'fixtures'>('standings');
   const [pkTab, setPkTab] = useState<'overall' | 'pools' | 'knockout'>('overall');
   const [openTieId, setOpenTieId] = useState<string | null>(null);
+  const [poolSearch, setPoolSearch] = useState('');
+
+  // Match a club by squad name OR any player (men/women/mix) name.
+  const clubMatches = (clubId?: string) => {
+    const q = poolSearch.trim().toLowerCase();
+    if (!q || !clubId) return false;
+    const club = clubs.find((c) => c.id === clubId);
+    if (!club) return false;
+    if (club.name.toLowerCase().includes(q)) return true;
+    return RUBBER_CATEGORIES.some((cat) => club.teams[cat]?.name.toLowerCase().includes(q));
+  };
 
   // Count rubbers won by each club in a tie (for the tie header score).
   const tieScore = (tie: Tie) => {
@@ -285,6 +296,26 @@ export default function ClashView({
         {/* Pools */}
         {pkTab === 'pools' && (
           <div className="relative z-10 space-y-8">
+            {/* Search squad / player */}
+            <div className="relative max-w-sm">
+              <input
+                type="text"
+                value={poolSearch}
+                onChange={(e) => setPoolSearch(e.target.value)}
+                placeholder="Cari squad atau nama pemain…"
+                className="w-full pl-9 pr-8 py-2.5 bg-white border border-[#F0EBE3] rounded-xl text-sm text-[#2A2A2A] placeholder-gray-400 focus:ring-2 focus:ring-[#B45330] focus:border-transparent"
+              />
+              <Search className="w-4 h-4 text-gray-400 absolute left-3 top-1/2 -translate-y-1/2" />
+              {poolSearch && (
+                <button
+                  onClick={() => setPoolSearch('')}
+                  className="absolute right-2 top-1/2 -translate-y-1/2 text-gray-400 hover:text-[#B45330] text-sm"
+                >
+                  ✕
+                </button>
+              )}
+            </div>
+
             {pools.map((pool) => {
               const rows = calculateClashPoolStandings(tournament, pool.id);
               const poolTies = ties
@@ -311,8 +342,10 @@ export default function ClashView({
                         </tr>
                       </thead>
                       <tbody>
-                        {rows.map((r, idx) => (
-                          <tr key={r.club.id} className={`border-b border-[#F0EBE3]/50 ${idx < 2 ? 'bg-[#B45330]/10' : ''}`}>
+                        {rows.map((r, idx) => {
+                          const hit = clubMatches(r.club.id);
+                          return (
+                          <tr key={r.club.id} className={`border-b border-[#F0EBE3]/50 ${hit ? 'bg-yellow-200 ring-2 ring-[#B45330]' : idx < 2 ? 'bg-[#B45330]/10' : ''}`}>
                             <td className="py-2 px-2">
                               <span className={`w-6 h-6 rounded-full inline-flex items-center justify-center text-xs font-bold ${idx === 0 ? 'bg-yellow-400 text-black' : idx === 1 ? 'bg-[#8B7355] text-white' : 'bg-[#F0EBE3] text-gray-400'}`}>
                                 {idx + 1}
@@ -329,12 +362,22 @@ export default function ClashView({
                             </td>
                             <td className="py-2 px-2 text-center font-bold text-[#B45330]">{r.points}</td>
                           </tr>
-                        ))}
+                          );
+                        })}
                       </tbody>
                     </table>
                     <p className="text-xs text-gray-400 mt-3">Top 2 lolos · ranking PTS → GD → GF</p>
                   </div>
-                  <div className="space-y-4">{poolTies.map(renderTie)}</div>
+                  <div className="space-y-4">
+                    {poolTies.map((tie) => (
+                      <div
+                        key={tie.id}
+                        className={clubMatches(tie.club1Id) || clubMatches(tie.club2Id) ? 'rounded-2xl ring-2 ring-[#B45330]' : ''}
+                      >
+                        {renderTie(tie)}
+                      </div>
+                    ))}
+                  </div>
                 </div>
               );
             })}
