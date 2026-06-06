@@ -125,10 +125,14 @@ export function createTournament(
     ? clubs.flatMap((c) => RUBBER_CATEGORIES.map((cat) => c.teams[cat]))
     : teams;
 
-  // Pool-knockout: chunk clubs into pools of CLASH_POOL_SIZE (Squad Battle = 4).
+  // Pool-knockout: split clubs into 2 or 3 balanced pools.
+  const clashPoolCount =
+    isClash && clashStructure === 'pool-knockout'
+      ? config?.clashPoolCount ?? 3
+      : undefined;
   const clashPools =
     isClash && clashStructure === 'pool-knockout' && clubs
-      ? chunkClubsIntoPools(clubs)
+      ? balancedPools(clubs, clashPoolCount ?? 3)
       : undefined;
 
   const tournament: Tournament = {
@@ -145,7 +149,8 @@ export function createTournament(
     breakBetweenMatches: 15,
     groups: format === 'group-knockout' ? [] : undefined,
     groupStage: format === 'group-knockout',
-    scoringMode,
+    // Squad Battle uses fixed per-stage race scoring, so it is always race mode.
+    scoringMode: clashStructure === 'pool-knockout' ? 'race' : scoringMode,
     raceTarget,
     matchRules,
     teamsPerGroup,
@@ -158,6 +163,7 @@ export function createTournament(
         : 'round-robin'
       : undefined,
     clashPools,
+    clashPoolCount,
     clashThirdPlace: isClash && clashStructure === 'pool-knockout'
       ? config?.clashThirdPlace ?? true
       : undefined,
@@ -336,35 +342,51 @@ function generateClashMatches(tournament: Tournament): Match[] {
 
 // ─── Clash pool-knockout (Squad Battle) generation ───────────────────────────
 
-const CLASH_POOL_SIZE = 4; // Squad Battle: 4 squads per pool
-
-// Chunk clubs into pools of CLASH_POOL_SIZE in input order.
-function chunkClubsIntoPools(clubs: Club[]): ClashPool[] {
-  const pools: ClashPool[] = [];
-  for (let i = 0; i < clubs.length; i += CLASH_POOL_SIZE) {
-    const idx = pools.length;
-    pools.push({
-      id: `pool-${idx + 1}`,
-      name: `Pool ${idx + 1}`,
-      clubIds: clubs.slice(i, i + CLASH_POOL_SIZE).map((c) => c.id),
-    });
+// Split clubs into `poolCount` balanced, contiguous pools (sizes differ by ≤1).
+function balancedPools(clubs: Club[], poolCount: number): ClashPool[] {
+  const pools: ClashPool[] = Array.from({ length: poolCount }, (_, i) => ({
+    id: `pool-${i + 1}`,
+    name: `Pool ${i + 1}`,
+    clubIds: [] as string[],
+  }));
+  const base = Math.floor(clubs.length / poolCount);
+  const extra = clubs.length % poolCount; // first `extra` pools get one more
+  let idx = 0;
+  for (let p = 0; p < poolCount; p++) {
+    const size = base + (p < extra ? 1 : 0);
+    for (let k = 0; k < size && idx < clubs.length; k++) {
+      pools[p].clubIds.push(clubs[idx++].id);
+    }
   }
   return pools;
 }
 
-// Pools (round-robin each) + a fixed 6-team seeded knockout:
-//   PO1 = S3 v S6, PO2 = S4 v S5
-//   SF1 = PO1 winner v S2, SF2 = PO2 winner v S1
-//   Final = SF1 winner v SF2 winner (+ optional 3rd place from SF losers)
+// Pools (round-robin each) + a seeded knockout:
+//   3 pools → 6-team bracket: PO1=S3vS6, PO2=S4vS5, SF1=PO1 v S2,
+//             SF2=PO2 v S1, Final (+ optional 3rd place)
+//   2 pools → 4-team bracket: SF1=Champ A v RU B, SF2=Champ B v RU A,
+//             Final (+ optional 3rd place)
 function generateClashPoolKnockout(tournament: Tournament): Match[] {
   const clubs = tournament.clubs ?? [];
-  const pools = tournament.clashPools ?? chunkClubsIntoPools(clubs);
+  const poolCount = tournament.clashPoolCount ?? 3;
+  const pools = tournament.clashPools ?? balancedPools(clubs, poolCount);
   const thirdPlace = tournament.clashThirdPlace ?? true;
   const byId = new Map(clubs.map((c) => [c.id, c]));
   const matches: Match[] = [];
   const ties: Tie[] = [];
   let matchId = 1;
   let tieId = 1;
+
+  // Per-stage race target (games to win the rubber). Tiebreak fires at
+  // (target-1)-(target-1) → first to 7, golden at 6-6 (handled by the scorer).
+  const stageTarget = (stage: Tie['stage']): number => {
+    switch (stage) {
+      case 'semifinal': return 5;
+      case 'final': return 6;
+      case 'third-place': return 5;
+      default: return 3; // pool, playoff
+    }
+  };
 
   const buildRubbers = (
     tie: Tie,
@@ -379,6 +401,8 @@ function generateClashPoolKnockout(tournament: Tournament): Match[] {
       m.tieId = tie.id;
       m.category = cat;
       applyRubberScoring(m, tournament);
+      m.scoringMode = 'race';
+      m.raceTarget = stageTarget(tie.stage); // per-stage games-to-win
       tie.matchIds.push(m.id);
       matches.push(m);
     });
@@ -431,6 +455,9 @@ function generateClashPoolKnockout(tournament: Tournament): Match[] {
     ties.push(tie);
   };
 
+  // Always a 6-team bracket: seeds 1 & 2 bye to the semifinals.
+  //   2 pools → 6 qualify = top 3 each (pool winners are seeds 1 & 2 = byes)
+  //   3 pools → 6 qualify = top 2 each (best 2 champions = seeds 1 & 2 = byes)
   koTie('playoff', 0, 1, 3, 6);
   koTie('playoff', 1, 1, 4, 5);
   koTie('semifinal', 0, 2, undefined, 2); // club1 = PO1 winner
@@ -780,21 +807,38 @@ export function calculateClashPoolStandings(
   return [...rows.values()].sort(compareClashPoolRows);
 }
 
-// Seed order for the knockout: champions of each pool ranked across pools
-// (Seed #1..#3), then runners-up ranked across pools (Seed #4..#6).
-// Returns clubs in seed order (index 0 = Seed #1).
+// Cross-pool ranking uses per-match averages so pools of different sizes are
+// compared fairly (a 4-team pool plays more ties than a 3-team pool). For
+// equal-sized pools this is identical to ranking on raw PTS → GD → GF.
+function compareClashSeedRows(a: ClashPoolRow, b: ClashPoolRow): number {
+  const pa = a.played || 1;
+  const pb = b.played || 1;
+  const pts = b.points / pb - a.points / pa;
+  if (Math.abs(pts) > 1e-9) return pts;
+  const gd = b.rubberDiff / pb - a.rubberDiff / pa;
+  if (Math.abs(gd) > 1e-9) return gd;
+  return b.rubbersWon / pb - a.rubbersWon / pa;
+}
+
+// Seed order for the 6-team knockout. Qualifiers per pool = 6 / poolCount
+// (3 pools → top 2 each, 2 pools → top 3 each). Seeded by finishing rank:
+// all pool winners first (ranked across pools), then all runners-up, etc.
+// So seeds 1 & 2 are always pool winners → they bye to the semifinals.
 export function computeClashSeeds(tournament: Tournament): Club[] {
   const pools = tournament.clashPools ?? [];
-  const champions: ClashPoolRow[] = [];
-  const runnersUp: ClashPoolRow[] = [];
-  pools.forEach((pool) => {
-    const standings = calculateClashPoolStandings(tournament, pool.id);
-    if (standings[0]) champions.push(standings[0]);
-    if (standings[1]) runnersUp.push(standings[1]);
-  });
-  champions.sort(compareClashPoolRows);
-  runnersUp.sort(compareClashPoolRows);
-  return [...champions, ...runnersUp].map((r) => r.club);
+  const poolCount = tournament.clashPoolCount ?? pools.length ?? 3;
+  const perPool = poolCount > 0 ? Math.round(6 / poolCount) : 2;
+  const standingsByPool = pools.map((p) => calculateClashPoolStandings(tournament, p.id));
+
+  const seeds: ClashPoolRow[] = [];
+  for (let rank = 0; rank < perPool; rank++) {
+    const tier = standingsByPool
+      .map((s) => s[rank])
+      .filter((r): r is ClashPoolRow => Boolean(r))
+      .sort(compareClashSeedRows);
+    seeds.push(...tier);
+  }
+  return seeds.slice(0, 6).map((r) => r.club);
 }
 
 // Flat leaderboard of every squad across all pools, ranked PTS → GD → GF.

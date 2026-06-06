@@ -193,6 +193,7 @@ export interface Tournament {
   // Pool-knockout additions
   clashPools?: ClashPool[];
   clashThirdPlace?: boolean; // include a 3rd-place tie
+  clashPoolCount?: number; // 2 (→ 4-team KO) or 3 (→ 6-team KO), default 3
 }
 
 export interface TournamentConfig {
@@ -203,6 +204,7 @@ export interface TournamentConfig {
   clubs?: Club[];
   clashStructure?: ClashStructure;
   clashThirdPlace?: boolean;
+  clashPoolCount?: number;
 }
 
 export type TournamentFormat =
