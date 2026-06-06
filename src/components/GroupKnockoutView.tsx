@@ -340,7 +340,7 @@ export default function GroupKnockoutView({
                     {getRoundName(round, maxRound)}
                   </h3>
                   {knockoutMatches
-                    .filter((m) => m.round === round)
+                    .filter((m) => m.round === round && !m.isThirdPlace)
                     .sort((a, b) => a.position - b.position)
                     .map((match) => (
                       <MatchCard
@@ -356,6 +356,22 @@ export default function GroupKnockoutView({
               ))}
             </div>
           </div>
+
+          {/* 3rd-place match */}
+          {knockoutMatches.filter((m) => m.isThirdPlace).map((match) => (
+            <div key={match.id} className="mt-6 pt-6 border-t border-[#F0EBE3] max-w-sm">
+              <h3 className="text-sm font-bold uppercase tracking-widest text-[#8B7355] mb-3 flex items-center gap-2">
+                🥉 3rd Place
+              </h3>
+              <MatchCard
+                match={match}
+                onSelect={() => onMatchSelect(match)}
+                isSelected={selectedMatch?.id === match.id}
+                tournament={tournament}
+                isContestantView={headerProps.isContestantView}
+              />
+            </div>
+          ))}
         </div>
       )}
 
