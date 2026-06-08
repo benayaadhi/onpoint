@@ -63,22 +63,41 @@ export function subscribeToScoreUpdates(
   return () => { state.listeners.delete(callback); };
 }
 
+// Plain whole-row upsert (last-write-wins). Used as a fallback before the
+// merge function is installed, or if the RPC isn't available.
+async function upsertTournament(tournament: Tournament): Promise<{ error: unknown }> {
+  return supabase.from('tournaments').upsert(
+    {
+      id: tournament.id,
+      name: tournament.name,
+      format: tournament.format,
+      data: tournament,
+      updated_at: new Date().toISOString(),
+    },
+    { onConflict: 'id' }
+  );
+}
+
 export async function saveTournament(tournament: Tournament): Promise<void> {
   try {
-    const { error } = await supabase.from('tournaments').upsert(
-      {
-        id: tournament.id,
-        name: tournament.name,
-        format: tournament.format,
-        data: tournament,
-        updated_at: new Date().toISOString(),
-      },
-      { onConflict: 'id' }
-    );
+    // Preferred path: atomic server-side merge (per-match by lastUpdated +
+    // court.currentMatch recomputed from match status). Prevents two courts
+    // scored at once from clobbering each other. Requires the
+    // `save_tournament_merged` DB function (see db/save_tournament_merged.sql).
+    const { error: rpcError } = await supabase.rpc('save_tournament_merged', {
+      p_id: tournament.id,
+      p_name: tournament.name,
+      p_format: tournament.format,
+      p_data: tournament,
+    });
+    if (!rpcError) return;
 
+    // Function not installed / errored → fall back to plain upsert so the app
+    // keeps working before the migration is applied.
+    console.warn('save_tournament_merged unavailable, using upsert fallback:', rpcError);
+    const { error } = await upsertTournament(tournament);
     if (error) {
       console.error('Failed to save tournament to Supabase:', error);
-      // Fallback to localStorage
       saveTournamentLocal(tournament);
     }
   } catch (error) {

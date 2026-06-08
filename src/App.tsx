@@ -360,13 +360,24 @@ function App() {
         };
         init();
 
-        // Slow path: postgres_changes — fires after DB write (~500ms-2s)
+        // Slow path: postgres_changes — fires after DB write (~500ms-2s).
+        // Fires on ANY tournament change (whole table), so merge per-match by
+        // lastUpdated instead of replacing wholesale — otherwise a refetch
+        // (e.g. triggered by another tournament) could revert a locally-newer
+        // optimistic score.
         const unsubscribe = subscribeTournaments((updated) => {
             setSavedTournaments(updated);
             setCurrentTournament((prev) => {
                 if (!prev) return prev;
                 const fresh = updated.find((t) => t.id === prev.id);
-                return fresh ?? prev;
+                if (!fresh) return prev;
+                return {
+                    ...fresh,
+                    matches: fresh.matches.map((fm) => {
+                        const pm = prev.matches.find((m) => m.id === fm.id);
+                        return pm && (pm.lastUpdated ?? 0) > (fm.lastUpdated ?? 0) ? pm : fm;
+                    }),
+                };
             });
         });
         return unsubscribe;
@@ -514,9 +525,24 @@ function App() {
             // standings pass is needed here.
             const advancedTournament = advanceTournament(tournamentAfterCourt);
 
+            // Stamp lastUpdated on every match the advance changed (bracket fills,
+            // completions, court frees). The merge save keeps the newest version
+            // per match, so stamping ensures these win over a concurrent court's
+            // stale copy. The scored match is already stamped by the scorer.
+            const stampNow = Date.now();
+            const stampedTournament = {
+                ...advancedTournament,
+                matches: advancedTournament.matches.map((m) => {
+                    const before = tournamentAfterCourt.matches.find((x) => x.id === m.id);
+                    return before && JSON.stringify(before) !== JSON.stringify(m)
+                        ? { ...m, lastUpdated: stampNow }
+                        : m;
+                }),
+            };
+
             // Persist only — local state is already updated below (return), and
             // spectators sync via the websocket broadcast. No full-table refetch.
-            saveTournament(advancedTournament);
+            saveTournament(stampedTournament);
 
             // No auto-navigate on completion — user stays on scoring page
             // so they can undo if accidentally clicked the winning point.
@@ -536,7 +562,7 @@ function App() {
                 broadcastScoreUpdate(updatedMatch, ct.id);
             }
 
-            return advancedTournament;
+            return stampedTournament;
         });
     };
 
