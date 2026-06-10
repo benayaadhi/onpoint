@@ -169,6 +169,9 @@ export default function Landing() {
               <a href="#fitur" className="hover:text-white transition-colors">Fitur</a>
               <a href="#harga" className="hover:text-white transition-colors">Harga</a>
               <a href="#faq" className="hover:text-white transition-colors">FAQ</a>
+              <button onClick={() => navigate('/iklan')} className="hover:text-[#F3D27E] transition-colors">
+                Pasang Iklan
+              </button>
               <button onClick={() => navigate('/contestant')} className="hover:text-white transition-colors">
                 Cek Tournament
               </button>
@@ -416,6 +419,7 @@ export default function Landing() {
             <span>© {new Date().getFullYear()} OnPoint</span>
           </div>
           <div className="flex items-center gap-7">
+            <button onClick={() => navigate('/iklan')} className="hover:text-white transition-colors">Pasang iklan</button>
             <button onClick={() => navigate('/contestant')} className="hover:text-white transition-colors">Cek tournament kamu</button>
             <a href={wa('Halo OnPoint!')} className="hover:text-white transition-colors">WhatsApp</a>
           </div>

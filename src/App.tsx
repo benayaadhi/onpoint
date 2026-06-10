@@ -3,6 +3,7 @@ import { Routes, Route, useNavigate, useParams, useSearchParams, Navigate } from
 import { Plus, RotateCcw, Trash2, Target, Tv, ExternalLink, Copy, Download, Monitor } from 'lucide-react';
 import { slugify } from './utils/slugify';
 const Landing = lazy(() => import('./components/Landing'));
+const Advertise = lazy(() => import('./components/Advertise'));
 const ContestantHomepage = lazy(() => import('./components/ContestantHomepage'));
 const TournamentSetup = lazy(() => import('./components/TournamentSetup'));
 const TournamentBracket = lazy(() => import('./components/TournamentBracket'));
@@ -659,6 +660,7 @@ function App() {
                 path="/"
                 element={<Landing />}
             />
+            <Route path="/iklan" element={<Advertise />} />
 
             {/* Admin Setup */}
             <Route
