@@ -516,6 +516,22 @@ export default function MatchScoring({
       updated.winner = undefined;
       updated.completed = false;
       updated.status = 'in-progress';
+
+      // Keep the games-level-at-N-1 ⇄ tiebreak rule consistent when the score
+      // is corrected manually (same rule as handleRacePoint).
+      const levelAtDecider = !updated.gamesFixed && t1 === target - 1 && t2 === target - 1;
+      if (levelAtDecider && !updated.isTiebreaker) {
+        updated.isTiebreaker = true;
+        updated.tiebreakPoints = { team1: 0, team2: 0 };
+        updated.isGoldenPoint = false;
+        updated.pointsInGame = 0;
+        updated.team1Score = { ...updated.team1Score, points: 0 };
+        updated.team2Score = { ...updated.team2Score, points: 0 };
+      } else if (!levelAtDecider && updated.isTiebreaker) {
+        updated.isTiebreaker = false;
+        updated.tiebreakPoints = undefined;
+        updated.pointsInGame = 0;
+      }
     }
 
     updateMatchWithHistory(updated, `Score adjusted: ${t1}–${t2}`, REAL_TIME_EVENTS.MATCH_UPDATED);
