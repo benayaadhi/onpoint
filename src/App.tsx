@@ -495,6 +495,11 @@ function App() {
 
     const handleResetTournament = async (navigate: (path: string) => void) => {
         if (currentTournament) {
+            // In-place reset: same tournament, scores wiped — no archive copy,
+            // so confirm first.
+            if (!window.confirm(`Reset "${currentTournament.name}"? Semua skor dihapus dan tidak bisa dikembalikan.`)) {
+                return;
+            }
             const base = createTournament(
                 currentTournament.name,
                 currentTournament.format,
@@ -508,20 +513,26 @@ function App() {
                     qualifiersPerGroup: currentTournament.qualifiersPerGroup,
                 }
             );
-            // A reset is the SAME purchased event with scores wiped — carry the
-            // commercial identity over. Without this, resetting minted a fresh
-            // untiered (= full access) tournament, bypassing the paid gate.
+            const stampNow = Date.now();
+            // Same id (in place) and same commercial identity (tier/slug/ads —
+            // an untiered copy would bypass the paid gate). Fresh matches are
+            // stamped so the server-side per-match merge prefers them over the
+            // old scored matches instead of "protecting" the old scores.
             const resetTournament: Tournament = {
                 ...base,
+                id: currentTournament.id,
+                createdAt: currentTournament.createdAt,
                 tier: currentTournament.tier,
                 slug: currentTournament.slug,
                 ads: currentTournament.ads,
                 adsEnabled: currentTournament.adsEnabled,
+                matches: base.matches.map((m) => ({ ...m, lastUpdated: stampNow })),
             };
             setCurrentTournament(resetTournament);
             await saveTournament(resetTournament);
-            const tournaments = await getTournaments();
-            setSavedTournaments(tournaments);
+            setSavedTournaments((prev) =>
+                prev.map((t) => (t.id === resetTournament.id ? resetTournament : t))
+            );
             navigate(`/admin/tournament/${resetTournament.id}`);
         }
     };
