@@ -211,9 +211,9 @@ export default function MatchScoring({
   };
 
   // ─── Deciding-game tiebreak (shared by race & padel) ───────────────────────
-  // Triggered only when both teams are one game from winning (N-1 each) and the
-  // game reaches 40-40. First to rules.tiebreakPoints (win by 2). Winner takes
-  // the Nth game → match (race) or set (padel).
+  // Race: triggered as soon as games level at N-1 each (e.g. 3-3 in a race
+  // to 4). Padel: triggered at 6-6 in a set. First to rules.tiebreakPoints.
+  // Winner takes the Nth game → match (race) or set (padel).
   const handleTiebreakPoint = (team: 'team1' | 'team2') => {
     const m = cloneMatch(currentMatch);
     if (!m.tiebreakPoints) m.tiebreakPoints = { team1: 0, team2: 0 };
@@ -284,11 +284,15 @@ export default function MatchScoring({
     const r1 = updatedMatch.team1RaceScore || 0;
     const r2 = updatedMatch.team2RaceScore || 0;
 
-    // Deciding game (both one game from winning) reaching 40-40 → tiebreak
-    // instead of a single golden point.
+    // Games level at N-1 each (e.g. 3-3 in a race to 4) → go straight to a
+    // tiebreak (first to rules.tiebreakPoints), like a 6-6 set. addRacePoint
+    // resets both points to 0 only when a game was just won, so this fires
+    // exactly once, on the click that levels the games.
+    const gameJustWon =
+      updatedMatch.team1Score.points === 0 && updatedMatch.team2Score.points === 0;
     if (
       !updatedMatch.gamesFixed &&
-      updatedMatch.isGoldenPoint &&
+      gameJustWon &&
       !updatedMatch.completed &&
       r1 === raceTarget - 1 &&
       r2 === raceTarget - 1

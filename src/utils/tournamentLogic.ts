@@ -236,7 +236,7 @@ function generateFairRoundRobinMatches(
 function generateMatches(tournament: Tournament): Match[] {
   switch (tournament.format) {
     case 'round-robin':
-      return generateRoundRobinMatches(tournament.teams);
+      return generateRoundRobinMatches(tournament.teams, tournament.scoringMode, tournament.raceTarget);
     case 'single-elimination':
       return generateEliminationMatches(tournament.teams, tournament.scoringMode, tournament.raceTarget, tournament.thirdPlace);
     case 'group-knockout':
@@ -572,8 +572,23 @@ function generateClashLadder8(tournament: Tournament): Match[] {
   return matches;
 }
 
-function generateRoundRobinMatches(teams: Team[]): Match[] {
-  return generateFairRoundRobinMatches(teams, 1);
+function generateRoundRobinMatches(
+  teams: Team[],
+  scoringMode?: 'padel' | 'race',
+  raceTarget?: number
+): Match[] {
+  const matches = generateFairRoundRobinMatches(teams, 1);
+  // Apply race scoring to matches if tournament uses race mode
+  if (scoringMode === 'race') {
+    matches.forEach((m) => {
+      m.scoringMode = 'race';
+      m.raceTarget = raceTarget || 4;
+      m.team1RaceScore = 0;
+      m.team2RaceScore = 0;
+      m.isGoldenPoint = false;
+    });
+  }
+  return matches;
 }
 
 function generateEliminationMatches(
