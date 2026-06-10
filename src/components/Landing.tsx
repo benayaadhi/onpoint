@@ -38,36 +38,36 @@ function Reveal({ children, delay = 0, className = '' }: {
 }
 
 const STATS = [
-  { n: '0,2', u: 'dtk', d: 'skor sampai ke TV' },
-  { n: '3+', u: 'court', d: 'serentak tanpa bentrok' },
-  { n: '72', u: 'jam', d: 'masa aktif per event' },
-  { n: '1', u: 'kode', d: 'langsung jalan' },
+  { n: '0.2', u: 's', d: 'score to every TV' },
+  { n: '3+', u: 'courts', d: 'scored at once, zero clashes' },
+  { n: '72', u: 'h', d: 'active window per event' },
+  { n: '1', u: 'code', d: "and you're live" },
 ];
 
 const FEATURES = [
   {
-    t: 'Scoring live anti-bentrok',
-    d: 'Beberapa panitia menskor beberapa court bersamaan — skor tidak pernah saling timpa. Teruji ratusan match simulasi penuh.',
+    t: 'Clash-proof live scoring',
+    d: 'Multiple crew scoring multiple courts at the same time — scores never overwrite each other. Proven across hundreds of simulated matches.',
   },
   {
-    t: 'TV display per court',
-    d: 'Skor live di layar venue, ganti match otomatis dalam sepersekian detik, perayaan juara, dan standings saat jeda.',
+    t: 'A TV display on every court',
+    d: 'Live scores on the venue screens, matches switch automatically in a blink, winner celebrations, standings between matches.',
   },
   {
-    t: 'Iklan sponsor di TV',
-    d: 'Video iklan gaya YouTube saat jeda: bumper singkat antar game, reel panjang antar match. Slot-nya kamu jual ke sponsor.',
+    t: 'Sponsor ads on TV',
+    d: 'YouTube-style video ads during breaks: short bumpers between games, full reels between matches. The slots are yours to sell.',
   },
   {
-    t: 'Semua format turnamen',
-    d: 'Round robin, group + knockout, eliminasi, sampai clash antar klub (squad battle men/women/mix).',
+    t: 'Every tournament format',
+    d: 'Round robin, groups + knockout, single elimination, and club-vs-club clash (men / women / mix squad battles).',
   },
   {
-    t: 'Link live untuk peserta',
-    d: 'Bracket, jadwal, dan skor di HP masing-masing peserta — cukup buka link, tanpa install apa pun.',
+    t: 'Live links for players',
+    d: 'Bracket, schedule, and scores on every player\'s phone — just open a link, nothing to install.',
   },
   {
-    t: 'Satu kode, semua beres',
-    d: 'Bayar per event, terima kode aktivasi, buat turnamen. Hasil dan bracket tersimpan dan bisa dilihat selamanya.',
+    t: 'One code, all set',
+    d: 'Pay per event, get an activation code, create your tournament. Results and brackets stay viewable forever.',
   },
 ];
 
@@ -75,80 +75,80 @@ const TIERS = [
   {
     name: 'STARTER',
     price: '1jt',
-    tag: 'Komunitas',
+    tag: 'Community',
     best: false,
     items: [
-      'Scoring live + bracket semua format',
-      'TV display per court',
-      'Link live peserta',
-      'Iklan jaringan OnPoint tampil di TV',
-      'Watermark OnPoint',
+      'Live scoring + every bracket format',
+      'TV display on every court',
+      'Live links for players',
+      'OnPoint network ads play on your TVs',
+      'OnPoint watermark',
     ],
   },
   {
     name: 'COMPACT',
     price: '2jt',
-    tag: 'Event privat',
+    tag: 'Private event',
     best: false,
     items: [
-      'Semua fitur Starter',
-      'TV bersih — tanpa iklan',
-      'Tanpa watermark',
+      'Everything in Starter',
+      'Clean TVs — no ads',
+      'No watermark',
     ],
   },
   {
     name: 'TOURNAMENT',
     price: '4jt',
-    tag: 'Event bersponsor',
+    tag: 'Sponsored event',
     best: true,
     items: [
-      'Semua fitur Compact',
-      'Bar sponsor 3 logo di TV — milikmu',
-      'Jual slot-nya ke sponsor, untung 100% buatmu',
+      'Everything in Compact',
+      'Sponsor bar on TV: 3 logo slots — yours',
+      'Sell them to sponsors, keep 100%',
     ],
   },
   {
     name: 'CHAMPIONSHIP',
     price: '6jt',
-    tag: 'Event besar',
+    tag: 'Big stage',
     best: false,
     items: [
-      'Semua fitur Tournament',
-      'Sistem video ads penuh: bumper antar game, reel antar match, tombol Break',
-      'Inventori iklan senilai jutaan — siap dijual',
-      'Prioritas support saat event',
+      'Everything in Tournament',
+      'Full video ad system: bumpers between games, reels between matches, Break button',
+      'Millions worth of ad inventory — ready to sell',
+      'Priority support on event day',
     ],
   },
 ];
 
 const FAQ = [
   {
-    q: 'Gimana cara mulai?',
-    a: 'Chat WhatsApp kami → sepakati paket & tanggal event → transfer → kamu terima kode aktivasi → masukkan kode saat membuat turnamen. Lima menit jadi.',
+    q: 'How do I get started?',
+    a: 'Chat us on WhatsApp → agree on a package & event date → transfer → receive your activation code → enter it when creating the tournament. Five minutes, done.',
   },
   {
-    q: 'Kode aktivasi itu apa?',
-    a: 'Satu kode = satu event. Kode dipakai sekali saat membuat turnamen, lalu paketmu (Starter/Compact/Tournament/Championship) aktif otomatis di semua fitur.',
+    q: "What's an activation code?",
+    a: 'One code = one event. The code is used once when you create the tournament, and your package (Starter / Compact / Tournament / Championship) activates across every feature automatically.',
   },
   {
-    q: 'Masa aktif 72 jam maksudnya?',
-    a: 'Sejak kode dipakai, turnamen bisa diskor dan di-reset selama 3 hari — cukup untuk persiapan plus hari-H. Setelah itu hasil, bracket, dan TV tetap bisa dilihat selamanya; hanya input skor yang terkunci.',
+    q: 'What does the 72-hour window mean?',
+    a: 'From the moment your code is used, the tournament can be scored and reset for 3 days — enough for setup plus event day. After that, results, brackets, and TVs stay viewable forever; only score input locks.',
   },
   {
-    q: 'Event diundur / molor?',
-    a: 'Chat kami, masa aktifnya kami geser. Gratis, manusiawi.',
+    q: 'Event postponed or running late?',
+    a: "Chat us and we'll shift your window. Free, no drama.",
   },
   {
-    q: 'Perlu install aplikasi?',
-    a: 'Tidak. Semuanya jalan di browser — HP panitia, HP peserta, sampai TV venue (cukup browser di TV/mini PC).',
+    q: 'Do I need to install anything?',
+    a: 'No. Everything runs in the browser — crew phones, player phones, and the venue TVs (any TV or mini PC with a browser).',
   },
   {
-    q: 'Iklan sponsornya gimana cara kerjanya?',
-    a: 'Di paket Tournament kamu dapat 3 slot logo di TV. Di Championship kamu juga bisa upload video/poster iklan yang diputar otomatis di setiap jeda — antar game, antar match, atau saat tombol Break ditekan. Slot-slot itu kamu jual sendiri ke sponsor: satu sponsor biasanya sudah menutup biaya paketnya.',
+    q: 'How do the sponsor ads work?',
+    a: 'On Tournament you get 3 logo slots on the TVs. On Championship you can also upload video/poster ads that play automatically during every break — between games, between matches, or when the Break button is pressed. You sell those slots yourself: one sponsor usually covers the whole package.',
   },
 ];
 
-const MARQUEE = ['LIVE SCORING', 'TV DISPLAY', 'SPONSOR ADS', 'BRACKET OTOMATIS', 'MULTI-COURT', 'CLASH ANTAR KLUB'];
+const MARQUEE = ['LIVE SCORING', 'TV DISPLAY', 'SPONSOR ADS', 'AUTO BRACKETS', 'MULTI-COURT', 'CLUB CLASH'];
 
 export default function Landing() {
   const navigate = useNavigate();
@@ -166,14 +166,14 @@ export default function Landing() {
               </span>
             </a>
             <nav className="hidden md:flex items-center gap-8 text-sm text-white/55">
-              <a href="#fitur" className="hover:text-white transition-colors">Fitur</a>
-              <a href="#harga" className="hover:text-white transition-colors">Harga</a>
+              <a href="#fitur" className="hover:text-white transition-colors">Features</a>
+              <a href="#harga" className="hover:text-white transition-colors">Pricing</a>
               <a href="#faq" className="hover:text-white transition-colors">FAQ</a>
               <button onClick={() => navigate('/iklan')} className="hover:text-[#F3D27E] transition-colors">
-                Pasang Iklan
+                Advertise
               </button>
               <button onClick={() => navigate('/contestant')} className="hover:text-white transition-colors">
-                Cek Tournament
+                My Tournament
               </button>
             </nav>
             <a
@@ -209,16 +209,16 @@ export default function Landing() {
           </Reveal>
           <Reveal delay={120}>
             <h1 className="font-display text-[2.6rem] sm:text-6xl md:text-[5.2rem] font-bold leading-[0.98] tracking-tight uppercase max-w-4xl">
-              Turnamen padel
+              Padel tournaments,
               <br />
-              rasa <span className="gold-text">broadcast.</span>
+              <span className="gold-text">broadcast feel.</span>
             </h1>
           </Reveal>
           <Reveal delay={240}>
             <p className="mt-7 max-w-xl text-white/65 text-base md:text-lg leading-relaxed">
-              Scoring live multi-court, TV display di tiap lapangan, dan slot iklan
-              yang bisa kamu jual ke sponsor. Panitia tinggal pencet skor — sisanya
-              jalan sendiri.
+              Live multi-court scoring, a TV display on every court, and ad slots
+              you can sell to sponsors. Your crew just taps the score — everything
+              else runs itself.
             </p>
           </Reveal>
           <Reveal delay={360}>
@@ -228,10 +228,10 @@ export default function Landing() {
                 className="rounded-full px-8 py-4 font-bold text-[#06081A] text-sm md:text-base transition-all hover:shadow-[0_0_36px_-6px_rgba(226,185,91,0.9)] hover:-translate-y-0.5"
                 style={{ background: `linear-gradient(110deg, #F3D27E, ${GOLD} 60%, #C9952F)` }}
               >
-                Pesan via WhatsApp
+                Chat on WhatsApp
               </a>
               <a href="#harga" className="rounded-full px-8 py-4 font-bold text-sm md:text-base border border-white/20 hover:border-[#E2B95B]/70 hover:text-[#F3D27E] transition-colors">
-                Lihat Harga
+                See Pricing
               </a>
             </div>
           </Reveal>
@@ -268,9 +268,9 @@ export default function Landing() {
       {/* ── Features ── */}
       <section id="fitur" className="mx-auto max-w-6xl px-4 py-16">
         <Reveal>
-          <p className="font-mono text-[11px] tracking-[0.45em] uppercase text-white/35 mb-5">Fitur</p>
+          <p className="font-mono text-[11px] tracking-[0.45em] uppercase text-white/35 mb-5">Features</p>
           <h2 className="font-display text-3xl md:text-5xl font-bold uppercase tracking-tight max-w-2xl leading-[1.05]">
-            Semua yang venue &amp; panitia butuhkan
+            Everything a venue &amp; crew need
           </h2>
         </Reveal>
         <div className="mt-14 grid sm:grid-cols-2 lg:grid-cols-3 gap-5">
@@ -291,15 +291,15 @@ export default function Landing() {
         <Reveal>
           <div className="relative overflow-hidden rounded-3xl p-10 md:p-16" style={{ background: '#FAF8F5', color: '#06081A' }}>
             <div className="absolute -top-32 -right-32 w-[420px] h-[420px] rounded-full pointer-events-none" style={{ background: 'radial-gradient(circle, rgba(201,149,47,0.18) 0%, transparent 65%)' }} />
-            <p className="font-mono text-[11px] tracking-[0.45em] uppercase mb-5" style={{ color: '#8B7355' }}>Matematika sponsor</p>
+            <p className="font-mono text-[11px] tracking-[0.45em] uppercase mb-5" style={{ color: '#8B7355' }}>Sponsor math</p>
             <h2 className="font-display text-3xl md:text-5xl font-bold uppercase tracking-tight leading-[1.05] max-w-3xl">
-              Sistemnya bisa <span style={{ color: '#C9952F' }}>terbayar sendiri.</span>
+              The system can <span style={{ color: '#C9952F' }}>pay for itself.</span>
             </h2>
             <p className="mt-6 max-w-2xl leading-relaxed" style={{ color: 'rgba(6,8,26,0.65)' }}>
-              TV di venue ditatap semua orang yang menunggu giliran main. Di paket
-              Tournament &amp; Championship, slot logo dan video iklan di TV itu{' '}
-              <strong style={{ color: '#06081A' }}>milikmu</strong> — jual ke brand lokal,
-              dan satu-dua sponsor biasanya sudah menutup biaya paketnya. Sisanya untung.
+              Everyone waiting for their turn watches the venue TVs. On Tournament
+              &amp; Championship, the logo and video ad slots on those screens are{' '}
+              <strong style={{ color: '#06081A' }}>yours</strong> — sell them to local
+              brands, and one or two sponsors usually cover the package. The rest is profit.
             </p>
           </div>
         </Reveal>
@@ -308,10 +308,10 @@ export default function Landing() {
       {/* ── Pricing ── */}
       <section id="harga" className="mx-auto max-w-6xl px-4 py-16">
         <Reveal>
-          <p className="font-mono text-[11px] tracking-[0.45em] uppercase text-white/35 mb-5">Harga</p>
+          <p className="font-mono text-[11px] tracking-[0.45em] uppercase text-white/35 mb-5">Pricing</p>
           <h2 className="font-display text-3xl md:text-5xl font-bold uppercase tracking-tight leading-[1.05]">
-            Bayar per event.
-            <br className="hidden md:block" /> Tanpa langganan.
+            Pay per event.
+            <br className="hidden md:block" /> No subscriptions.
           </h2>
         </Reveal>
         <div className="mt-14 grid sm:grid-cols-2 lg:grid-cols-4 gap-5 items-stretch">
@@ -356,7 +356,7 @@ export default function Landing() {
                   }`}
                   style={t.best ? { background: `linear-gradient(110deg, #F3D27E, ${GOLD} 60%, #C9952F)` } : undefined}
                 >
-                  Pesan {t.name[0] + t.name.slice(1).toLowerCase()}
+                  Get {t.name[0] + t.name.slice(1).toLowerCase()}
                 </a>
               </div>
             </Reveal>
@@ -364,11 +364,11 @@ export default function Landing() {
         </div>
         <Reveal>
           <p className="mt-7 text-sm text-white/35">
-            Butuh event rutin tiap minggu atau lisensi venue?{' '}
+            Running weekly events or want a venue license?{' '}
             <a className="underline decoration-[#E2B95B]/50 underline-offset-4 hover:text-[#F3D27E]" href={wa('Halo OnPoint, saya tertarik lisensi venue / paket event rutin.')}>
-              Chat kami
+              Chat with us
             </a>{' '}
-            — ada paketnya.
+            — we have a plan for that.
           </p>
         </Reveal>
       </section>
@@ -377,7 +377,7 @@ export default function Landing() {
       <section id="faq" className="mx-auto max-w-3xl px-4 py-16">
         <Reveal>
           <p className="font-mono text-[11px] tracking-[0.45em] uppercase text-white/35 mb-5">FAQ</p>
-          <h2 className="font-display text-3xl md:text-5xl font-bold uppercase tracking-tight">Sering ditanya</h2>
+          <h2 className="font-display text-3xl md:text-5xl font-bold uppercase tracking-tight">Common questions</h2>
         </Reveal>
         <Reveal>
           <div className="mt-12 divide-y divide-white/10 border-y border-white/10">
@@ -400,16 +400,16 @@ export default function Landing() {
           <div className="relative overflow-hidden rounded-3xl border border-white/10 bg-gradient-to-b from-white/[0.05] to-transparent p-12 md:p-20 text-center">
             <div className="absolute left-1/2 -translate-x-1/2 -bottom-48 w-[720px] h-[480px] rounded-full pointer-events-none" style={{ background: 'radial-gradient(circle, rgba(226,185,91,0.18) 0%, transparent 65%)' }} />
             <h2 className="font-display text-3xl md:text-6xl font-bold uppercase tracking-tight leading-[1.03]">
-              Event berikutnya,
+              Your next event,
               <br />
-              <span className="gold-text">level berikutnya.</span>
+              <span className="gold-text">on another level.</span>
             </h2>
             <a
               href={wa('Halo OnPoint, saya mau pakai sistemnya untuk event padel saya. Boleh info paketnya?')}
               className="relative mt-10 inline-block rounded-full px-10 py-4.5 py-4 font-bold text-[#06081A] transition-all hover:shadow-[0_0_44px_-8px_rgba(226,185,91,1)] hover:-translate-y-0.5"
               style={{ background: `linear-gradient(110deg, #F3D27E, ${GOLD} 60%, #C9952F)` }}
             >
-              Chat WhatsApp — 0852 9000 0130
+              WhatsApp — 0852 9000 0130
             </a>
           </div>
         </Reveal>
@@ -419,8 +419,8 @@ export default function Landing() {
             <span>© {new Date().getFullYear()} OnPoint</span>
           </div>
           <div className="flex items-center gap-7">
-            <button onClick={() => navigate('/iklan')} className="hover:text-white transition-colors">Pasang iklan</button>
-            <button onClick={() => navigate('/contestant')} className="hover:text-white transition-colors">Cek tournament kamu</button>
+            <button onClick={() => navigate('/iklan')} className="hover:text-white transition-colors">Advertise</button>
+            <button onClick={() => navigate('/contestant')} className="hover:text-white transition-colors">Find your tournament</button>
             <a href={wa('Halo OnPoint!')} className="hover:text-white transition-colors">WhatsApp</a>
           </div>
         </footer>
