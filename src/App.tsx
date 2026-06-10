@@ -495,7 +495,7 @@ function App() {
 
     const handleResetTournament = async (navigate: (path: string) => void) => {
         if (currentTournament) {
-            const resetTournament = createTournament(
+            const base = createTournament(
                 currentTournament.name,
                 currentTournament.format,
                 currentTournament.teams,
@@ -508,6 +508,16 @@ function App() {
                     qualifiersPerGroup: currentTournament.qualifiersPerGroup,
                 }
             );
+            // A reset is the SAME purchased event with scores wiped — carry the
+            // commercial identity over. Without this, resetting minted a fresh
+            // untiered (= full access) tournament, bypassing the paid gate.
+            const resetTournament: Tournament = {
+                ...base,
+                tier: currentTournament.tier,
+                slug: currentTournament.slug,
+                ads: currentTournament.ads,
+                adsEnabled: currentTournament.adsEnabled,
+            };
             setCurrentTournament(resetTournament);
             await saveTournament(resetTournament);
             const tournaments = await getTournaments();
