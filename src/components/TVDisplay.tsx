@@ -641,13 +641,18 @@ export default function TVDisplay() {
   }, [activeMatch, hasAds, waitingPhase]);
 
   // Automatic between-games ad: when the live match's game/set tally changes
-  // (a game just ended), play one ad. The score strip stays on top, and the ad
-  // is not skippable — it ends on its own, then the scoreboard returns.
+  // (a game just ended), play one short ad. It ends on its own — but the
+  // moment the next point is scored, play has resumed, so the scoreboard
+  // takes priority and the ad is cancelled immediately.
   const [autoAdBreak, setAutoAdBreak] = useState(false);
   const gameKeyRef = React.useRef<string | null>(null);
+  const breakPtsRef = React.useRef<string | null>(null);
+  const ptsKey = (m: Match) =>
+    `${m.team1Score.points}-${m.team2Score.points}|${m.tiebreakPoints?.team1 ?? 0}-${m.tiebreakPoints?.team2 ?? 0}`;
   useEffect(() => {
     if (!activeMatch || activeMatch.completed) {
       gameKeyRef.current = null;
+      breakPtsRef.current = null;
       setAutoAdBreak(false);
       return;
     }
@@ -657,8 +662,15 @@ export default function TVDisplay() {
     gameKeyRef.current = key;
     if (hasShortAds && prev && prev.startsWith(`${m.id}|`) && prev !== key) {
       setAutoAdBreak(true);
+      breakPtsRef.current = ptsKey(m);
+      return;
     }
-  }, [activeMatch, hasShortAds]);
+    // A point landed while the between-games ad was up → back to the score.
+    if (autoAdBreak && breakPtsRef.current !== null && ptsKey(m) !== breakPtsRef.current) {
+      setAutoAdBreak(false);
+      breakPtsRef.current = null;
+    }
+  }, [activeMatch, hasShortAds, autoAdBreak]);
 
   // When activeMatchId clears (court freed), check if the previous match was completed
   // and show winner celebration for 15 seconds before going to waiting screen
