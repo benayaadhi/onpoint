@@ -623,7 +623,12 @@ export default function TVDisplay() {
 
   // ── TV ads (YouTube-style, organizer can disable per tournament) ──────────
   const ads: AdItem[] = tournament && tournament.adsEnabled !== false ? tournament.ads ?? [] : [];
-  const hasAds = ads.length > 0;
+  // Short slot = the brief between-games gap (bumper, 3-5s creatives only).
+  // Long slot = between matches / manual break. Videos default to long.
+  const shortAds = ads.filter((a) => (a.slot ?? (a.type === 'video' ? 'long' : 'both')) !== 'long');
+  const longAds = ads.filter((a) => (a.slot ?? (a.type === 'video' ? 'long' : 'both')) !== 'short');
+  const hasAds = longAds.length > 0;
+  const hasShortAds = shortAds.length > 0;
 
   // Waiting screen alternates: info/standings ~20s ↔ one full ad cycle.
   const [waitingPhase, setWaitingPhase] = useState<'info' | 'ads'>('info');
@@ -650,10 +655,10 @@ export default function TVDisplay() {
     const key = `${m.id}|${m.team1RaceScore ?? 0}-${m.team2RaceScore ?? 0}|${m.team1Score.sets}-${m.team2Score.sets}|${m.team1Score.games}-${m.team2Score.games}`;
     const prev = gameKeyRef.current;
     gameKeyRef.current = key;
-    if (hasAds && prev && prev.startsWith(`${m.id}|`) && prev !== key) {
+    if (hasShortAds && prev && prev.startsWith(`${m.id}|`) && prev !== key) {
       setAutoAdBreak(true);
     }
-  }, [activeMatch, hasAds]);
+  }, [activeMatch, hasShortAds]);
 
   // When activeMatchId clears (court freed), check if the previous match was completed
   // and show winner celebration for 15 seconds before going to waiting screen
@@ -825,7 +830,7 @@ export default function TVDisplay() {
       return (
         <>
           <FullscreenBtn />
-          <AdPlayer ads={ads} onCycleDone={() => setWaitingPhase('info')} />
+          <AdPlayer ads={longAds} onCycleDone={() => setWaitingPhase('info')} />
         </>
       );
     }
@@ -839,12 +844,22 @@ export default function TVDisplay() {
 
   // Mid-match break: manual (admin pressed Break) or automatic (a game just
   // ended). Not skippable — the ad finishes on its own; manual break keeps
-  // cycling until the admin resumes or scores the next point.
-  if (hasAds && (activeMatch.onBreak || autoAdBreak)) {
+  // cycling until the admin resumes or scores the next point. The automatic
+  // between-games gap only plays SHORT-slot ads (bumper 3-5s); the manual
+  // break is a long rest, so it gets the long reel.
+  if (activeMatch.onBreak && hasAds) {
     return (
       <AdPlayer
-        ads={ads}
-        single={!activeMatch.onBreak}
+        ads={longAds}
+        scoreStrip={<AdScoreStrip match={activeMatch} court={court} />}
+      />
+    );
+  }
+  if (autoAdBreak && hasShortAds) {
+    return (
+      <AdPlayer
+        ads={shortAds}
+        single
         onCycleDone={() => setAutoAdBreak(false)}
         scoreStrip={<AdScoreStrip match={activeMatch} court={court} />}
       />

@@ -114,6 +114,10 @@ export interface AdItem {
   type: 'video' | 'image';
   durationSec?: number; // images only — videos always play to completion
   name?: string;
+  // Where this ad may play. 'short' = the brief between-games gap (use 3-5s
+  // creatives); 'long' = between matches / manual break (30s-1min ok);
+  // 'both' = anywhere. Default: images 'both', videos 'long'.
+  slot?: 'short' | 'long' | 'both';
 }
 
 export interface SetHistory {

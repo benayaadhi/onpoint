@@ -374,6 +374,9 @@ function TournamentAds({
   const setDuration = (id: string, sec: number) =>
     save({ ads: ads.map((a) => (a.id === id ? { ...a, durationSec: Math.max(2, sec) } : a)) });
 
+  const setSlot = (id: string, slot: AdItem['slot']) =>
+    save({ ads: ads.map((a) => (a.id === id ? { ...a, slot } : a)) });
+
   return (
     <div className="space-y-4">
       <div className="flex items-center justify-between">
@@ -437,25 +440,38 @@ function TournamentAds({
                   ? <video src={ad.url} muted className="max-h-full max-w-full" />
                   : <img src={ad.url} alt="" className="max-h-full max-w-full object-contain" />}
               </div>
-              <div className="p-2.5 flex items-center justify-between gap-2">
-                <span className="text-xs text-gray-500 truncate">
-                  {ad.type === 'video' ? '🎬 video (putar penuh)' : '🖼 gambar'}
-                </span>
-                <div className="flex items-center gap-1.5">
-                  {ad.type === 'image' && (
-                    <input
-                      type="number"
-                      min={2}
-                      value={ad.durationSec ?? 8}
-                      onChange={(e) => setDuration(ad.id, parseInt(e.target.value, 10) || 8)}
-                      className="w-14 text-xs border border-[#F0EBE3] rounded-lg px-1.5 py-1 bg-white"
-                      title="Durasi tampil (detik)"
-                    />
-                  )}
-                  <button onClick={() => handleRemove(ad)} className="text-gray-400 hover:text-red-500 p-1">
-                    <Trash2 className="w-3.5 h-3.5" />
-                  </button>
+              <div className="p-2.5 space-y-1.5">
+                <div className="flex items-center justify-between gap-2">
+                  <span className="text-xs text-gray-500 truncate">
+                    {ad.type === 'video' ? '🎬 video (putar penuh)' : '🖼 gambar'}
+                  </span>
+                  <div className="flex items-center gap-1.5">
+                    {ad.type === 'image' && (
+                      <input
+                        type="number"
+                        min={2}
+                        value={ad.durationSec ?? 8}
+                        onChange={(e) => setDuration(ad.id, parseInt(e.target.value, 10) || 8)}
+                        className="w-14 text-xs border border-[#F0EBE3] rounded-lg px-1.5 py-1 bg-white"
+                        title="Durasi tampil (detik)"
+                      />
+                    )}
+                    <button onClick={() => handleRemove(ad)} className="text-gray-400 hover:text-red-500 p-1">
+                      <Trash2 className="w-3.5 h-3.5" />
+                    </button>
+                  </div>
                 </div>
+                {/* Slot: jeda pendek antar game (3-5 detik) vs jeda panjang */}
+                <select
+                  value={ad.slot ?? (ad.type === 'video' ? 'long' : 'both')}
+                  onChange={(e) => setSlot(ad.id, e.target.value as AdItem['slot'])}
+                  className="w-full text-xs border border-[#F0EBE3] rounded-lg px-1.5 py-1 bg-white text-gray-600"
+                  title="Di momen mana iklan ini boleh tampil"
+                >
+                  <option value="short">Antar game (pendek, 3-5 dtk)</option>
+                  <option value="long">Jeda panjang (antar match / break)</option>
+                  <option value="both">Semua momen</option>
+                </select>
               </div>
             </div>
           ))}

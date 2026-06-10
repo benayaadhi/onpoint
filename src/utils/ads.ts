@@ -19,6 +19,8 @@ export async function uploadAdMedia(tournamentId: string, file: File): Promise<A
     type: isVideo ? 'video' : 'image',
     durationSec: isVideo ? undefined : 8,
     name: file.name,
+    // Long videos shouldn't land in the brief between-games gap by default.
+    slot: isVideo ? 'long' : 'both',
   };
 }
 
