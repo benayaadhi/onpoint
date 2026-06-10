@@ -1,18 +1,18 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef, lazy, Suspense } from 'react';
 import { Routes, Route, useNavigate, useParams, useSearchParams, Navigate } from 'react-router-dom';
 import { Plus, RotateCcw, Trash2, Target, Tv, ExternalLink, Copy, Download, Monitor } from 'lucide-react';
-import { exportTournamentToExcel } from './utils/exportExcel';
 import { slugify } from './utils/slugify';
-import Homepage from './components/Homepage';
-import ContestantHomepage from './components/ContestantHomepage';
-import TournamentSetup from './components/TournamentSetup';
-import TournamentBracket from './components/TournamentBracket';
-import MatchScoring from './components/MatchScoring';
-import TeamManager from './components/TeamManager';
-import SponsorManager from './components/SponsorManager';
-import StandaloneSpectatorView from './components/StandaloneSpectatorView';
-import SpectatorView from './components/SpectatorView';
-import TVDisplay, { TVCourtPicker } from './components/TVDisplay';
+const Landing = lazy(() => import('./components/Landing'));
+const ContestantHomepage = lazy(() => import('./components/ContestantHomepage'));
+const TournamentSetup = lazy(() => import('./components/TournamentSetup'));
+const TournamentBracket = lazy(() => import('./components/TournamentBracket'));
+const MatchScoring = lazy(() => import('./components/MatchScoring'));
+const TeamManager = lazy(() => import('./components/TeamManager'));
+const SponsorManager = lazy(() => import('./components/SponsorManager'));
+const StandaloneSpectatorView = lazy(() => import('./components/StandaloneSpectatorView'));
+const SpectatorView = lazy(() => import('./components/SpectatorView'));
+const TVDisplay = lazy(() => import('./components/TVDisplay'));
+const TVCourtPicker = lazy(() => import('./components/TVDisplay').then((m) => ({ default: m.TVCourtPicker })));
 import {
     Tournament,
     Match,
@@ -220,7 +220,7 @@ function AdminLayout({
                                     </button>
 
                                     <button
-                                        onClick={() => exportTournamentToExcel(currentTournament)}
+                                        onClick={() => import('./utils/exportExcel').then((m) => m.exportTournamentToExcel(currentTournament))}
                                         className="flex items-center gap-2 text-[#8B7355] hover:text-[#B45330] transition-colors px-3 py-2 rounded-xl hover:bg-[#F0EBE3]/50 border border-[#F0EBE3] hover:border-[#B45330]/30"
                                     >
                                         <Download className="w-4 h-4" />
@@ -652,11 +652,12 @@ function App() {
     };
 
     return (
+        <Suspense fallback={<div className="min-h-screen bg-[#0A0E23]" />}>
         <Routes>
             {/* Landing Page */}
             <Route
                 path="/"
-                element={<HomepageWrapper />}
+                element={<Landing />}
             />
 
             {/* Admin Setup */}
@@ -765,6 +766,7 @@ function App() {
             {/* Catch-all */}
             <Route path="*" element={<Navigate to="/" replace />} />
         </Routes>
+        </Suspense>
     );
 }
 
@@ -1663,12 +1665,6 @@ function TVDisplayBySlug() {
             <Monitor className="w-10 h-10 text-[#B45330] animate-pulse" />
         </div>
     );
-}
-
-// --- Homepage wrapper with navigation ---
-function HomepageWrapper() {
-    const navigate = useNavigate();
-    return <Homepage onGetStarted={() => navigate('/contestant')} />;
 }
 
 // --- Contestant Homepage wrapper with navigation ---
