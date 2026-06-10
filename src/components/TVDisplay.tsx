@@ -489,7 +489,27 @@ export default function TVDisplay() {
     const unsub = subscribeToScoreUpdates(tournamentId, (match) => {
       setTournament(prev => {
         if (!prev) return prev;
-        return { ...prev, matches: prev.matches.map(m => m.id === match.id ? match : m) };
+        const matches = prev.matches.map(m => {
+          if (m.id !== match.id) return m;
+          // Reject a stale broadcast that would revert a newer score
+          if ((match.lastUpdated ?? 0) < (m.lastUpdated ?? 0)) return m;
+          return match;
+        });
+        // Adopt court.currentMatch from the broadcast so the TV goes live /
+        // clears immediately instead of waiting for the slower table-change
+        // refetch or the 20s poll (which can lag several seconds when many
+        // courts are scored at once).
+        const courts = prev.courts.map(c => {
+          if (match.courtId !== c.id) return c;
+          if (match.status === 'in-progress' && !match.completed && c.currentMatch !== match.id) {
+            return { ...c, currentMatch: match.id };
+          }
+          if (match.completed && c.currentMatch === match.id) {
+            return { ...c, currentMatch: null };
+          }
+          return c;
+        });
+        return { ...prev, matches, courts };
       });
     });
     return unsub;

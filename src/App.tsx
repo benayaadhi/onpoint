@@ -1088,6 +1088,10 @@ function AdminScoringPage({
         const updated = startMatchOnCourt(tournament, matchId);
         setStartedMatchId(matchId);
         onUpdateTournament(updated);
+        // Tell TVs right away (~50ms) that this match is live on its court,
+        // instead of leaving them to the slower table-change refetch.
+        const started = updated.matches.find((m) => m.id === matchId);
+        if (started) broadcastScoreUpdate(started, updated.id);
     }, [tournament, matchId, startedMatchId]);
 
     useEffect(() => {
