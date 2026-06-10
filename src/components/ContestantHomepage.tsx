@@ -109,7 +109,7 @@ export default function ContestantHomepage({ onSelectTournament, onBackToHome }:
           <div className="flex items-center gap-3">
             <div className="w-10 h-10 bg-[#FFFFFF] rounded-lg flex items-center justify-center border border-[#F0EBE3]"><Target className="w-6 h-6 text-[#B45330]" /></div>
             <div>
-              <span className="text-2xl font-bold bg-gradient-to-r from-[#B45330] to-[#C96A40] bg-clip-text text-transparent">On Point</span>
+              <span className="font-display text-2xl font-bold tracking-[0.12em]"><span style={{ color: '#C9952F' }}>ON</span><span className="text-[#2A2A2A]">POINT</span></span>
               <div className="text-sm text-gray-600">Tournament Viewer</div>
             </div>
           </div>
@@ -123,7 +123,7 @@ export default function ContestantHomepage({ onSelectTournament, onBackToHome }:
       <main className="relative z-10 px-6 py-12">
         <div className="max-w-7xl mx-auto">
           <div className="text-center mb-16">
-            <h1 className="text-5xl lg:text-6xl font-bold text-[#2A2A2A] mb-6">
+            <h1 className="font-display text-5xl lg:text-6xl font-bold uppercase tracking-tight text-[#2A2A2A] mb-6">
               Live <span className="bg-gradient-to-r from-[#B45330] to-[#C96A40] bg-clip-text text-transparent">Tournaments</span>
             </h1>
             <p className="text-lg text-gray-600 max-w-3xl mx-auto">Follow your favorite padel tournaments in real-time. Watch live matches, check standings, and never miss a point.</p>

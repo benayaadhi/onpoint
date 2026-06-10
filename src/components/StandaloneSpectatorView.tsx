@@ -144,7 +144,7 @@ export default function StandaloneSpectatorView({ matchId, tournamentName = "PAD
         <header className="relative z-10 flex justify-between items-center p-6 border-b border-[#F0EBE3]">
           <div className="flex items-center gap-3">
             <Monitor className="w-8 h-8 text-[#B45330]" />
-            <span className="text-2xl font-bold text-[#B45330]">SPECTATOR VIEW</span>
+            <span className="font-display text-2xl font-bold tracking-[0.18em] text-[#B45330]">SPECTATOR VIEW</span>
             {isConnected && <div className="w-3 h-3 bg-[#B45330] rounded-full animate-pulse" title="Live connected" />}
           </div>
           <div className="flex items-center gap-4">
@@ -160,7 +160,7 @@ export default function StandaloneSpectatorView({ matchId, tournamentName = "PAD
 
         <main className="relative z-10 flex-1 flex flex-col justify-center px-4 md:px-8">
           <div className="text-center mb-6">
-            <div className="text-[#B45330] text-4xl font-bold tracking-wider mb-2">{tournamentName?.toUpperCase()}</div>
+            <div className="font-display text-[#B45330] text-4xl font-bold tracking-wider mb-2">{tournamentName?.toUpperCase()}</div>
             <div className="text-gray-600 text-lg">{currentMatch?.gamesFixed ? `BEST OF ${currentMatch.gamesFixed}` : `RACE TO ${raceTarget}`}</div>
           </div>
 
@@ -189,7 +189,7 @@ export default function StandaloneSpectatorView({ matchId, tournamentName = "PAD
             {/* Team 1 */}
             <div className="grid grid-cols-3 border-b border-[#F0EBE3]">
               <div className="p-6 flex items-center gap-3">
-                <div className="text-4xl font-bold text-[#2A2A2A] uppercase">{currentMatch.team1.name}</div>
+                <div className="font-display text-4xl font-bold text-[#2A2A2A] uppercase">{currentMatch.team1.name}</div>
               </div>
               <div className="p-6 text-center text-4xl font-bold flex items-center justify-center">{currentMatch.team1RaceScore || 0}</div>
               <div className={`p-6 text-center text-6xl font-bold flex items-center justify-center ${currentMatch.isTiebreaker ? 'bg-blue-500 text-white' : goldenPoint ? 'bg-yellow-400 text-black' : 'bg-[#B45330] text-[#FAF8F5]'}`}>
@@ -202,7 +202,7 @@ export default function StandaloneSpectatorView({ matchId, tournamentName = "PAD
             {/* Team 2 */}
             <div className="grid grid-cols-3">
               <div className="p-6 flex items-center gap-3">
-                <div className="text-4xl font-bold text-[#2A2A2A] uppercase">{currentMatch.team2.name}</div>
+                <div className="font-display text-4xl font-bold text-[#2A2A2A] uppercase">{currentMatch.team2.name}</div>
               </div>
               <div className="p-6 text-center text-4xl font-bold flex items-center justify-center">{currentMatch.team2RaceScore || 0}</div>
               <div className={`p-6 text-center text-6xl font-bold flex items-center justify-center ${currentMatch.isTiebreaker ? 'bg-blue-500 text-white' : goldenPoint ? 'bg-yellow-400 text-black' : 'bg-[#B45330] text-[#FAF8F5]'}`}>

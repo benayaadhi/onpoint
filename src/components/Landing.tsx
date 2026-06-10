@@ -289,16 +289,16 @@ export default function Landing() {
       {/* ── Sponsor math ── */}
       <section className="mx-auto max-w-6xl px-4 py-16">
         <Reveal>
-          <div className="relative overflow-hidden rounded-3xl border border-[#E2B95B]/30 p-10 md:p-16" style={{ background: 'linear-gradient(120deg, rgba(226,185,91,0.14) 0%, rgba(226,185,91,0.05) 55%, rgba(6,8,26,0) 100%)' }}>
-            <div className="absolute -top-32 -right-32 w-[420px] h-[420px] rounded-full pointer-events-none" style={{ background: 'radial-gradient(circle, rgba(226,185,91,0.22) 0%, transparent 65%)' }} />
-            <p className="font-mono text-[11px] tracking-[0.45em] uppercase text-white/40 mb-5">Matematika sponsor</p>
+          <div className="relative overflow-hidden rounded-3xl p-10 md:p-16" style={{ background: '#FAF8F5', color: '#06081A' }}>
+            <div className="absolute -top-32 -right-32 w-[420px] h-[420px] rounded-full pointer-events-none" style={{ background: 'radial-gradient(circle, rgba(201,149,47,0.18) 0%, transparent 65%)' }} />
+            <p className="font-mono text-[11px] tracking-[0.45em] uppercase mb-5" style={{ color: '#8B7355' }}>Matematika sponsor</p>
             <h2 className="font-display text-3xl md:text-5xl font-bold uppercase tracking-tight leading-[1.05] max-w-3xl">
-              Sistemnya bisa <span className="gold-text">terbayar sendiri.</span>
+              Sistemnya bisa <span style={{ color: '#C9952F' }}>terbayar sendiri.</span>
             </h2>
-            <p className="mt-6 max-w-2xl leading-relaxed text-white/65">
+            <p className="mt-6 max-w-2xl leading-relaxed" style={{ color: 'rgba(6,8,26,0.65)' }}>
               TV di venue ditatap semua orang yang menunggu giliran main. Di paket
               Tournament &amp; Championship, slot logo dan video iklan di TV itu{' '}
-              <strong className="text-white">milikmu</strong> — jual ke brand lokal,
+              <strong style={{ color: '#06081A' }}>milikmu</strong> — jual ke brand lokal,
               dan satu-dua sponsor biasanya sudah menutup biaya paketnya. Sisanya untung.
             </p>
           </div>
