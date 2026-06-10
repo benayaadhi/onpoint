@@ -345,7 +345,7 @@ function TierLock({ feature, requiredTier }: { feature: string; requiredTier: st
       <p className="text-gray-500 text-sm">
         🔒 {feature} tersedia mulai paket <span className="font-bold text-[#B45330]">{requiredTier}</span>.
       </p>
-      <p className="text-gray-400 text-xs mt-1">Hubungi WePadl untuk upgrade event ini.</p>
+      <p className="text-gray-400 text-xs mt-1">Hubungi OnPoint untuk upgrade event ini.</p>
     </div>
   );
 }
@@ -693,9 +693,9 @@ export default function SponsorManager({ tournaments, initialTournamentId, onUpd
 
       {/* ── Iklan Jaringan (WePadl) ── */}
       <div className="bg-white/80 backdrop-blur-xl border border-[#B45330]/30 rounded-2xl p-6 shadow-sm">
-        <h2 className="text-xl font-bold text-[#2A2A2A] mb-1">Iklan Jaringan <span className="text-xs align-middle bg-[#B45330]/10 text-[#B45330] px-2 py-0.5 rounded-full">khusus WePadl</span></h2>
+        <h2 className="text-xl font-bold text-[#2A2A2A] mb-1">Iklan Jaringan <span className="text-xs align-middle bg-[#B45330]/10 text-[#B45330] px-2 py-0.5 rounded-full">khusus OnPoint</span></h2>
         <p className="text-gray-500 text-sm mb-5">
-          Reel iklan milik WePadl — otomatis tayang di TV semua event paket Starter. Ini inventori yang kamu jual ke pengiklan.
+          Reel iklan milik OnPoint — otomatis tayang di TV semua event paket Starter. Ini inventori yang kamu jual ke pengiklan.
         </p>
         <NetworkAds />
       </div>

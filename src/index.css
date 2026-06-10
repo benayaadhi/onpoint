@@ -2,3 +2,54 @@
 @tailwind components;
 @tailwind utilities;
 
+
+/* ── OnPoint landing: premium type & effects ───────────────────────────── */
+@font-face {
+  font-family: 'Space Grotesk';
+  font-weight: 300 700;
+  font-display: swap;
+  src: url('/fonts/SpaceGrotesk.woff2') format('woff2');
+}
+
+.font-display {
+  font-family: 'Space Grotesk', ui-sans-serif, system-ui, sans-serif;
+}
+
+html { scroll-behavior: smooth; }
+
+/* film grain — almost imperceptible, kills the "flat digital" look */
+.grain::after {
+  content: '';
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  z-index: 5;
+  opacity: 0.05;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+}
+
+/* slow cinematic zoom on the hero photo */
+@keyframes kenburns {
+  from { transform: scale(1.08); }
+  to   { transform: scale(1); }
+}
+.kenburns { animation: kenburns 14s ease-out forwards; }
+
+/* scroll reveal */
+.reveal { opacity: 0; transform: translateY(28px); transition: opacity 0.8s ease, transform 0.8s cubic-bezier(0.16,1,0.3,1); }
+.reveal.in { opacity: 1; transform: none; }
+
+/* marquee strip */
+@keyframes marquee { from { transform: translateX(0); } to { transform: translateX(-50%); } }
+.marquee { animation: marquee 28s linear infinite; }
+
+/* champagne-gold gradient text */
+.gold-text {
+  background: linear-gradient(110deg, #F3D27E 0%, #E2B95B 38%, #C9952F 70%, #F3D27E 100%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+
+/* gold hairline + glow for the featured card */
+.gold-glow { box-shadow: 0 0 50px -12px rgba(226,185,91,0.45), inset 0 0 0 1px rgba(226,185,91,0.55); }

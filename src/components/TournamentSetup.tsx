@@ -289,7 +289,7 @@ export default function TournamentSetup({ onCreateTournament }: TournamentSetupP
               <p className="text-sm text-red-500 mt-1.5">{codeError}</p>
             ) : (
               <p className="text-xs text-gray-400 mt-1.5">
-                Kode menentukan paket (Starter / Compact / Tournament / Championship). Belum punya? Hubungi WePadl.
+                Kode menentukan paket (Starter / Compact / Tournament / Championship). Belum punya? Hubungi OnPoint.
               </p>
             )}
           </div>
