@@ -101,6 +101,19 @@ export interface Match {
   // Monotonic stamp (ms) of the last score change — used to reject stale
   // incoming updates so an optimistic local score never bounces backward.
   lastUpdated?: number;
+  // Admin pressed "Break" on the scoring page: TVs show ads until the next
+  // point or until the admin resumes.
+  onBreak?: boolean;
+}
+
+// A TV ad (YouTube-style, not skippable) shown during breaks. Stored inside
+// the tournament jsonb; media lives in the existing 'sponsors' storage bucket.
+export interface AdItem {
+  id: string;
+  url: string;
+  type: 'video' | 'image';
+  durationSec?: number; // images only — videos always play to completion
+  name?: string;
 }
 
 export interface SetHistory {
@@ -185,6 +198,9 @@ export interface Tournament {
   scoringMode?: 'padel' | 'race';
   raceTarget?: number;
   showSponsorBar?: boolean;
+  // TV ads (videos/images) played during breaks; organizer can disable.
+  ads?: AdItem[];
+  adsEnabled?: boolean; // default true when ads exist
   // Configurable rules (padel scoring + group structure)
   matchRules?: MatchRules;
   teamsPerGroup?: number; // default 4

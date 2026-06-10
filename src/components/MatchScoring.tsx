@@ -11,6 +11,8 @@ import {
   Target,
   Timer,
   FileText,
+  Coffee,
+  Play,
 } from 'lucide-react';
 import { Match, Tournament, DEFAULT_MATCH_RULES } from '../types/tournament';
 import { getDisplayScore } from '../utils/padelScoring';
@@ -216,6 +218,7 @@ export default function MatchScoring({
   // Winner takes the Nth game → match (race) or set (padel).
   const handleTiebreakPoint = (team: 'team1' | 'team2') => {
     const m = cloneMatch(currentMatch);
+    m.onBreak = false; // any point resumes from a TV ad break
     if (!m.tiebreakPoints) m.tiebreakPoints = { team1: 0, team2: 0 };
 
     const prevTiePts = m.tiebreakPoints.team1 + m.tiebreakPoints.team2;
@@ -281,6 +284,7 @@ export default function MatchScoring({
   // ─── Race mode ────────────────────────────────────────────────────────────
   const handleRacePoint = (team: 'team1' | 'team2') => {
     const updatedMatch = addRacePoint(cloneMatch(currentMatch), team);
+    updatedMatch.onBreak = false; // any point resumes from a TV ad break
     const r1 = updatedMatch.team1RaceScore || 0;
     const r2 = updatedMatch.team2RaceScore || 0;
 
@@ -323,6 +327,7 @@ export default function MatchScoring({
     const prevGames = currentMatch.team1Score.games + currentMatch.team2Score.games;
     const prevSet = currentMatch.currentSet;
     const updatedMatch = cloneMatch(currentMatch);
+    updatedMatch.onBreak = false; // any point resumes from a TV ad break
 
     if (team === 'team1') updatedMatch.team1Score.points++;
     else updatedMatch.team2Score.points++;
@@ -428,6 +433,17 @@ export default function MatchScoring({
   const handleLet = () => {
     setFaultCount(0);
     addToLog('Let — Replay', '');
+  };
+
+  // ─── Break: TVs play ads until resumed or the next point ──────────────────
+  const toggleBreak = () => {
+    const updated = cloneMatch(currentMatch);
+    updated.onBreak = !updated.onBreak;
+    updateMatchWithHistory(
+      updated,
+      updated.onBreak ? 'Break — ads playing on TV' : 'Resumed from break',
+      REAL_TIME_EVENTS.MATCH_UPDATED
+    );
   };
 
   // ─── Switch serve ─────────────────────────────────────────────────────────
@@ -1038,6 +1054,20 @@ export default function MatchScoring({
                     className="flex items-center gap-2 py-2 px-4 rounded-lg text-sm bg-[#FFFFFF] text-yellow-400 border border-yellow-400/50 hover:bg-yellow-400/10 transition-colors"
                   >
                     <Zap className="w-4 h-4" /> Win: {currentMatch.team2.name}
+                  </button>
+
+                  <button
+                    onClick={toggleBreak}
+                    className={`flex items-center gap-2 py-2 px-4 rounded-lg text-sm border transition-colors ${
+                      currentMatch.onBreak
+                        ? 'bg-amber-500 text-white border-amber-500 hover:bg-amber-600'
+                        : 'bg-white text-amber-600 border-amber-400/60 hover:bg-amber-50'
+                    }`}
+                    title="TV menayangkan iklan sampai Resume atau poin berikutnya"
+                  >
+                    {currentMatch.onBreak
+                      ? <><Play className="w-4 h-4" /> Resume (stop ads)</>
+                      : <><Coffee className="w-4 h-4" /> Break — Ads di TV</>}
                   </button>
                 </div>
               </div>

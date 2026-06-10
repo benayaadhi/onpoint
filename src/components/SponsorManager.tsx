@@ -3,7 +3,7 @@ import {
   Upload, Trash2, ImageIcon, CheckCircle, AlertCircle, Loader,
   Plus, ChevronDown, ChevronUp, Layers, Trophy, Eye, EyeOff,
 } from 'lucide-react';
-import { Tournament } from '../types/tournament';
+import { Tournament, AdItem } from '../types/tournament';
 import {
   SponsorSlot, SponsorTemplate,
   getTemplates, createTemplate, deleteTemplate,
@@ -11,6 +11,7 @@ import {
   getTournamentSponsors, saveTournamentSponsor, uploadTournamentSponsorLogo,
   removeTournamentSponsor, loadTemplateToTournament,
 } from '../utils/sponsors';
+import { uploadAdMedia, removeAdMedia } from '../utils/ads';
 
 type Status = { type: 'success' | 'error' | 'loading'; message: string } | null;
 
@@ -335,6 +336,135 @@ function TournamentSponsors({
   );
 }
 
+// ─── TV Ads (video/gambar, gaya YouTube — tidak bisa di-skip) ─────────────────
+
+function TournamentAds({
+  tournament,
+  onUpdateTournament,
+}: {
+  tournament: Tournament;
+  onUpdateTournament?: (t: Tournament) => void;
+}) {
+  const fileRef = useRef<HTMLInputElement>(null);
+  const [status, setStatus] = useState<Status>(null);
+  const ads = tournament.ads ?? [];
+  const adsEnabled = tournament.adsEnabled !== false;
+
+  const save = (patch: Partial<Tournament>) =>
+    onUpdateTournament?.({ ...tournament, ...patch });
+
+  const handleUpload = async (file: File) => {
+    setStatus({ type: 'loading', message: 'Uploading…' });
+    try {
+      const item = await uploadAdMedia(tournament.id, file);
+      save({ ads: [...ads, item] });
+      setStatus({ type: 'success', message: 'Tersimpan!' });
+    } catch (err) {
+      console.error(err);
+      setStatus({ type: 'error', message: 'Upload gagal.' });
+    }
+    setTimeout(() => setStatus(null), 3000);
+  };
+
+  const handleRemove = async (ad: AdItem) => {
+    save({ ads: ads.filter((a) => a.id !== ad.id) });
+    removeAdMedia(ad.url).catch(console.error);
+  };
+
+  const setDuration = (id: string, sec: number) =>
+    save({ ads: ads.map((a) => (a.id === id ? { ...a, durationSec: Math.max(2, sec) } : a)) });
+
+  return (
+    <div className="space-y-4">
+      <div className="flex items-center justify-between">
+        <div className="flex items-center gap-2">
+          <Trophy className="w-4 h-4 text-[#B45330]" />
+          <span className="font-semibold text-[#2A2A2A]">{tournament.name}</span>
+        </div>
+        <div className="flex items-center gap-2">
+          {/* Master switch — keputusan penyelenggara */}
+          <button
+            onClick={() => save({ adsEnabled: !adsEnabled })}
+            className={`flex items-center gap-1.5 text-sm px-3 py-1.5 rounded-lg border transition-all ${
+              adsEnabled
+                ? 'bg-green-50 text-green-700 border-green-300 hover:bg-green-100'
+                : 'bg-[#F0EBE3] text-gray-500 border-[#D4C9BB] hover:bg-[#E8E0D5]'
+            }`}
+            title="Aktif/nonaktifkan semua iklan di TV untuk tournament ini"
+          >
+            {adsEnabled ? <><Eye className="w-3.5 h-3.5" /> Ads ON</> : <><EyeOff className="w-3.5 h-3.5" /> Ads OFF</>}
+          </button>
+          <input
+            ref={fileRef}
+            type="file"
+            accept="video/*,image/*"
+            className="hidden"
+            onChange={(e) => {
+              const file = e.target.files?.[0];
+              if (file) handleUpload(file);
+              e.target.value = '';
+            }}
+          />
+          <button
+            disabled={status?.type === 'loading'}
+            onClick={() => fileRef.current?.click()}
+            className="flex items-center gap-1.5 text-sm bg-gradient-to-r from-[#B45330] to-[#C96A40] text-white px-3 py-1.5 rounded-lg disabled:opacity-50 transition-all"
+          >
+            {status?.type === 'loading' ? <Loader className="w-3.5 h-3.5 animate-spin" /> : <Upload className="w-3.5 h-3.5" />}
+            Upload video / gambar
+          </button>
+        </div>
+      </div>
+
+      {status && status.type !== 'loading' && (
+        <div className={`flex items-center gap-1 text-xs font-medium ${status.type === 'success' ? 'text-green-600' : 'text-red-500'}`}>
+          {status.type === 'success' ? <CheckCircle className="w-3 h-3" /> : <AlertCircle className="w-3 h-3" />}
+          {status.message}
+        </div>
+      )}
+
+      {ads.length === 0 ? (
+        <p className="text-gray-400 text-sm">
+          Belum ada iklan. Upload video (MP4/WebM) atau gambar — diputar di TV saat jeda:
+          antar match, setelah match selesai, antar game, dan saat tombol Break ditekan.
+        </p>
+      ) : (
+        <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
+          {ads.map((ad) => (
+            <div key={ad.id} className="border border-[#F0EBE3] rounded-xl bg-[#FAF8F5] overflow-hidden">
+              <div className="h-28 bg-black flex items-center justify-center">
+                {ad.type === 'video'
+                  ? <video src={ad.url} muted className="max-h-full max-w-full" />
+                  : <img src={ad.url} alt="" className="max-h-full max-w-full object-contain" />}
+              </div>
+              <div className="p-2.5 flex items-center justify-between gap-2">
+                <span className="text-xs text-gray-500 truncate">
+                  {ad.type === 'video' ? '🎬 video (putar penuh)' : '🖼 gambar'}
+                </span>
+                <div className="flex items-center gap-1.5">
+                  {ad.type === 'image' && (
+                    <input
+                      type="number"
+                      min={2}
+                      value={ad.durationSec ?? 8}
+                      onChange={(e) => setDuration(ad.id, parseInt(e.target.value, 10) || 8)}
+                      className="w-14 text-xs border border-[#F0EBE3] rounded-lg px-1.5 py-1 bg-white"
+                      title="Durasi tampil (detik)"
+                    />
+                  )}
+                  <button onClick={() => handleRemove(ad)} className="text-gray-400 hover:text-red-500 p-1">
+                    <Trash2 className="w-3.5 h-3.5" />
+                  </button>
+                </div>
+              </div>
+            </div>
+          ))}
+        </div>
+      )}
+    </div>
+  );
+}
+
 // ─── Main SponsorManager ──────────────────────────────────────────────────────
 
 export default function SponsorManager({ tournaments, initialTournamentId, onUpdateTournament }: Props) {
@@ -401,6 +531,18 @@ export default function SponsorManager({ tournaments, initialTournamentId, onUpd
             )}
           </div>
         )}
+      </div>
+
+      {/* ── TV Ads ── */}
+      <div className="bg-white/80 backdrop-blur-xl border border-[#F0EBE3] rounded-2xl p-6 shadow-sm">
+        <h2 className="text-xl font-bold text-[#2A2A2A] mb-1">TV Ads</h2>
+        <p className="text-gray-500 text-sm mb-5">
+          Video/gambar iklan yang diputar di TV saat jeda (gaya YouTube, tidak bisa di-skip).
+          Penyelenggara bisa mematikannya per tournament.
+        </p>
+        {selectedTournament
+          ? <TournamentAds tournament={selectedTournament} onUpdateTournament={onUpdateTournament} />
+          : <p className="text-gray-400 text-sm">Pilih tournament di atas dulu.</p>}
       </div>
 
       {/* ── Templates ── */}

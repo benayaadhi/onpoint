@@ -1,12 +1,82 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, useSearchParams, useNavigate } from 'react-router-dom';
 import { Maximize, Minimize, Monitor, Trophy, Tv, ArrowLeft, Target } from 'lucide-react';
-import { Tournament, Match, Court, Group } from '../types/tournament';
+import { Tournament, Match, Court, Group, AdItem } from '../types/tournament';
 import { getTournaments, getTournament, subscribeTournaments, subscribeToScoreUpdates } from '../utils/storage';
 import { realTimeUpdates, MatchUpdateData } from '../utils/realTimeUpdates';
 import { getRacePointDisplay, isGoldenPoint } from '../utils/raceScoring';
 import { getTournamentSponsors, SponsorSlot } from '../utils/sponsors';
 import { calculateGroupStandings } from '../utils/tournamentLogic';
+
+// ─── Ad Player — YouTube-style, not skippable ─────────────────────────────────
+// Plays the playlist full-screen. Images run durationSec (default 8s); videos
+// always play to completion (only a load-failure skips one, so a broken file
+// can't freeze the TV). `single` shows one ad then calls onCycleDone — used
+// for the automatic between-games break; the manual Break cycles until resumed.
+
+function AdPlayer({ ads, single, onCycleDone, scoreStrip }: {
+  ads: AdItem[];
+  single?: boolean;
+  onCycleDone?: () => void;
+  scoreStrip?: React.ReactNode;
+}) {
+  const [idx, setIdx] = useState(0);
+  const ad = ads[idx % ads.length];
+
+  const advance = React.useCallback(() => {
+    setIdx((i) => {
+      if (single || i + 1 >= ads.length) onCycleDone?.();
+      return (i + 1) % ads.length;
+    });
+  }, [ads.length, single, onCycleDone]);
+
+  // Image timer
+  useEffect(() => {
+    if (!ad || ad.type !== 'image') return;
+    const t = setTimeout(advance, (ad.durationSec ?? 8) * 1000);
+    return () => clearTimeout(t);
+  }, [ad, advance]);
+
+  if (!ad) return null;
+  return (
+    <div className="min-h-screen bg-black font-mono relative flex items-center justify-center">
+      {ad.type === 'video' ? (
+        <video
+          key={ad.id + idx}
+          src={ad.url}
+          autoPlay
+          muted
+          playsInline
+          onEnded={advance}
+          onError={advance}
+          className="w-full h-screen object-contain"
+        />
+      ) : (
+        <img key={ad.id + idx} src={ad.url} alt="" className="w-full h-screen object-contain" onError={advance} />
+      )}
+      <div className="absolute bottom-4 right-4 bg-yellow-400 text-black text-xs font-bold px-2 py-1 rounded">
+        AD
+      </div>
+      {scoreStrip}
+    </div>
+  );
+}
+
+// Slim live-score bar shown on top of ads during a mid-match break, so the
+// score never disappears even while an ad is playing.
+function AdScoreStrip({ match, court }: { match: Match; court: Court }) {
+  const isRace = match.scoringMode === 'race';
+  const s1 = isRace ? match.team1RaceScore ?? 0 : match.team1Score.games;
+  const s2 = isRace ? match.team2RaceScore ?? 0 : match.team2Score.games;
+  return (
+    <div className="absolute top-0 inset-x-0 bg-black/80 backdrop-blur text-white flex items-center justify-center gap-4 py-2 px-4 text-sm md:text-lg font-bold">
+      <span className="text-[#C96A40] uppercase tracking-widest text-xs md:text-sm">{court.name} · BREAK</span>
+      <span className="truncate max-w-[30%]">{match.team1.name}</span>
+      <span className="text-[#C96A40]">{s1} – {s2}</span>
+      <span className="truncate max-w-[30%]">{match.team2.name}</span>
+    </div>
+  );
+}
 
 // ─── Waiting Screen — shows standings while no match active ──────────────────
 
@@ -551,6 +621,40 @@ export default function TVDisplay() {
     ? tournament?.matches.find(m => m.id === activeMatchId) ?? null
     : null;
 
+  // ── TV ads (YouTube-style, organizer can disable per tournament) ──────────
+  const ads: AdItem[] = tournament && tournament.adsEnabled !== false ? tournament.ads ?? [] : [];
+  const hasAds = ads.length > 0;
+
+  // Waiting screen alternates: info/standings ~20s ↔ one full ad cycle.
+  const [waitingPhase, setWaitingPhase] = useState<'info' | 'ads'>('info');
+  useEffect(() => {
+    if (activeMatch || !hasAds) { setWaitingPhase('info'); return; }
+    if (waitingPhase === 'info') {
+      const t = setTimeout(() => setWaitingPhase('ads'), 20000);
+      return () => clearTimeout(t);
+    }
+  }, [activeMatch, hasAds, waitingPhase]);
+
+  // Automatic between-games ad: when the live match's game/set tally changes
+  // (a game just ended), play one ad. The score strip stays on top, and the ad
+  // is not skippable — it ends on its own, then the scoreboard returns.
+  const [autoAdBreak, setAutoAdBreak] = useState(false);
+  const gameKeyRef = React.useRef<string | null>(null);
+  useEffect(() => {
+    if (!activeMatch || activeMatch.completed) {
+      gameKeyRef.current = null;
+      setAutoAdBreak(false);
+      return;
+    }
+    const m = activeMatch;
+    const key = `${m.id}|${m.team1RaceScore ?? 0}-${m.team2RaceScore ?? 0}|${m.team1Score.sets}-${m.team2Score.sets}|${m.team1Score.games}-${m.team2Score.games}`;
+    const prev = gameKeyRef.current;
+    gameKeyRef.current = key;
+    if (hasAds && prev && prev.startsWith(`${m.id}|`) && prev !== key) {
+      setAutoAdBreak(true);
+    }
+  }, [activeMatch, hasAds]);
+
   // When activeMatchId clears (court freed), check if the previous match was completed
   // and show winner celebration for 15 seconds before going to waiting screen
   // Use a ref for tournament so we can read the latest value without adding it
@@ -715,13 +819,35 @@ export default function TVDisplay() {
     );
   }
 
-  // Waiting — no active match, show standings
+  // Waiting — no active match: alternate standings/up-next with the ad reel
   if (!activeMatch) {
+    if (hasAds && waitingPhase === 'ads') {
+      return (
+        <>
+          <FullscreenBtn />
+          <AdPlayer ads={ads} onCycleDone={() => setWaitingPhase('info')} />
+        </>
+      );
+    }
     return (
       <>
         <FullscreenBtn />
         <WaitingScreen court={court} tournament={tournament} nextMatch={nextMatch} />
       </>
+    );
+  }
+
+  // Mid-match break: manual (admin pressed Break) or automatic (a game just
+  // ended). Not skippable — the ad finishes on its own; manual break keeps
+  // cycling until the admin resumes or scores the next point.
+  if (hasAds && (activeMatch.onBreak || autoAdBreak)) {
+    return (
+      <AdPlayer
+        ads={ads}
+        single={!activeMatch.onBreak}
+        onCycleDone={() => setAutoAdBreak(false)}
+        scoreStrip={<AdScoreStrip match={activeMatch} court={court} />}
+      />
     );
   }
 
