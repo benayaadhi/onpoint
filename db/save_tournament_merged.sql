@@ -28,7 +28,9 @@ begin
 
   -- Merge matches: per match id keep the version with the greater lastUpdated
   -- (tie → incoming wins). A concurrent court's newer match is preserved.
-  p_data := jsonb_set(p_data, '{matches}', (
+  -- coalesce(...,'[]') guards the empty-array case: jsonb_agg over zero rows
+  -- returns SQL NULL, and jsonb_set is STRICT → that would null out p_data.
+  p_data := jsonb_set(p_data, '{matches}', coalesce((
     select jsonb_agg(
       case
         when coalesce((ex.match->>'lastUpdated')::bigint, 0)
@@ -44,12 +46,12 @@ begin
       where e->>'id' = n->>'id'
       limit 1
     ) ex on true
-  ));
+  ), '[]'::jsonb));
 
   -- Recompute each court's currentMatch from the merged match statuses, so
   -- court "live" state (used by the TV) can't be clobbered by a stale save.
   if p_data ? 'courts' then
-    p_data := jsonb_set(p_data, '{courts}', (
+    p_data := jsonb_set(p_data, '{courts}', coalesce((
       select jsonb_agg(
         case
           when c ? 'id' then jsonb_set(
@@ -66,7 +68,12 @@ begin
         end
       )
       from jsonb_array_elements(p_data->'courts') c
-    ));
+    ), '[]'::jsonb));
+  end if;
+
+  -- Safety net: never write NULL over an existing tournament.
+  if p_data is null then
+    raise exception 'save_tournament_merged: refusing to write NULL data for %', p_id;
   end if;
 
   update tournaments
