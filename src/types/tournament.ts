@@ -205,6 +205,9 @@ export interface Tournament {
   // TV ads (videos/images) played during breaks; organizer can disable.
   ads?: AdItem[];
   adsEnabled?: boolean; // default true when ads exist
+  // Pricing tier set when an activation code is redeemed at creation.
+  // Absent = created before the gate existed (full access).
+  tier?: 'starter' | 'compact' | 'tournament' | 'championship';
   // Configurable rules (padel scoring + group structure)
   matchRules?: MatchRules;
   teamsPerGroup?: number; // default 4

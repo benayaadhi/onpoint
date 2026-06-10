@@ -6,6 +6,8 @@ import { getTournaments, getTournament, subscribeTournaments, subscribeToScoreUp
 import { realTimeUpdates, MatchUpdateData } from '../utils/realTimeUpdates';
 import { getRacePointDisplay, isGoldenPoint } from '../utils/raceScoring';
 import { getTournamentSponsors, SponsorSlot } from '../utils/sponsors';
+import { getNetworkAds } from '../utils/ads';
+import { canOwnAds, canOwnSponsors, isNetworkAdTier } from '../utils/tier';
 import { calculateGroupStandings } from '../utils/tournamentLogic';
 
 // ─── Ad Player — YouTube-style, not skippable ─────────────────────────────────
@@ -621,8 +623,17 @@ export default function TVDisplay() {
     ? tournament?.matches.find(m => m.id === activeMatchId) ?? null
     : null;
 
-  // ── TV ads (YouTube-style, organizer can disable per tournament) ──────────
-  const ads: AdItem[] = tournament && tournament.adsEnabled !== false ? tournament.ads ?? [] : [];
+  // ── TV ads (YouTube-style) ─────────────────────────────────────────────────
+  // Tier rules: starter plays WePadl's network reel (organizer has no say);
+  // championship/legacy play the organizer's own ads; compact/tournament play
+  // nothing.
+  const [networkAdItems, setNetworkAdItems] = useState<AdItem[]>([]);
+  useEffect(() => {
+    if (tournament && isNetworkAdTier(tournament)) getNetworkAds().then(setNetworkAdItems);
+  }, [tournament?.id]);
+  const ownAds: AdItem[] =
+    tournament && tournament.adsEnabled !== false && canOwnAds(tournament) ? tournament.ads ?? [] : [];
+  const ads: AdItem[] = tournament && isNetworkAdTier(tournament) ? networkAdItems : ownAds;
   // Short slot = the brief between-games gap (bumper, 3-5s creatives only).
   // Long slot = between matches / manual break. Videos default to long.
   const shortAds = ads.filter((a) => (a.slot ?? (a.type === 'video' ? 'long' : 'both')) !== 'long');
@@ -719,12 +730,19 @@ export default function TVDisplay() {
     : null;
 
   const FullscreenBtn = () => (
-    <button
-      onClick={toggleFullscreen}
-      className="fixed top-4 right-4 z-50 p-3 bg-white/80 backdrop-blur border border-[#F0EBE3] rounded-xl shadow-lg text-[#2A2A2A] hover:bg-white transition-all"
-    >
-      {isFullscreen ? <Minimize className="w-5 h-5" /> : <Maximize className="w-5 h-5" />}
-    </button>
+    <>
+      <button
+        onClick={toggleFullscreen}
+        className="fixed top-4 right-4 z-50 p-3 bg-white/80 backdrop-blur border border-[#F0EBE3] rounded-xl shadow-lg text-[#2A2A2A] hover:bg-white transition-all"
+      >
+        {isFullscreen ? <Minimize className="w-5 h-5" /> : <Maximize className="w-5 h-5" />}
+      </button>
+      {tournament && isNetworkAdTier(tournament) && (
+        <div className="fixed bottom-3 left-3 z-50 bg-black/70 text-white/90 text-xs font-bold px-3 py-1.5 rounded-full pointer-events-none">
+          ⚡ Powered by OnPoint
+        </div>
+      )}
+    </>
   );
 
   // Loading
@@ -800,7 +818,7 @@ export default function TVDisplay() {
         </div>
 
         {/* Sponsor bar */}
-        {tournament.showSponsorBar !== false && sponsors.length > 0 && <SponsorBar sponsors={sponsors} />}
+        {tournament.showSponsorBar !== false && sponsors.length > 0 && canOwnSponsors(tournament) && <SponsorBar sponsors={sponsors} />}
       </div>
     );
   }
@@ -831,7 +849,7 @@ export default function TVDisplay() {
           </div>
         </div>
 
-        {tournament.showSponsorBar !== false && sponsors.length > 0 && <SponsorBar sponsors={sponsors} />}
+        {tournament.showSponsorBar !== false && sponsors.length > 0 && canOwnSponsors(tournament) && <SponsorBar sponsors={sponsors} />}
       </div>
     );
   }
@@ -861,20 +879,26 @@ export default function TVDisplay() {
   // break is a long rest, so it gets the long reel.
   if (activeMatch.onBreak && hasAds) {
     return (
-      <AdPlayer
-        ads={longAds}
-        scoreStrip={<AdScoreStrip match={activeMatch} court={court} />}
-      />
+      <>
+        <FullscreenBtn />
+        <AdPlayer
+          ads={longAds}
+          scoreStrip={<AdScoreStrip match={activeMatch} court={court} />}
+        />
+      </>
     );
   }
   if (autoAdBreak && hasShortAds) {
     return (
-      <AdPlayer
-        ads={shortAds}
-        single
-        onCycleDone={() => setAutoAdBreak(false)}
-        scoreStrip={<AdScoreStrip match={activeMatch} court={court} />}
-      />
+      <>
+        <FullscreenBtn />
+        <AdPlayer
+          ads={shortAds}
+          single
+          onCycleDone={() => setAutoAdBreak(false)}
+          scoreStrip={<AdScoreStrip match={activeMatch} court={court} />}
+        />
+      </>
     );
   }
 
@@ -893,7 +917,7 @@ export default function TVDisplay() {
         <RaceScoreboard match={activeMatch} court={court} tournament={tournament} />
       </div>
 
-      {tournament.showSponsorBar !== false && sponsors.length > 0 && (
+      {tournament.showSponsorBar !== false && sponsors.length > 0 && canOwnSponsors(tournament) && (
         <div className="relative z-10">
           <SponsorBar sponsors={sponsors} />
         </div>

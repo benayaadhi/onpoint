@@ -1,5 +1,29 @@
 # Database — Supabase functions & revert guide
 
+## `activation_codes.sql` — gerbang tier + kode aktivasi
+
+**Apa ini:** tabel kode aktivasi + fungsi `redeem_activation_code` + tabel
+`network_ads` (reel iklan WePadl untuk paket Starter). Sekali kode dipakai
+untuk membuat tournament, statusnya `used` dan tidak bisa dipakai lagi
+(atomic, aman dari dua orang menebus barengan).
+
+**Pasang:** paste isi `activation_codes.sql` di SQL Editor, Run sekali.
+
+**Sebelum dipasang:** app tetap jalan — pembuatan tournament tidak minta
+validasi (fallback "ungated", tournament dibuat tanpa tier = akses penuh).
+**Setelah dipasang:** buat tournament wajib kode yang valid.
+
+**Generate kode jualan:**
+```bash
+npx tsx scripts/gen-codes.ts tournament 3 "Budi - WA 0812xxx"
+```
+Tier: `starter` (1jt) | `compact` (2jt) | `tournament` (4jt) | `championship` (6jt).
+
+**Revert:** drop function + kedua tabel (lihat komentar di akhir file SQL);
+app otomatis balik ke perilaku ungated.
+
+---
+
 Tournaments are stored as **one `jsonb` row per tournament** in the
 `tournaments` table. These SQL files are **additive** — they don't change the
 table, columns, or any data; they only add/remove a function and change *how*

@@ -11,7 +11,8 @@ import {
   getTournamentSponsors, saveTournamentSponsor, uploadTournamentSponsorLogo,
   removeTournamentSponsor, loadTemplateToTournament,
 } from '../utils/sponsors';
-import { uploadAdMedia, removeAdMedia } from '../utils/ads';
+import { uploadAdMedia, removeAdMedia, getNetworkAds, saveNetworkAds } from '../utils/ads';
+import { canOwnAds, canOwnSponsors, TIER_LABELS } from '../utils/tier';
 
 type Status = { type: 'success' | 'error' | 'loading'; message: string } | null;
 
@@ -311,7 +312,7 @@ function TournamentSponsors({
                   onClick={() => handleLoadTemplate(t.id)}
                   className="w-full text-left px-4 py-2.5 text-sm hover:bg-[#FAF8F5] text-[#2A2A2A] border-b border-[#F0EBE3] last:border-0 transition-colors"
                 >
-                  {t.name}
+                  {t.name}{t.tier ? ` · ${TIER_LABELS[t.tier]}` : ''}
                 </button>
               ))}
             </div>
@@ -332,6 +333,19 @@ function TournamentSponsors({
           />
         ))}
       </div>
+    </div>
+  );
+}
+
+// ─── Tier lock notice ─────────────────────────────────────────────────────────
+
+function TierLock({ feature, requiredTier }: { feature: string; requiredTier: string }) {
+  return (
+    <div className="border-2 border-dashed border-[#D4C9BB] rounded-xl p-6 text-center bg-[#FAF8F5]">
+      <p className="text-gray-500 text-sm">
+        🔒 {feature} tersedia mulai paket <span className="font-bold text-[#B45330]">{requiredTier}</span>.
+      </p>
+      <p className="text-gray-400 text-xs mt-1">Hubungi WePadl untuk upgrade event ini.</p>
     </div>
   );
 }
@@ -481,6 +495,118 @@ function TournamentAds({
   );
 }
 
+// ─── Network Ads (reel WePadl untuk event tier Starter) ──────────────────────
+
+function NetworkAds() {
+  const fileRef = useRef<HTMLInputElement>(null);
+  const [items, setItems] = useState<AdItem[]>([]);
+  const [status, setStatus] = useState<Status>(null);
+
+  useEffect(() => { getNetworkAds().then(setItems); }, []);
+
+  const persist = async (next: AdItem[]) => {
+    setItems(next);
+    const ok = await saveNetworkAds(next);
+    if (!ok) setStatus({ type: 'error', message: 'Gagal menyimpan (tabel network_ads belum dipasang?).' });
+  };
+
+  const handleUpload = async (file: File) => {
+    setStatus({ type: 'loading', message: 'Uploading…' });
+    try {
+      const item = await uploadAdMedia('network', file);
+      await persist([...items, item]);
+      setStatus({ type: 'success', message: 'Tersimpan!' });
+    } catch (err) {
+      console.error(err);
+      setStatus({ type: 'error', message: 'Upload gagal.' });
+    }
+    setTimeout(() => setStatus(null), 3000);
+  };
+
+  return (
+    <div className="space-y-4">
+      <div className="flex items-center justify-end gap-2">
+        <input
+          ref={fileRef}
+          type="file"
+          accept="video/*,image/*"
+          className="hidden"
+          onChange={(e) => {
+            const file = e.target.files?.[0];
+            if (file) handleUpload(file);
+            e.target.value = '';
+          }}
+        />
+        <button
+          disabled={status?.type === 'loading'}
+          onClick={() => fileRef.current?.click()}
+          className="flex items-center gap-1.5 text-sm bg-gradient-to-r from-[#B45330] to-[#C96A40] text-white px-3 py-1.5 rounded-lg disabled:opacity-50 transition-all"
+        >
+          {status?.type === 'loading' ? <Loader className="w-3.5 h-3.5 animate-spin" /> : <Upload className="w-3.5 h-3.5" />}
+          Upload video / gambar
+        </button>
+      </div>
+
+      {status && status.type !== 'loading' && (
+        <div className={`flex items-center gap-1 text-xs font-medium ${status.type === 'success' ? 'text-green-600' : 'text-red-500'}`}>
+          {status.type === 'success' ? <CheckCircle className="w-3 h-3" /> : <AlertCircle className="w-3 h-3" />}
+          {status.message}
+        </div>
+      )}
+
+      {items.length === 0 ? (
+        <p className="text-gray-400 text-sm">Belum ada iklan jaringan. Reel ini tampil di TV semua event paket Starter.</p>
+      ) : (
+        <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
+          {items.map((ad) => (
+            <div key={ad.id} className="border border-[#F0EBE3] rounded-xl bg-[#FAF8F5] overflow-hidden">
+              <div className="h-28 bg-black flex items-center justify-center">
+                {ad.type === 'video'
+                  ? <video src={ad.url} muted className="max-h-full max-w-full" />
+                  : <img src={ad.url} alt="" className="max-h-full max-w-full object-contain" />}
+              </div>
+              <div className="p-2.5 space-y-1.5">
+                <div className="flex items-center justify-between gap-2">
+                  <span className="text-xs text-gray-500 truncate">
+                    {ad.type === 'video' ? '🎬 video' : '🖼 gambar'}
+                  </span>
+                  <div className="flex items-center gap-1.5">
+                    {ad.type === 'image' && (
+                      <input
+                        type="number"
+                        min={2}
+                        value={ad.durationSec ?? 8}
+                        onChange={(e) => persist(items.map((a) => a.id === ad.id ? { ...a, durationSec: Math.max(2, parseInt(e.target.value, 10) || 8) } : a))}
+                        className="w-14 text-xs border border-[#F0EBE3] rounded-lg px-1.5 py-1 bg-white"
+                        title="Durasi tampil (detik)"
+                      />
+                    )}
+                    <button
+                      onClick={() => { persist(items.filter((a) => a.id !== ad.id)); removeAdMedia(ad.url).catch(console.error); }}
+                      className="text-gray-400 hover:text-red-500 p-1"
+                    >
+                      <Trash2 className="w-3.5 h-3.5" />
+                    </button>
+                  </div>
+                </div>
+                <select
+                  value={ad.slot ?? (ad.type === 'video' ? 'long' : 'both')}
+                  onChange={(e) => persist(items.map((a) => a.id === ad.id ? { ...a, slot: e.target.value as AdItem['slot'] } : a))}
+                  className="w-full text-xs border border-[#F0EBE3] rounded-lg px-1.5 py-1 bg-white text-gray-600"
+                >
+                  <option value="short">Antar game (pendek, 3-5 dtk)</option>
+                  <option value="long">Jeda panjang (antar match / break)</option>
+                  <option value="both">Semua momen</option>
+                </select>
+              </div>
+            </div>
+          ))}
+        </div>
+      )}
+    </div>
+  );
+}
+
 // ─── Main SponsorManager ──────────────────────────────────────────────────────
 
 export default function SponsorManager({ tournaments, initialTournamentId, onUpdateTournament }: Props) {
@@ -537,13 +663,15 @@ export default function SponsorManager({ tournaments, initialTournamentId, onUpd
                       : 'border-[#F0EBE3] text-gray-600 hover:border-[#B45330] hover:text-[#B45330]'
                   }`}
                 >
-                  {t.name}
+                  {t.name}{t.tier ? ` · ${TIER_LABELS[t.tier]}` : ''}
                 </button>
               ))}
             </div>
 
             {selectedTournament && (
-              <TournamentSponsors tournament={selectedTournament} templates={templates} onUpdateTournament={onUpdateTournament} />
+              canOwnSponsors(selectedTournament)
+                ? <TournamentSponsors tournament={selectedTournament} templates={templates} onUpdateTournament={onUpdateTournament} />
+                : <TierLock feature="Bar sponsor (3 logo) milik organizer" requiredTier="Tournament" />
             )}
           </div>
         )}
@@ -557,8 +685,19 @@ export default function SponsorManager({ tournaments, initialTournamentId, onUpd
           Penyelenggara bisa mematikannya per tournament.
         </p>
         {selectedTournament
-          ? <TournamentAds tournament={selectedTournament} onUpdateTournament={onUpdateTournament} />
+          ? (canOwnAds(selectedTournament)
+              ? <TournamentAds tournament={selectedTournament} onUpdateTournament={onUpdateTournament} />
+              : <TierLock feature="TV Ads (slot video iklan milik organizer)" requiredTier="Championship" />)
           : <p className="text-gray-400 text-sm">Pilih tournament di atas dulu.</p>}
+      </div>
+
+      {/* ── Iklan Jaringan (WePadl) ── */}
+      <div className="bg-white/80 backdrop-blur-xl border border-[#B45330]/30 rounded-2xl p-6 shadow-sm">
+        <h2 className="text-xl font-bold text-[#2A2A2A] mb-1">Iklan Jaringan <span className="text-xs align-middle bg-[#B45330]/10 text-[#B45330] px-2 py-0.5 rounded-full">khusus WePadl</span></h2>
+        <p className="text-gray-500 text-sm mb-5">
+          Reel iklan milik WePadl — otomatis tayang di TV semua event paket Starter. Ini inventori yang kamu jual ke pengiklan.
+        </p>
+        <NetworkAds />
       </div>
 
       {/* ── Templates ── */}

@@ -5,7 +5,8 @@ import { generateDummyTeams } from '../utils/tournamentLogic';
 import CourtManager from './CourtManager';
 
 interface TournamentSetupProps {
-  onCreateTournament: (name: string, format: TournamentFormat, teams: Team[], courts: Court[], scoringMode?: 'padel' | 'race', raceTarget?: number, config?: Partial<TournamentConfig>) => void;
+  // Returns an error message (e.g. invalid activation code) or null on success.
+  onCreateTournament: (name: string, format: TournamentFormat, teams: Team[], courts: Court[], scoringMode?: 'padel' | 'race', raceTarget?: number, config?: Partial<TournamentConfig>, activationCode?: string) => Promise<string | null> | void;
 }
 
 export default function TournamentSetup({ onCreateTournament }: TournamentSetupProps) {
@@ -17,6 +18,8 @@ export default function TournamentSetup({ onCreateTournament }: TournamentSetupP
   const [currentTab, setCurrentTab] = useState<'teams' | 'courts'>('teams');
   const [scoringMode, setScoringMode] = useState<'padel' | 'race'>('padel');
   const [raceTarget, setRaceTarget] = useState(4);
+  const [activationCode, setActivationCode] = useState('');
+  const [codeError, setCodeError] = useState<string | null>(null);
   // Custom match rules (padel)
   const [setsToWin, setSetsToWin] = useState(2);
   const [gamesToWinSet, setGamesToWinSet] = useState(6);
@@ -194,9 +197,10 @@ export default function TournamentSetup({ onCreateTournament }: TournamentSetupP
     return teams.length >= 4;
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!canCreateTournament()) return;
+    setCodeError(null);
 
     const rules = { matchRules: { setsToWin, gamesToWinSet, tiebreakAt, tiebreakPoints, goldenPoint } };
 
@@ -213,23 +217,25 @@ export default function TournamentSetup({ onCreateTournament }: TournamentSetupP
           },
         };
       });
-      onCreateTournament(tournamentName, 'clash', [], courts, scoringMode, raceTarget, {
+      const err = await onCreateTournament(tournamentName, 'clash', [], courts, scoringMode, raceTarget, {
         ...rules,
         clubs,
         clashStructure,
         clashThirdPlace: isPoolKnockout ? clashThirdPlace : undefined,
         clashPoolCount: isPoolKnockout ? effPoolCount : undefined,
         clashLadder8: isPoolKnockout ? clashLadder8 : undefined,
-      });
+      }, activationCode);
+      if (err) setCodeError(err);
       return;
     }
 
-    onCreateTournament(tournamentName, format, teams, courts, scoringMode, raceTarget, {
+    const err = await onCreateTournament(tournamentName, format, teams, courts, scoringMode, raceTarget, {
       ...rules,
       teamsPerGroup,
       qualifiersPerGroup,
       thirdPlace: format === 'group-knockout' || format === 'single-elimination' ? thirdPlace : undefined,
-    });
+    }, activationCode);
+    if (err) setCodeError(err);
   };
 
   const addDefaultCourts = (count: number) => {
@@ -267,6 +273,25 @@ export default function TournamentSetup({ onCreateTournament }: TournamentSetupP
               className="w-full px-4 py-3 bg-white border border-[#F0EBE3] rounded-lg text-[#2A2A2A] placeholder-gray-400 focus:ring-2 focus:ring-[#B45330] focus:border-transparent transition-all"
               placeholder="Enter tournament name"
             />
+          </div>
+
+          {/* Activation Code */}
+          <div>
+            <label className="block text-sm font-semibold text-gray-700 mb-2">Kode Aktivasi</label>
+            <input
+              type="text"
+              value={activationCode}
+              onChange={(e) => { setActivationCode(e.target.value.toUpperCase()); setCodeError(null); }}
+              className={`w-full px-4 py-3 bg-white border rounded-lg text-[#2A2A2A] placeholder-gray-400 focus:ring-2 focus:ring-[#B45330] focus:border-transparent transition-all font-mono tracking-widest ${codeError ? 'border-red-400' : 'border-[#F0EBE3]'}`}
+              placeholder="WPDL-XXXX-XXXX-XXXX"
+            />
+            {codeError ? (
+              <p className="text-sm text-red-500 mt-1.5">{codeError}</p>
+            ) : (
+              <p className="text-xs text-gray-400 mt-1.5">
+                Kode menentukan paket (Starter / Compact / Tournament / Championship). Belum punya? Hubungi WePadl.
+              </p>
+            )}
           </div>
 
           {/* Format Selection */}

@@ -24,6 +24,30 @@ export async function uploadAdMedia(tournamentId: string, file: File): Promise<A
   };
 }
 
+// WePadl's network reel (played on starter-tier TVs). Lives in the single-row
+// network_ads table; returns [] until that table exists.
+export async function getNetworkAds(): Promise<AdItem[]> {
+  try {
+    const { data, error } = await supabase
+      .from('network_ads')
+      .select('items')
+      .eq('id', 1)
+      .maybeSingle();
+    if (error || !data) return [];
+    return (data.items as AdItem[]) ?? [];
+  } catch {
+    return [];
+  }
+}
+
+export async function saveNetworkAds(items: AdItem[]): Promise<boolean> {
+  const { error } = await supabase
+    .from('network_ads')
+    .upsert({ id: 1, items, updated_at: new Date().toISOString() });
+  if (error) console.error('saveNetworkAds:', error);
+  return !error;
+}
+
 export async function removeAdMedia(url: string): Promise<void> {
   const marker = '/sponsors/';
   const idx = url.indexOf(marker);

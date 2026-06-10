@@ -18,6 +18,7 @@ import { Match, Tournament, DEFAULT_MATCH_RULES } from '../types/tournament';
 import { getDisplayScore } from '../utils/padelScoring';
 import { addRacePoint, getRacePointDisplay } from '../utils/raceScoring';
 import { realTimeUpdates, REAL_TIME_EVENTS } from '../utils/realTimeUpdates';
+import { canOwnAds, isNetworkAdTier } from '../utils/tier';
 import { getCourtName } from '../utils/courtAssignment';
 import SpectatorView from './SpectatorView';
 import { openSpectatorWindow } from './StandaloneSpectatorView';
@@ -1056,6 +1057,7 @@ export default function MatchScoring({
                     <Zap className="w-4 h-4" /> Win: {currentMatch.team2.name}
                   </button>
 
+                  {(!tournament || canOwnAds(tournament) || isNetworkAdTier(tournament)) && (
                   <button
                     onClick={toggleBreak}
                     className={`flex items-center gap-2 py-2 px-4 rounded-lg text-sm border transition-colors ${
@@ -1069,6 +1071,7 @@ export default function MatchScoring({
                       ? <><Play className="w-4 h-4" /> Resume (stop ads)</>
                       : <><Coffee className="w-4 h-4" /> Break — Ads di TV</>}
                   </button>
+                  )}
                 </div>
               </div>
 

@@ -43,6 +43,7 @@ import {
     useRealTimeMatch,
     REAL_TIME_EVENTS,
 } from './utils/realTimeUpdates';
+import { redeemActivationCode } from './utils/tier';
 import { supabase } from './lib/supabase';
 
 // ==========================================
@@ -437,8 +438,9 @@ function App() {
         scoringMode: 'padel' | 'race' = 'padel',
         raceTarget: number = 4,
         navigate: (path: string) => void,
-        config?: Partial<TournamentConfig>
-    ) => {
+        config?: Partial<TournamentConfig>,
+        activationCode?: string
+    ): Promise<string | null> => {
         const baseTournament = createTournament(
             name,
             format,
@@ -449,16 +451,29 @@ function App() {
             config
         );
         // Attach slugs to tournament and each court
-        const tournament = {
+        const tournament: Tournament = {
             ...baseTournament,
             slug: slugify(name),
             courts: baseTournament.courts.map(c => ({ ...c, slug: slugify(c.name) })),
         };
+
+        // Gate: redeem the activation code → stamps the pricing tier. While the
+        // DB function isn't installed yet this returns 'ungated' and creation
+        // proceeds without a tier (full access), so deploys stay safe.
+        const redeemed = await redeemActivationCode(activationCode ?? '', tournament.id);
+        if (redeemed === null) {
+            return 'Kode aktivasi tidak valid atau sudah terpakai. Hubungi WePadl untuk membeli kode.';
+        }
+        if (redeemed !== 'ungated') {
+            tournament.tier = redeemed;
+        }
+
         setCurrentTournament(tournament);
         await saveTournament(tournament);
         const tournaments = await getTournaments();
         setSavedTournaments(tournaments);
         navigate(`/admin/tournament/${tournament.id}`);
+        return null;
     };
 
     const handleResetTournament = async (navigate: (path: string) => void) => {
@@ -724,8 +739,9 @@ function AdminSetupPage({
         scoringMode: 'padel' | 'race',
         raceTarget: number,
         navigate: (path: string) => void,
-        config?: Partial<TournamentConfig>
-    ) => void;
+        config?: Partial<TournamentConfig>,
+        activationCode?: string
+    ) => Promise<string | null>;
     onDeleteTournament: (id: string) => void;
     onLoadTournament: (t: Tournament) => void;
     onResetTournament: (navigate: (path: string) => void) => void;
@@ -741,7 +757,7 @@ function AdminSetupPage({
         >
             <div className="space-y-8">
                 <TournamentSetup
-                    onCreateTournament={(name, format, teams, courts, scoringMode, raceTarget, config) =>
+                    onCreateTournament={(name, format, teams, courts, scoringMode, raceTarget, config, activationCode) =>
                         onCreateTournament(
                             name,
                             format,
@@ -750,7 +766,8 @@ function AdminSetupPage({
                             scoringMode || 'padel',
                             raceTarget || 4,
                             navigate,
-                            config
+                            config,
+                            activationCode
                         )
                     }
                 />
