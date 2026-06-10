@@ -1,18 +1,29 @@
 /**
  * Generate activation codes (jual via WA, satu kode = satu tournament).
- *   npx tsx scripts/gen-codes.ts <tier> [jumlah] [catatan pembeli]
+ *
+ * Tabel kode dikunci RLS, jadi script ini butuh SERVICE ROLE KEY (bukan anon):
+ *   Supabase Dashboard → Project Settings → API → service_role (secret)
+ *
+ *   export SUPABASE_SERVICE_KEY="eyJ..."   # sekali per sesi terminal
  *   npx tsx scripts/gen-codes.ts tournament 3 "Budi - WA 0812xxx"
+ *
  * Tiers: starter | compact | tournament | championship
- * Butuh tabel activation_codes (db/activation_codes.sql) sudah terpasang.
+ * JANGAN pernah taruh service key di kode yang di-deploy.
  */
 import { randomBytes } from 'crypto';
-import { supabase } from '../src/lib/supabase';
+
+const SUPABASE_URL = 'https://ivwlszqdnlebpnaofqce.supabase.co';
+const SERVICE_KEY = process.env.SUPABASE_SERVICE_KEY;
 
 const TIERS = ['starter', 'compact', 'tournament', 'championship'] as const;
 const tier = process.argv[2] as (typeof TIERS)[number];
 const count = parseInt(process.argv[3] ?? '1', 10);
 const note = process.argv[4] ?? null;
 
+if (!SERVICE_KEY) {
+  console.error('Set dulu: export SUPABASE_SERVICE_KEY="<service_role key dari dashboard>"');
+  process.exit(1);
+}
 if (!TIERS.includes(tier)) {
   console.error(`Pakai: npx tsx scripts/gen-codes.ts <${TIERS.join('|')}> [jumlah] [catatan]`);
   process.exit(1);
@@ -30,9 +41,17 @@ const rows = Array.from({ length: count }, () => ({
   note,
 }));
 
-const { error } = await supabase.from('activation_codes').insert(rows);
-if (error) {
-  console.error('Gagal insert (tabel activation_codes sudah dipasang?):', error.message);
+const res = await fetch(`${SUPABASE_URL}/rest/v1/activation_codes`, {
+  method: 'POST',
+  headers: {
+    apikey: SERVICE_KEY,
+    Authorization: `Bearer ${SERVICE_KEY}`,
+    'Content-Type': 'application/json',
+  },
+  body: JSON.stringify(rows),
+});
+if (!res.ok) {
+  console.error('Gagal insert:', res.status, await res.text());
   process.exit(1);
 }
 console.log(`${count} kode ${tier.toUpperCase()}${note ? ` untuk "${note}"` : ''}:`);

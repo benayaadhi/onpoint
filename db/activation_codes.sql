@@ -21,11 +21,28 @@ create table if not exists network_ads (
 );
 insert into network_ads (id) values (1) on conflict (id) do nothing;
 
+-- RLS: the codes table is fully locked from the public API — codes can ONLY
+-- be redeemed through the function below (which runs as definer), and only
+-- created with the service-role key (scripts/gen-codes.ts). This is what
+-- stops anyone minting their own codes via REST.
+alter table activation_codes enable row level security;
+
+-- network_ads must stay readable by TVs and writable from the (anon) admin
+-- UI — same trust level as the tournaments table itself.
+alter table network_ads enable row level security;
+drop policy if exists network_ads_read on network_ads;
+create policy network_ads_read on network_ads for select using (true);
+drop policy if exists network_ads_write on network_ads;
+create policy network_ads_write on network_ads for all using (true) with check (true);
+
 -- Atomically redeem a code: only an 'unused' code passes, and it can never
--- be redeemed twice (row lock serializes concurrent attempts).
+-- be redeemed twice (row lock serializes concurrent attempts). SECURITY
+-- DEFINER so it can see the RLS-locked codes table.
 create or replace function redeem_activation_code(p_code text, p_tournament_id text)
 returns text
 language plpgsql
+security definer
+set search_path = public
 as $$
 declare
   v_tier text;
@@ -52,3 +69,6 @@ $$;
 --   drop function if exists redeem_activation_code(text, text);
 --   drop table if exists activation_codes;
 --   drop table if exists network_ads;
+
+-- This file is safe to re-run (create if not exists / or replace / drop+create
+-- policies).

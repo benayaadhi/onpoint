@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useParams, useSearchParams, useNavigate } from 'react-router-dom';
 import { Maximize, Minimize, Monitor, Trophy, Tv, ArrowLeft, Target } from 'lucide-react';
 import { Tournament, Match, Court, Group, AdItem } from '../types/tournament';
-import { getTournaments, getTournament, subscribeTournaments, subscribeToScoreUpdates } from '../utils/storage';
+import { getTournaments, getTournament, subscribeTournaments, subscribeTournamentChanges, subscribeToScoreUpdates } from '../utils/storage';
 import { realTimeUpdates, MatchUpdateData } from '../utils/realTimeUpdates';
 import { getRacePointDisplay, isGoldenPoint } from '../utils/raceScoring';
 import { getTournamentSponsors, SponsorSlot } from '../utils/sponsors';
@@ -520,18 +520,28 @@ export default function TVDisplay() {
   const [countdown, setCountdown] = useState(0);
   const prevActiveMatchIdRef = React.useRef<string | null>(null);
 
-  // Load + subscribe via Supabase (cross-device)
+  // Load + subscribe via Supabase (cross-device). Egress-friendly: fetch only
+  // this tournament's row, and refetch it (debounced 2s) when it changes —
+  // never the whole table.
   useEffect(() => {
     if (!tournamentId) return;
-    getTournaments().then(ts => {
-      const t = ts.find(t => t.id === tournamentId);
+    getTournament(tournamentId).then(t => {
       if (t) setTournament(t);
     });
-    const unsub = subscribeTournaments(ts => {
-      const t = ts.find(t => t.id === tournamentId);
-      if (t) setTournament(t);
+    let timer: ReturnType<typeof setTimeout> | null = null;
+    const unsub = subscribeTournamentChanges((id) => {
+      if (id !== tournamentId) return;
+      if (timer) clearTimeout(timer);
+      timer = setTimeout(() => {
+        getTournament(tournamentId).then(t => {
+          if (t) setTournament(t);
+        });
+      }, 2000);
     });
-    return unsub;
+    return () => {
+      unsub();
+      if (timer) clearTimeout(timer);
+    };
   }, [tournamentId]);
 
   // Resolve court

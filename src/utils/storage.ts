@@ -164,6 +164,30 @@ export async function deleteTournament(tournamentId: string): Promise<void> {
   }
 }
 
+// Lightweight change feed: notifies WHICH tournament changed instead of
+// refetching the whole table. Each save used to make every connected client
+// download every row — that's what ate the Supabase egress quota. Callers
+// fetch just the row they care about (getTournament).
+export function subscribeTournamentChanges(
+  onChange: (tournamentId: string | null) => void
+): () => void {
+  const channelId = `tournaments-feed-${Date.now()}-${Math.random().toString(36).slice(2)}`;
+  const channel = supabase
+    .channel(channelId)
+    .on(
+      'postgres_changes',
+      { event: '*', schema: 'public', table: 'tournaments' },
+      (payload) => {
+        const row = (payload.new ?? payload.old) as { id?: string } | null;
+        onChange(row?.id ?? null);
+      }
+    )
+    .subscribe();
+  return () => {
+    supabase.removeChannel(channel);
+  };
+}
+
 // Subscribe to real-time tournament changes
 export function subscribeTournaments(
   callback: (tournaments: Tournament[]) => void

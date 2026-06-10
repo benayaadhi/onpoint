@@ -34,7 +34,7 @@ import {
     getTournaments,
     getTournament,
     deleteTournament,
-    subscribeTournaments,
+    subscribeTournamentChanges,
     broadcastScoreUpdate,
     subscribeToScoreUpdates,
 } from './utils/storage';
@@ -362,26 +362,43 @@ function App() {
         init();
 
         // Slow path: postgres_changes — fires after DB write (~500ms-2s).
-        // Fires on ANY tournament change (whole table), so merge per-match by
-        // lastUpdated instead of replacing wholesale — otherwise a refetch
-        // (e.g. triggered by another tournament) could revert a locally-newer
+        // Egress-friendly: fetch ONLY the changed row (the old refetch-all made
+        // every client download the whole table on every point), debounced 2s
+        // per tournament so a scoring burst collapses into one fetch. Merge
+        // per-match by lastUpdated so a refetch can't revert a locally-newer
         // optimistic score.
-        const unsubscribe = subscribeTournaments((updated) => {
-            setSavedTournaments(updated);
-            setCurrentTournament((prev) => {
-                if (!prev) return prev;
-                const fresh = updated.find((t) => t.id === prev.id);
-                if (!fresh) return prev;
-                return {
-                    ...fresh,
-                    matches: fresh.matches.map((fm) => {
-                        const pm = prev.matches.find((m) => m.id === fm.id);
-                        return pm && (pm.lastUpdated ?? 0) > (fm.lastUpdated ?? 0) ? pm : fm;
-                    }),
-                };
-            });
+        const timers = new Map<string, ReturnType<typeof setTimeout>>();
+        const unsubscribe = subscribeTournamentChanges((id) => {
+            if (!id) return; // 20s poll + broadcast cover unidentified changes
+            clearTimeout(timers.get(id));
+            timers.set(id, setTimeout(async () => {
+                timers.delete(id);
+                const fresh = await getTournament(id);
+                if (!fresh) {
+                    // Row deleted
+                    setSavedTournaments((prev) => prev.filter((t) => t.id !== id));
+                    return;
+                }
+                setSavedTournaments((prev) => {
+                    const i = prev.findIndex((t) => t.id === id);
+                    return i === -1 ? [fresh, ...prev] : prev.map((t) => (t.id === id ? fresh : t));
+                });
+                setCurrentTournament((prev) => {
+                    if (!prev || prev.id !== id) return prev;
+                    return {
+                        ...fresh,
+                        matches: fresh.matches.map((fm) => {
+                            const pm = prev.matches.find((m) => m.id === fm.id);
+                            return pm && (pm.lastUpdated ?? 0) > (fm.lastUpdated ?? 0) ? pm : fm;
+                        }),
+                    };
+                });
+            }, 2000));
         });
-        return unsubscribe;
+        return () => {
+            unsubscribe();
+            timers.forEach((t) => clearTimeout(t));
+        };
     }, []);
 
     // Fast path: Supabase broadcast (~50ms cross-device via WebSocket)

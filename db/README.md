@@ -13,8 +13,10 @@ untuk membuat tournament, statusnya `used` dan tidak bisa dipakai lagi
 validasi (fallback "ungated", tournament dibuat tanpa tier = akses penuh).
 **Setelah dipasang:** buat tournament wajib kode yang valid.
 
-**Generate kode jualan:**
+**Generate kode jualan** (butuh service_role key — Dashboard → Settings → API,
+karena tabel kode dikunci RLS dari API publik):
 ```bash
+export SUPABASE_SERVICE_KEY="<service_role key>"
 npx tsx scripts/gen-codes.ts tournament 3 "Budi - WA 0812xxx"
 ```
 Tier: `starter` (1jt) | `compact` (2jt) | `tournament` (4jt) | `championship` (6jt).
