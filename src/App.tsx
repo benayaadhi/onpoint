@@ -609,12 +609,19 @@ function App() {
             return found;
         }
 
-        // Fetch fresh from storage
-        const tournaments = await getTournaments();
-        setSavedTournaments(tournaments);
-        found = tournaments.find((t) => t.id === id) || null;
-        if (found) setCurrentTournament(found);
-        return found;
+        // Fetch fresh from storage — single row only. Every spectator/TV that
+        // opens a shared link lands here; pulling the whole table cost real
+        // egress for no benefit.
+        const fresh = await getTournament(id);
+        if (fresh) {
+            setCurrentTournament(fresh);
+            setSavedTournaments((prev) =>
+                prev.some((t) => t.id === id)
+                    ? prev.map((t) => (t.id === id ? fresh : t))
+                    : [fresh, ...prev]
+            );
+        }
+        return fresh;
     };
 
     return (
@@ -666,7 +673,7 @@ function App() {
                         onUpdateTournament={async (t) => {
                             setCurrentTournament(t);
                             await saveTournament(t);
-                            getTournaments().then(setSavedTournaments);
+                            setSavedTournaments((prev) => prev.map((x) => (x.id === t.id ? t : x)));
                         }}
                     />
                 }
@@ -984,8 +991,8 @@ function AdminBracketPage({
         setTournament(updatedTournament);
         setCurrentTournament(updatedTournament);
         await saveTournament(updatedTournament);
-        const tournaments = await getTournaments();
-        setSavedTournaments(tournaments);
+        // Update the list in place — no need to redownload every tournament
+        setSavedTournaments((prev) => prev.map((t) => (t.id === updatedTournament.id ? updatedTournament : t)));
         setPendingMatch(null);
         navigate(`/admin/tournament/${tournament.id}/scoring/${match.id}`);
     };
@@ -1527,8 +1534,7 @@ function AdminSponsorsPage({
                 initialTournamentId={currentTournament?.id}
                 onUpdateTournament={async (t) => {
                     await saveTournament(t);
-                    const updated = await getTournaments();
-                    setSavedTournaments(updated);
+                    setSavedTournaments((prev) => prev.map((x) => (x.id === t.id ? t : x)));
                     if (currentTournament?.id === t.id) setCurrentTournament(t);
                 }}
             />
