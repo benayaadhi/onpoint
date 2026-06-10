@@ -208,6 +208,9 @@ export interface Tournament {
   // Pricing tier set when an activation code is redeemed at creation.
   // Absent = created before the gate existed (full access).
   tier?: 'starter' | 'compact' | 'tournament' | 'championship';
+  // When the activation code was redeemed; writes lock 3 days later
+  // (results stay viewable). Absent on legacy/ungated tournaments.
+  activatedAt?: string;
   // Configurable rules (padel scoring + group structure)
   matchRules?: MatchRules;
   teamsPerGroup?: number; // default 4

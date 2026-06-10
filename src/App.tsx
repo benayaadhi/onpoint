@@ -43,7 +43,7 @@ import {
     useRealTimeMatch,
     REAL_TIME_EVENTS,
 } from './utils/realTimeUpdates';
-import { redeemActivationCode } from './utils/tier';
+import { redeemActivationCode, isExpired, expiryLabel } from './utils/tier';
 import { supabase } from './lib/supabase';
 
 // ==========================================
@@ -483,6 +483,7 @@ function App() {
         }
         if (redeemed !== 'ungated') {
             tournament.tier = redeemed;
+            tournament.activatedAt = new Date().toISOString();
         }
 
         setCurrentTournament(tournament);
@@ -495,6 +496,10 @@ function App() {
 
     const handleResetTournament = async (navigate: (path: string) => void) => {
         if (currentTournament) {
+            if (isExpired(currentTournament)) {
+                window.alert('Masa aktif event ini sudah berakhir (3 hari) — hasil tetap bisa dilihat, tapi reset tidak bisa lagi. Hubungi WePadl untuk event baru.');
+                return;
+            }
             // In-place reset: same tournament, scores wiped — no archive copy,
             // so confirm first.
             if (!window.confirm(`Reset "${currentTournament.name}"? Semua skor dihapus dan tidak bisa dikembalikan.`)) {
@@ -549,6 +554,7 @@ function App() {
     const handleUpdateMatch = (updatedMatch: Match) => {
         setCurrentTournament((ct) => {
             if (!ct) return null;
+            if (isExpired(ct)) return ct; // read-only after the active window
 
             const updatedMatches = ct.matches.map((m) =>
                 m.id === updatedMatch.id ? updatedMatch : m
@@ -1004,6 +1010,11 @@ function AdminBracketPage({
 
     const handleCourtAssignAndNavigate = async (match: Match, courtId: string) => {
         if (!tournament) return;
+        if (isExpired(tournament)) {
+            window.alert('Masa aktif event ini sudah berakhir — mode lihat saja.');
+            setPendingMatch(null);
+            return;
+        }
         // Assign courtId to match
         const updatedMatches = tournament.matches.map((m) =>
             m.id === match.id ? { ...m, courtId } : m
@@ -1185,6 +1196,32 @@ function AdminScoringPage({
             >
                 <div className="text-center py-20 text-gray-400">
                     Checking access...
+                </div>
+            </AdminLayout>
+        );
+    }
+
+    if (tournament && isExpired(tournament)) {
+        return (
+            <AdminLayout
+                currentTournament={tournament}
+                onResetTournament={() => onResetTournament(navigate)}
+                activePage="scoring"
+            >
+                <div className="flex flex-col items-center justify-center py-24 gap-4">
+                    <div className="text-6xl">⏳</div>
+                    <h2 className="text-2xl font-bold text-gray-700">Masa Aktif Berakhir</h2>
+                    <p className="text-gray-500 text-center max-w-md">
+                        Event ini sudah melewati masa aktif 3 hari (berakhir {expiryLabel(tournament)}).
+                        Hasil dan bracket tetap bisa dilihat, tapi skor tidak bisa diubah lagi.
+                        Hubungi WePadl untuk mengaktifkan event baru.
+                    </p>
+                    <button
+                        onClick={() => navigate(`/admin/tournament/${tournament.id}`)}
+                        className="mt-2 px-5 py-2.5 rounded-xl bg-[#B45330] text-white font-semibold text-sm hover:bg-[#C96A40] transition-colors"
+                    >
+                        Lihat Bracket
+                    </button>
                 </div>
             </AdminLayout>
         );

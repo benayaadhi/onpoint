@@ -22,6 +22,23 @@ export function isNetworkAdTier(t: Tournament): boolean {
   return t.tier === 'starter';
 }
 
+// One code = one event: a tiered tournament is writable (scoring, reset,
+// court assignment) for 3 days after activation, then becomes read-only —
+// results stay viewable forever. Legacy/ungated tournaments never expire.
+export const ACTIVE_WINDOW_MS = 3 * 24 * 60 * 60 * 1000;
+
+export function isExpired(t: Tournament): boolean {
+  if (!t.tier || !t.activatedAt) return false;
+  return Date.now() - new Date(t.activatedAt).getTime() > ACTIVE_WINDOW_MS;
+}
+
+export function expiryLabel(t: Tournament): string | null {
+  if (!t.tier || !t.activatedAt) return null;
+  return new Date(new Date(t.activatedAt).getTime() + ACTIVE_WINDOW_MS).toLocaleString('id-ID', {
+    day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit',
+  });
+}
+
 export const TIER_LABELS: Record<Tier, string> = {
   starter: 'Starter',
   compact: 'Compact',
