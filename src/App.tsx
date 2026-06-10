@@ -2,18 +2,33 @@ import React, { useState, useEffect, useRef, lazy, Suspense } from 'react';
 import { Routes, Route, useNavigate, useParams, useSearchParams, Navigate } from 'react-router-dom';
 import { Plus, RotateCcw, Trash2, Target, Tv, ExternalLink, Copy, Download, Monitor } from 'lucide-react';
 import { slugify } from './utils/slugify';
-const Landing = lazy(() => import('./components/Landing'));
-const Advertise = lazy(() => import('./components/Advertise'));
-const ContestantHomepage = lazy(() => import('./components/ContestantHomepage'));
-const TournamentSetup = lazy(() => import('./components/TournamentSetup'));
-const TournamentBracket = lazy(() => import('./components/TournamentBracket'));
-const MatchScoring = lazy(() => import('./components/MatchScoring'));
-const TeamManager = lazy(() => import('./components/TeamManager'));
-const SponsorManager = lazy(() => import('./components/SponsorManager'));
-const StandaloneSpectatorView = lazy(() => import('./components/StandaloneSpectatorView'));
-const SpectatorView = lazy(() => import('./components/SpectatorView'));
-const TVDisplay = lazy(() => import('./components/TVDisplay'));
-const TVCourtPicker = lazy(() => import('./components/TVDisplay').then((m) => ({ default: m.TVCourtPicker })));
+// After a redeploy, a browser holding the old index.html will 404 on the old
+// lazy chunks and hang on the Suspense fallback (blank screen). Reload once to
+// pick up the fresh build.
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+const lazyReload = (factory: () => Promise<any>) =>
+    lazy(() =>
+        factory().catch(() => {
+            if (!sessionStorage.getItem('chunk-reload')) {
+                sessionStorage.setItem('chunk-reload', '1');
+                window.location.reload();
+            }
+            return new Promise(() => {}); // keep fallback while reloading
+        })
+    );
+
+const Landing = lazyReload(() => import('./components/Landing'));
+const Advertise = lazyReload(() => import('./components/Advertise'));
+const ContestantHomepage = lazyReload(() => import('./components/ContestantHomepage'));
+const TournamentSetup = lazyReload(() => import('./components/TournamentSetup'));
+const TournamentBracket = lazyReload(() => import('./components/TournamentBracket'));
+const MatchScoring = lazyReload(() => import('./components/MatchScoring'));
+const TeamManager = lazyReload(() => import('./components/TeamManager'));
+const SponsorManager = lazyReload(() => import('./components/SponsorManager'));
+const StandaloneSpectatorView = lazyReload(() => import('./components/StandaloneSpectatorView'));
+const SpectatorView = lazyReload(() => import('./components/SpectatorView'));
+const TVDisplay = lazyReload(() => import('./components/TVDisplay'));
+const TVCourtPicker = lazyReload(() => import('./components/TVDisplay').then((m) => ({ default: m.TVCourtPicker })));
 import {
     Tournament,
     Match,
