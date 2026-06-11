@@ -39,6 +39,30 @@ export function expiryLabel(t: Tournament): string | null {
   });
 }
 
+// ── Event PIN (optional, set at creation) ──────────────────────────────────
+// The voucher is the ticket (burned at creation); the PIN is the room key for
+// every admin access afterwards. Asked once per device, then remembered.
+const pinKey = (id: string) => `onpoint-pin-${id}`;
+
+export function isPinUnlocked(t: Tournament): boolean {
+  if (!t.pin) return true; // no PIN set = open, exactly like before
+  if (isExpired(t)) return true; // read-only anyway — nothing left to guard
+  try {
+    return localStorage.getItem(pinKey(t.id)) === t.pin;
+  } catch {
+    return true;
+  }
+}
+
+export function tryUnlockPin(t: Tournament, pin: string): boolean {
+  if (!t.pin) return true;
+  if (pin.trim() !== t.pin) return false;
+  try {
+    localStorage.setItem(pinKey(t.id), t.pin);
+  } catch { /* private mode — gate will just ask again */ }
+  return true;
+}
+
 export const TIER_LABELS: Record<Tier, string> = {
   starter: 'Starter',
   compact: 'Compact',

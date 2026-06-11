@@ -6,7 +6,7 @@ import CourtManager from './CourtManager';
 
 interface TournamentSetupProps {
   // Returns an error message (e.g. invalid activation code) or null on success.
-  onCreateTournament: (name: string, format: TournamentFormat, teams: Team[], courts: Court[], scoringMode?: 'padel' | 'race', raceTarget?: number, config?: Partial<TournamentConfig>, activationCode?: string) => Promise<string | null> | void;
+  onCreateTournament: (name: string, format: TournamentFormat, teams: Team[], courts: Court[], scoringMode?: 'padel' | 'race', raceTarget?: number, config?: Partial<TournamentConfig>, activationCode?: string, pin?: string) => Promise<string | null> | void;
 }
 
 export default function TournamentSetup({ onCreateTournament }: TournamentSetupProps) {
@@ -20,6 +20,7 @@ export default function TournamentSetup({ onCreateTournament }: TournamentSetupP
   const [raceTarget, setRaceTarget] = useState(4);
   const [activationCode, setActivationCode] = useState('');
   const [codeError, setCodeError] = useState<string | null>(null);
+  const [eventPin, setEventPin] = useState('');
   // Custom match rules (padel)
   const [setsToWin, setSetsToWin] = useState(2);
   const [gamesToWinSet, setGamesToWinSet] = useState(6);
@@ -224,7 +225,7 @@ export default function TournamentSetup({ onCreateTournament }: TournamentSetupP
         clashThirdPlace: isPoolKnockout ? clashThirdPlace : undefined,
         clashPoolCount: isPoolKnockout ? effPoolCount : undefined,
         clashLadder8: isPoolKnockout ? clashLadder8 : undefined,
-      }, activationCode);
+      }, activationCode, eventPin);
       if (err) setCodeError(err);
       return;
     }
@@ -234,7 +235,7 @@ export default function TournamentSetup({ onCreateTournament }: TournamentSetupP
       teamsPerGroup,
       qualifiersPerGroup,
       thirdPlace: format === 'group-knockout' || format === 'single-elimination' ? thirdPlace : undefined,
-    }, activationCode);
+    }, activationCode, eventPin);
     if (err) setCodeError(err);
   };
 
@@ -292,6 +293,24 @@ export default function TournamentSetup({ onCreateTournament }: TournamentSetupP
                 Kode menentukan paket (Starter / Compact / Tournament / Championship). Belum punya? Hubungi OnPoint.
               </p>
             )}
+          </div>
+
+          {/* Event PIN (optional) */}
+          <div>
+            <label className="block text-sm font-semibold text-gray-700 mb-2">PIN Event <span className="font-normal text-gray-400">(opsional)</span></label>
+            <input
+              type="text"
+              inputMode="numeric"
+              maxLength={6}
+              value={eventPin}
+              onChange={(e) => setEventPin(e.target.value.replace(/\D/g, ''))}
+              className="w-full px-4 py-3 bg-white border border-[#F0EBE3] rounded-lg text-[#2A2A2A] placeholder-gray-400 focus:ring-2 focus:ring-[#B45330] focus:border-transparent transition-all font-mono tracking-[0.5em]"
+              placeholder="4-6 digit"
+            />
+            <p className="text-xs text-gray-400 mt-1.5">
+              Kalau diisi, halaman admin event ini minta PIN sekali per device (share ke grup panitia).
+              Kosongkan = terbuka seperti biasa. Penonton & TV tidak pernah ditanya.
+            </p>
           </div>
 
           {/* Format Selection */}

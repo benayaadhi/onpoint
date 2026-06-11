@@ -211,6 +211,9 @@ export interface Tournament {
   // When the activation code was redeemed; writes lock 3 days later
   // (results stay viewable). Absent on legacy/ungated tournaments.
   activatedAt?: string;
+  // Optional event PIN set by the organizer at creation. Admin pages for this
+  // tournament ask for it once per device; empty = open like before.
+  pin?: string;
   // Configurable rules (padel scoring + group structure)
   matchRules?: MatchRules;
   teamsPerGroup?: number; // default 4

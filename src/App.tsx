@@ -59,7 +59,7 @@ import {
     useRealTimeMatch,
     REAL_TIME_EVENTS,
 } from './utils/realTimeUpdates';
-import { redeemActivationCode, isExpired, expiryLabel } from './utils/tier';
+import { redeemActivationCode, isExpired, expiryLabel, isPinUnlocked, tryUnlockPin } from './utils/tier';
 import { supabase } from './lib/supabase';
 
 // ==========================================
@@ -472,7 +472,8 @@ function App() {
         raceTarget: number = 4,
         navigate: (path: string) => void,
         config?: Partial<TournamentConfig>,
-        activationCode?: string
+        activationCode?: string,
+        pin?: string
     ): Promise<string | null> => {
         const baseTournament = createTournament(
             name,
@@ -500,6 +501,11 @@ function App() {
         if (redeemed !== 'ungated') {
             tournament.tier = redeemed;
             tournament.activatedAt = new Date().toISOString();
+        }
+        const trimmedPin = pin?.trim();
+        if (trimmedPin) {
+            tournament.pin = trimmedPin;
+            tryUnlockPin(tournament, trimmedPin); // creator's device is unlocked
         }
 
         setCurrentTournament(tournament);
@@ -559,6 +565,15 @@ function App() {
     };
 
     const handleDeleteTournament = async (tournamentId: string) => {
+        const target = savedTournaments.find((t) => t.id === tournamentId);
+        if (target && !isPinUnlocked(target)) {
+            const entered = window.prompt(`"${target.name}" terkunci PIN. Masukkan PIN untuk menghapus:`);
+            if (entered === null) return;
+            if (!tryUnlockPin(target, entered)) {
+                window.alert('PIN salah.');
+                return;
+            }
+        }
         await deleteTournament(tournamentId);
         const tournaments = await getTournaments();
         setSavedTournaments(tournaments);
@@ -810,7 +825,8 @@ function AdminSetupPage({
         raceTarget: number,
         navigate: (path: string) => void,
         config?: Partial<TournamentConfig>,
-        activationCode?: string
+        activationCode?: string,
+        pin?: string
     ) => Promise<string | null>;
     onDeleteTournament: (id: string) => void;
     onLoadTournament: (t: Tournament) => void;
@@ -827,7 +843,7 @@ function AdminSetupPage({
         >
             <div className="space-y-8">
                 <TournamentSetup
-                    onCreateTournament={(name, format, teams, courts, scoringMode, raceTarget, config, activationCode) =>
+                    onCreateTournament={(name, format, teams, courts, scoringMode, raceTarget, config, activationCode, pin) =>
                         onCreateTournament(
                             name,
                             format,
@@ -837,7 +853,8 @@ function AdminSetupPage({
                             raceTarget || 4,
                             navigate,
                             config,
-                            activationCode
+                            activationCode,
+                            pin
                         )
                     }
                 />
@@ -991,6 +1008,49 @@ function CourtPickerModal({
     );
 }
 
+// --- PIN gate: shown once per device for PIN-protected tournaments ---
+function PinGate({ tournament, onUnlocked }: { tournament: Tournament; onUnlocked: () => void }) {
+    const [pin, setPin] = useState('');
+    const [err, setErr] = useState(false);
+    const submit = () => {
+        if (tryUnlockPin(tournament, pin)) {
+            onUnlocked();
+        } else {
+            setErr(true);
+            setPin('');
+        }
+    };
+    return (
+        <div className="flex flex-col items-center justify-center py-24 gap-4">
+            <div className="text-6xl">🔒</div>
+            <h2 className="text-2xl font-bold text-gray-700">Event Terkunci PIN</h2>
+            <p className="text-gray-500 text-center max-w-sm">
+                "{tournament.name}" dilindungi PIN. Masukkan sekali — device ini akan diingat.
+            </p>
+            <input
+                type="text"
+                inputMode="numeric"
+                maxLength={6}
+                autoFocus
+                value={pin}
+                onChange={(e) => { setPin(e.target.value.replace(/\D/g, '')); setErr(false); }}
+                onKeyDown={(e) => e.key === 'Enter' && submit()}
+                className={`w-48 text-center px-4 py-3 bg-white border rounded-xl text-2xl font-mono tracking-[0.4em] focus:ring-2 focus:ring-[#B45330] focus:border-transparent ${err ? 'border-red-400' : 'border-[#F0EBE3]'}`}
+                placeholder="••••"
+            />
+            {err && <p className="text-sm text-red-500">PIN salah — coba lagi.</p>}
+            <button
+                onClick={submit}
+                disabled={pin.length < 4}
+                className="px-8 py-3 rounded-xl bg-gradient-to-r from-[#B45330] to-[#C96A40] text-white font-semibold disabled:opacity-40 transition-all"
+            >
+                Buka
+            </button>
+            <p className="text-xs text-gray-400 mt-2">Minta PIN ke penyelenggara event.</p>
+        </div>
+    );
+}
+
 // --- Admin Bracket Page ---
 function AdminBracketPage({
     currentTournament,
@@ -1011,6 +1071,7 @@ function AdminBracketPage({
         currentTournament
     );
     const [pendingMatch, setPendingMatch] = useState<Match | null>(null);
+    const [pinOk, setPinOk] = useState(false);
 
     useEffect(() => {
         if (id && (!tournament || tournament.id !== id)) {
@@ -1058,6 +1119,18 @@ function AdminBracketPage({
                 <div className="text-center py-20 text-gray-400">
                     Loading tournament...
                 </div>
+            </AdminLayout>
+        );
+    }
+
+    if (!pinOk && !isPinUnlocked(tournament)) {
+        return (
+            <AdminLayout
+                currentTournament={tournament}
+                onResetTournament={() => onResetTournament(navigate)}
+                activePage="bracket"
+            >
+                <PinGate tournament={tournament} onUnlocked={() => setPinOk(true)} />
             </AdminLayout>
         );
     }
@@ -1139,6 +1212,7 @@ function AdminScoringPage({
     const { lockedByOther, checking, wasKicked, forceKick } = useScoringLock(lockMatchId, selectedMatch?.courtId);
     const [kickedBanner, setKickedBanner] = useState(false);
     const [forceUnlockConfirm, setForceUnlockConfirm] = useState(false);
+    const [pinOk, setPinOk] = useState(false);
 
     // When we receive a force-kick, show banner briefly then navigate away
     useEffect(() => {
@@ -1202,6 +1276,18 @@ function AdminScoringPage({
                 <div className="text-center py-20 text-gray-400">
                     Loading match...
                 </div>
+            </AdminLayout>
+        );
+    }
+
+    if (!pinOk && !isPinUnlocked(tournament)) {
+        return (
+            <AdminLayout
+                currentTournament={tournament}
+                onResetTournament={() => onResetTournament(navigate)}
+                activePage="scoring"
+            >
+                <PinGate tournament={tournament} onUnlocked={() => setPinOk(true)} />
             </AdminLayout>
         );
     }
@@ -1375,6 +1461,7 @@ function AdminTeamsPage({
     const [tournament, setTournament] = useState<Tournament | null>(
         currentTournament
     );
+    const [pinOk, setPinOk] = useState(false);
 
     useEffect(() => {
         if (id && (!tournament || tournament.id !== id)) {
@@ -1398,6 +1485,18 @@ function AdminTeamsPage({
                 activePage="teams"
             >
                 <div className="text-center py-20 text-gray-400">Loading...</div>
+            </AdminLayout>
+        );
+    }
+
+    if (!pinOk && !isPinUnlocked(tournament)) {
+        return (
+            <AdminLayout
+                currentTournament={tournament}
+                onResetTournament={() => onResetTournament(navigate)}
+                activePage="teams"
+            >
+                <PinGate tournament={tournament} onUnlocked={() => setPinOk(true)} />
             </AdminLayout>
         );
     }
