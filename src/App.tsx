@@ -19,6 +19,8 @@ const lazyReload = (factory: () => Promise<any>) =>
 
 const Landing = lazyReload(() => import('./components/Landing'));
 const Advertise = lazyReload(() => import('./components/Advertise'));
+const RegistrationPage = lazyReload(() => import('./components/RegistrationPage'));
+const RegistrationManager = lazyReload(() => import('./components/RegistrationManager'));
 const ContestantHomepage = lazyReload(() => import('./components/ContestantHomepage'));
 const TournamentSetup = lazyReload(() => import('./components/TournamentSetup'));
 const TournamentBracket = lazyReload(() => import('./components/TournamentBracket'));
@@ -691,6 +693,7 @@ function App() {
                 element={<Landing />}
             />
             <Route path="/iklan" element={<Advertise />} />
+            <Route path="/daftar/:slug" element={<RegistrationPage />} />
 
             {/* Admin Setup */}
             <Route
@@ -1507,6 +1510,26 @@ function AdminTeamsPage({
             onResetTournament={() => onResetTournament(navigate)}
             activePage="teams"
         >
+            <div className="mb-6">
+                <RegistrationManager
+                    tournament={tournament}
+                    onUpdateTournament={(t) => {
+                        setCurrentTournament(t);
+                        setTournament(t);
+                        saveTournament(t);
+                    }}
+                    onRefreshed={(t) => {
+                        setCurrentTournament(t);
+                        setTournament(t);
+                    }}
+                    onImportTeams={(teams) => {
+                        const updatedTournament = { ...tournament, teams };
+                        setCurrentTournament(updatedTournament);
+                        setTournament(updatedTournament);
+                        saveTournament(updatedTournament);
+                    }}
+                />
+            </div>
             <TeamManager
                 teams={tournament.teams}
                 onUpdateTeams={(teams) => {

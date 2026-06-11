@@ -31,6 +31,17 @@ Tournaments are stored as **one `jsonb` row per tournament** in the
 table, columns, or any data; they only add/remove a function and change *how*
 the app writes.
 
+## `registration.sql` — pendaftaran tim online
+
+**Apa ini:** fungsi `register_team` + `update_registration` untuk fitur
+Pendaftaran Online (form publik `/daftar/:slug`). Entri pendaftaran bisa datang
+barengan dari banyak HP peserta, jadi penulisannya atomic (row lock) — dua
+pendaftar simultan tidak bisa saling timpa.
+
+**Pasang:** paste isi `registration.sql` di SQL Editor, Run sekali.
+**Sebelum dipasang:** fitur tetap jalan dengan fallback non-atomic (aman di
+volume kecil); setelah dipasang otomatis pakai jalur atomic.
+
 ---
 
 ## `save_tournament_merged`

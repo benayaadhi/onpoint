@@ -181,6 +181,32 @@ export interface ClashPool {
 
 export type ClashStructure = 'round-robin' | 'rr-final' | 'knockout' | 'pool-knockout';
 
+// ── Team registration (optional, per event) ─────────────────────────────────
+// Custom form the organizer can enable; players register via a public link.
+// Payment stays manual (bank transfer + WA) — the organizer just ticks "paid".
+export interface RegistrationField {
+  id: string;
+  label: string; // e.g. "Nama Tim", "No WA Kapten", "Ukuran Jersey"
+  type: 'text' | 'phone' | 'select';
+  options?: string[]; // for 'select'
+  required?: boolean;
+}
+
+export interface RegistrationEntry {
+  id: string;
+  values: Record<string, string>; // fieldId -> value
+  paid?: boolean;
+  waitlist?: boolean;
+  createdAt: string;
+}
+
+export interface RegistrationConfig {
+  enabled: boolean;
+  quota?: number; // 0/undefined = unlimited
+  paymentNote?: string; // e.g. "Transfer BCA 123456 a.n. ..., konfirmasi ke WA 08xx"
+  fields: RegistrationField[];
+}
+
 export interface Tournament {
   id: string;
   name: string;
@@ -214,6 +240,9 @@ export interface Tournament {
   // Optional event PIN set by the organizer at creation. Admin pages for this
   // tournament ask for it once per device; empty = open like before.
   pin?: string;
+  // Optional team registration (public form via /daftar/:slug)
+  registration?: RegistrationConfig;
+  registrations?: RegistrationEntry[];
   // Configurable rules (padel scoring + group structure)
   matchRules?: MatchRules;
   teamsPerGroup?: number; // default 4
