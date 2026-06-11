@@ -597,17 +597,19 @@ export default function TVDisplay() {
     return unsub;
   }, [tournamentId]);
 
-  // Guaranteed fallback: poll every 20s (websocket broadcast handles the
-  // instant updates; this only matters if that connection drops).
+  // Guaranteed fallback poll (matters when the realtime connection drops —
+  // observed when a venue's WiFi hiccups at match start). Adaptive: while the
+  // court is WAITING for a match (the critical moment to detect a start) poll
+  // every 5s; once a match is live the broadcast carries the scores, so 20s.
   useEffect(() => {
     if (!tournamentId) return;
     const interval = setInterval(() => {
       getTournament(tournamentId).then(t => {
         if (t) setTournament(t);
       });
-    }, 20000);
+    }, activeMatchId ? 20000 : 5000);
     return () => clearInterval(interval);
-  }, [tournamentId]);
+  }, [tournamentId, activeMatchId]);
 
   // Sponsors
   useEffect(() => {
