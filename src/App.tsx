@@ -693,6 +693,7 @@ function App() {
                 element={<Landing />}
             />
             <Route path="/iklan" element={<Advertise />} />
+            <Route path="/daftar" element={<RegistrationPage />} />
             <Route path="/daftar/:slug" element={<RegistrationPage />} />
 
             {/* Admin Setup */}

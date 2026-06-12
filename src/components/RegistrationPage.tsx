@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState } from 'react';
-import { useParams } from 'react-router-dom';
-import { Loader2, CheckCircle, Users } from 'lucide-react';
+import { useParams, Link } from 'react-router-dom';
+import { Loader2, CheckCircle, Users, ArrowRight } from 'lucide-react';
 import { Tournament, RegistrationEntry } from '../types/tournament';
 import { getTournaments } from '../utils/storage';
 import { registerTeam, RegisterResult } from '../utils/registration';
@@ -9,6 +9,60 @@ import { slugify } from '../utils/slugify';
 // ─── Public team-registration form (/daftar/:slug) ───────────────────────────
 // Custom fields come from the organizer's config; payment stays manual
 // (transfer + WA) — instructions are shown after submitting.
+
+// /daftar without a slug: list every event with open registration
+function RegistrationIndex() {
+  const [open, setOpen] = useState<Tournament[] | null>(null);
+  useEffect(() => {
+    getTournaments().then((ts) => setOpen(ts.filter((t) => t.registration?.enabled)));
+  }, []);
+
+  if (open === null) {
+    return (
+      <div className="min-h-screen bg-[#FAF8F5] flex items-center justify-center">
+        <Loader2 className="w-8 h-8 animate-spin text-[#B45330]" />
+      </div>
+    );
+  }
+  return (
+    <div className="min-h-screen bg-[#FAF8F5] font-mono text-[#2A2A2A] p-4 sm:p-8 flex justify-center">
+      <div className="w-full max-w-lg">
+        <div className="text-center mb-8 mt-6">
+          <p className="font-mono text-[11px] tracking-[0.4em] uppercase text-[#8B7355] mb-3">OnPoint</p>
+          <h1 className="font-display text-3xl font-bold uppercase tracking-tight">Pendaftaran Dibuka</h1>
+        </div>
+        {open.length === 0 ? (
+          <p className="text-center text-sm text-gray-500">
+            Belum ada event yang membuka pendaftaran online saat ini.
+          </p>
+        ) : (
+          <div className="space-y-3">
+            {open.map((t) => {
+              const regs = t.registrations ?? [];
+              const quota = t.registration?.quota ?? 0;
+              const left = quota > 0 ? Math.max(0, quota - regs.length) : null;
+              return (
+                <Link
+                  key={t.id}
+                  to={`/daftar/${t.slug || slugify(t.name)}`}
+                  className="flex items-center justify-between bg-white border border-[#F0EBE3] rounded-2xl p-5 hover:border-[#B45330] transition-colors"
+                >
+                  <div>
+                    <div className="font-display font-bold">{t.name}</div>
+                    <div className="text-xs text-gray-400 mt-1">
+                      {left === null ? 'Slot tersedia' : left === 0 ? 'Penuh — waiting list' : `Sisa ${left} slot`}
+                    </div>
+                  </div>
+                  <ArrowRight className="w-4 h-4 text-[#B45330] shrink-0" />
+                </Link>
+              );
+            })}
+          </div>
+        )}
+      </div>
+    </div>
+  );
+}
 
 export default function RegistrationPage() {
   const { slug } = useParams<{ slug: string }>();
@@ -20,6 +74,7 @@ export default function RegistrationPage() {
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
+    if (!slug) return;
     getTournaments().then((ts) => {
       const t = ts.find(
         (x) => x.id === slug || (x.slug || slugify(x.name)) === slug
@@ -28,6 +83,8 @@ export default function RegistrationPage() {
       setLoading(false);
     });
   }, [slug]);
+
+  if (!slug) return <RegistrationIndex />;
 
   const cfg = tournament?.registration;
   const regs = useMemo(() => tournament?.registrations ?? [], [tournament]);
