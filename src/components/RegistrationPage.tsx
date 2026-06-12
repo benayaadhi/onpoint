@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import { Loader2, CheckCircle, Users, ArrowRight } from 'lucide-react';
 import { Tournament, RegistrationEntry } from '../types/tournament';
@@ -87,7 +87,7 @@ export default function RegistrationPage() {
   if (!slug) return <RegistrationIndex />;
 
   const cfg = tournament?.registration;
-  const regs = useMemo(() => tournament?.registrations ?? [], [tournament]);
+  const regs = tournament?.registrations ?? [];
   const quota = cfg?.quota ?? 0;
   const slotsLeft = quota > 0 ? Math.max(0, quota - regs.length) : null;
 
