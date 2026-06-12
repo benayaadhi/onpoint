@@ -510,12 +510,75 @@ function App() {
             tryUnlockPin(tournament, trimmedPin); // creator's device is unlocked
         }
 
+        // Registration-first flow: created without teams → open the public
+        // registration immediately so the share link works out of the box.
+        if (tournament.teams.length === 0) {
+            tournament.registration = {
+                enabled: true,
+                fields: [
+                    { id: 'team', label: 'Nama Tim', type: 'text', required: true },
+                    { id: 'players', label: 'Nama Pemain (pasangan)', type: 'text', required: true },
+                    { id: 'wa', label: 'No. WhatsApp', type: 'phone', required: true },
+                ],
+            };
+        }
+
         setCurrentTournament(tournament);
         await saveTournament(tournament);
         const tournaments = await getTournaments();
         setSavedTournaments(tournaments);
         navigate(`/admin/tournament/${tournament.id}`);
         return null;
+    };
+
+    // Regenerate the bracket from the current team list — used when teams are
+    // imported from registration and nothing has been scored yet. Same
+    // carry-over rules as reset (id/tier/slug/ads/registration data survive).
+    const rebuildMatches = (t: Tournament, teams: Team[]): Tournament => {
+        const nothingScored = t.matches.every(
+            (m) =>
+                !m.completed &&
+                (m.team1RaceScore ?? 0) === 0 &&
+                (m.team2RaceScore ?? 0) === 0 &&
+                m.team1Score.points === 0 &&
+                m.team2Score.points === 0 &&
+                m.team1Score.games === 0 &&
+                m.team2Score.games === 0
+        );
+        const okForFormat =
+            teams.length >= 4 &&
+            (t.format !== 'single-elimination' || (teams.length & (teams.length - 1)) === 0);
+        if (!nothingScored || !okForFormat) {
+            return { ...t, teams }; // just update the roster; bracket untouched
+        }
+        const base = createTournament(
+            t.name,
+            t.format,
+            teams,
+            t.courts,
+            t.scoringMode || 'padel',
+            t.raceTarget || 4,
+            {
+                matchRules: t.matchRules,
+                teamsPerGroup: t.teamsPerGroup,
+                qualifiersPerGroup: t.qualifiersPerGroup,
+            }
+        );
+        const stampNow = Date.now();
+        return {
+            ...base,
+            id: t.id,
+            createdAt: t.createdAt,
+            slug: t.slug,
+            tier: t.tier,
+            activatedAt: t.activatedAt,
+            pin: t.pin,
+            ads: t.ads,
+            adsEnabled: t.adsEnabled,
+            registration: t.registration,
+            registrations: t.registrations,
+            matches: base.matches.map((m) => ({ ...m, lastUpdated: stampNow })),
+        };
     };
 
     const handleResetTournament = async (navigate: (path: string) => void) => {
@@ -752,6 +815,7 @@ function App() {
                         loadTournamentById={loadTournamentById}
                         setCurrentTournament={setCurrentTournament}
                         onResetTournament={handleResetTournament}
+                        rebuildMatches={rebuildMatches}
                     />
                 }
             />
@@ -1454,11 +1518,13 @@ function AdminTeamsPage({
     loadTournamentById,
     setCurrentTournament,
     onResetTournament,
+    rebuildMatches,
 }: {
     currentTournament: Tournament | null;
     loadTournamentById: (id: string) => Promise<Tournament | null>;
     setCurrentTournament: (t: Tournament | null) => void;
     onResetTournament: (navigate: (path: string) => void) => void;
+    rebuildMatches: (t: Tournament, teams: Team[]) => Tournament;
 }) {
     const { id } = useParams<{ id: string }>();
     const navigate = useNavigate();
@@ -1524,7 +1590,7 @@ function AdminTeamsPage({
                         setTournament(t);
                     }}
                     onImportTeams={(teams) => {
-                        const updatedTournament = { ...tournament, teams };
+                        const updatedTournament = rebuildMatches(tournament, teams);
                         setCurrentTournament(updatedTournament);
                         setTournament(updatedTournament);
                         saveTournament(updatedTournament);

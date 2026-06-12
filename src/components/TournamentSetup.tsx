@@ -192,6 +192,9 @@ export default function TournamentSetup({ onCreateTournament }: TournamentSetupP
 
   const canCreateTournament = () => {
     if (format === 'clash') return clashValid;
+    // 0 teams = registration-first flow: create now, teams arrive via the
+    // public registration link, bracket generates when they're imported.
+    if (teams.length === 0) return true;
     if (format === 'single-elimination') {
       return teams.length >= 4 && (teams.length & (teams.length - 1)) === 0;
     }
@@ -847,11 +850,16 @@ export default function TournamentSetup({ onCreateTournament }: TournamentSetupP
           </div>
 
           {/* Create Tournament Button */}
+          {teams.length === 0 && format !== 'clash' && (
+            <p className="text-sm text-center text-[#8B7355] -mb-4">
+              Tanpa tim? Event dibuat dengan <strong>Pendaftaran Online aktif</strong> — tim masuk lewat link, bracket menyusul otomatis.
+            </p>
+          )}
           <button type="submit" disabled={!canCreateTournament()} className={`w-full py-4 rounded-lg font-bold text-lg transition-all transform hover:scale-[1.02] duration-300 ${canCreateTournament()
               ? 'bg-gradient-to-r from-[#B45330] to-[#C96A40] text-white shadow-lg hover:shadow-neon-green'
               : 'bg-[#F0EBE3] text-gray-500 cursor-not-allowed'
             }`}>
-            Create Tournament
+            {format !== 'clash' && teams.length === 0 ? 'Buat & Buka Pendaftaran' : 'Create Tournament'}
           </button>
         </form>
       </div>

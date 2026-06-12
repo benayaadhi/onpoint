@@ -53,3 +53,20 @@ html { scroll-behavior: smooth; }
 
 /* gold hairline + glow for the featured card */
 .gold-glow { box-shadow: 0 0 50px -12px rgba(226,185,91,0.45), inset 0 0 0 1px rgba(226,185,91,0.55); }
+
+/* registration stepper & ticket */
+@keyframes stepIn { from { opacity: 0; transform: translateY(22px); } to { opacity: 1; transform: none; } }
+.step-in { animation: stepIn 0.45s cubic-bezier(0.16, 1, 0.3, 1); }
+
+@keyframes ticketIn { from { opacity: 0; transform: scale(0.92) rotate(-1.5deg); } to { opacity: 1; transform: scale(1) rotate(0); } }
+.ticket-in { animation: ticketIn 0.6s cubic-bezier(0.16, 1, 0.3, 1); }
+
+@keyframes shine { from { background-position: 200% center; } to { background-position: -200% center; } }
+.gold-shine {
+  background: linear-gradient(110deg, #F3D27E 20%, #fffbe8 38%, #E2B95B 50%, #C9952F 65%, #F3D27E 80%);
+  background-size: 200% auto;
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+  animation: shine 5s linear infinite;
+}

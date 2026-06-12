@@ -2,7 +2,11 @@ import { supabase } from '../lib/supabase';
 import { RegistrationEntry, Tournament } from '../types/tournament';
 import { saveTournament } from './storage';
 
-export type RegisterResult = 'registered' | 'waitlist' | 'closed' | 'not_found' | 'error';
+export type RegisterStatus = 'registered' | 'waitlist' | 'closed' | 'not_found' | 'error';
+export interface RegisterResult {
+  status: RegisterStatus;
+  count?: number; // urutan pendaftar (nomor tiket)
+}
 
 // Submit a registration atomically (RPC locks the row, so simultaneous
 // submissions can never clobber each other). Falls back to a plain merge-save
@@ -17,7 +21,7 @@ export async function registerTeam(
       p_tournament_id: tournament.id,
       p_entry: entry,
     });
-    if (!error && data?.status) return data.status as RegisterResult;
+    if (!error && data?.status) return { status: data.status as RegisterStatus, count: data.count };
     console.warn('register_team RPC unavailable, falling back:', error);
   } catch (err) {
     console.warn('register_team RPC failed, falling back:', err);
@@ -25,7 +29,7 @@ export async function registerTeam(
 
   // Fallback: client-side append (not atomic — installed SQL removes this path)
   const cfg = tournament.registration;
-  if (!cfg?.enabled) return 'closed';
+  if (!cfg?.enabled) return { status: 'closed' };
   const regs = tournament.registrations ?? [];
   const quota = cfg.quota ?? 0;
   const waitlist = quota > 0 && regs.length >= quota;
@@ -33,7 +37,7 @@ export async function registerTeam(
     ...tournament,
     registrations: [...regs, { ...entry, waitlist }],
   });
-  return waitlist ? 'waitlist' : 'registered';
+  return { status: waitlist ? 'waitlist' : 'registered', count: regs.length + 1 };
 }
 
 // Admin actions on an entry (paid / unpaid / delete), atomic via RPC with the
